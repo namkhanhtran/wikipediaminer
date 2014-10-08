@@ -60,10 +60,10 @@
 		The value must correspond to an org.wikipedia.miner.db.WDatabase.DatabaseType. 
 		The priority attribute can be either 'space' (default) or 'speed'. 
 	-->
-	<!-- 
+ 
 	<databaseToCache priority="space">pageLinksIn</databaseToCache>
 	<databaseToCache priority="space">label</databaseToCache>
-	 -->
+
 	<!--
 		A list of data dependencies that will be involved in generating relatedness measures between articles.
 		The more you add, the more accurate your measures will be, but the longer they will take to calculate. 
