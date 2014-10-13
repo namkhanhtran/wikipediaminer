@@ -147,7 +147,6 @@ public class PageSummaryStep extends IterativeStep {
 			DistributedCache.addCacheFile(new Path(job.getConfiguration()
 					.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
 			
-			
 		} else {
 			
 			job.setMapperClass(SubsequentMapper.class);
@@ -168,6 +167,8 @@ public class PageSummaryStep extends IterativeStep {
 		
 		FileOutputFormat.setOutputPath(job, getDir());
 
+		logger.info("Finished setting up..");
+		
 		job.waitForCompletion(true);
 	
 		if (job.isSuccessful()) {	
