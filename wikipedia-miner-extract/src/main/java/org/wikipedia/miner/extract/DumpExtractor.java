@@ -90,14 +90,18 @@ public class DumpExtractor {
 		configure() ;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
 		//PropertyConfigurator.configure("log4j.properties");  
 
-		DumpExtractor de = new DumpExtractor(args) ;
-		int result = de.run();
-
-		System.exit(result) ;
+		DumpExtractor de;
+		try {
+			de = new DumpExtractor(args);
+			int result = de.run();
+			System.exit(result) ;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static Job configureJob(Job job, String[] args) {
@@ -212,7 +216,7 @@ public class DumpExtractor {
 			//long startTime = System.currentTimeMillis() ;
 			
 			summaryStep = new PageSummaryStep(workingDir, summaryIteration) ;
-			ToolRunner.run(summaryStep.getConf(), summaryStep, args);
+			ToolRunner.run(summaryStep, args);
 			
 			//System.out.println("intitial step completed in " + timeFormat.format(System.currentTimeMillis()-startTime)) ;
 			
@@ -223,7 +227,7 @@ public class DumpExtractor {
 		}
 		
 		PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
-		ToolRunner.run(sortingStep.getConf(), sortingStep, args);
+		ToolRunner.run(sortingStep, args);
 		
 		
 		//calculate page depths
@@ -232,7 +236,7 @@ public class DumpExtractor {
 		while (true) {
 			
 			depthStep = new PageDepthStep(workingDir, depthIteration, sortingStep) ;
-			ToolRunner.run(depthStep.getConf(), depthStep, args);
+			ToolRunner.run(depthStep, args);
 			
 			if (!depthStep.furtherIterationsRequired())
 				break ;
@@ -242,15 +246,15 @@ public class DumpExtractor {
 		
 		//gather label senses
 		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
-		ToolRunner.run(sensesStep.getConf(), sensesStep, args);
+		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
 		PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
-		ToolRunner.run(primaryLabelStep.getConf(), primaryLabelStep, args);
+		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
 		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
-		ToolRunner.run(occurrencesStep.getConf(), occurrencesStep, args);
+		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		finalStep.run() ;
