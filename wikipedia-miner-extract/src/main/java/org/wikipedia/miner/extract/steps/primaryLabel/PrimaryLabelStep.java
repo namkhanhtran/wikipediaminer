@@ -65,6 +65,9 @@ public class PrimaryLabelStep extends Step {
 		AvroJob.setInputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setInputValueSchema(job, LabelSenseList.getClassSchema());
 			
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setMapOutputValueSchema(job, PrimaryLabels.getClassSchema());
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PrimaryLabels.getClassSchema());
 		

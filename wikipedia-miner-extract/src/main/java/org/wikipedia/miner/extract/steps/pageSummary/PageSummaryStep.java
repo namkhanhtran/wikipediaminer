@@ -162,6 +162,10 @@ public class PageSummaryStep extends IterativeStep {
 
 			job.setCombinerClass(MyCombiner.class) ;
 			job.setReducerClass(MyReducer.class);
+			
+			AvroJob.setMapOutputKeySchema(job, PageKey.getClassSchema());
+			AvroJob.setMapOutputValueSchema(job, PageDetail.getClassSchema());
+			
 			AvroJob.setOutputKeySchema(job, PageKey.getClassSchema());
 			AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 

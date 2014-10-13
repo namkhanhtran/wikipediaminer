@@ -100,6 +100,8 @@ public class LabelOccurrenceStep extends Step{
 		
 		job.setCombinerClass(MyCombiner.class) ;
 		job.setReducerClass(MyReducer.class);
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setMapOutputValueSchema(job,LabelOccurrences.getClassSchema());
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setOutputValueSchema(job,LabelOccurrences.getClassSchema());
 		

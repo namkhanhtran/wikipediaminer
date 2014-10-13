@@ -64,12 +64,16 @@ public class PageSortingStep extends Step {
 		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
 		AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
 		AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
-			
+		job.setMapperClass(MyMapper.class);
+		job.setReducerClass(MyReducer.class);
+		
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setMapOutputValueSchema(job, PageDetail.getClassSchema());
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 		
-		job.setMapperClass(MyMapper.class);
-		job.setReducerClass(MyReducer.class);
+
 		
 		FileOutputFormat.setOutputPath(job, getDir());
 		

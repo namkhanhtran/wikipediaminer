@@ -84,6 +84,9 @@ public class PageDepthStep extends IterativeStep {
 			job.setMapperClass(SubsequentDepthMapper.class);
 		}
 			
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setMapOutputValueSchema(job, PageDepthSummary.getClassSchema());	
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PageDepthSummary.getClassSchema());				
 		job.setCombinerClass(DepthCombiner.class) ;
