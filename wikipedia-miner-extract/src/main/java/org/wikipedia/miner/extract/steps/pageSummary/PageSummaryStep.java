@@ -51,7 +51,7 @@ import org.wikipedia.miner.extract.util.XmlInputFormat;
 public class PageSummaryStep extends IterativeStep {
 
 	private static Logger logger = Logger.getLogger(PageSummaryStep.class) ;
-	
+
 	public enum SummaryPageType {article, category, disambiguation, articleRedirect, categoryRedirect, unparseable} ; 
 	public enum Unforwarded {redirect,linkIn,linkOut,parentCategory,childCategory,childArticle} ; 
 
@@ -59,13 +59,13 @@ public class PageSummaryStep extends IterativeStep {
 	private Map<Unforwarded,Long> unforwardedCounts ;
 
 
-	
+
 	public PageSummaryStep(Path workingDir, int iteration) throws IOException {
 		super(workingDir, iteration);
-		
+
 
 	}
-	
+
 
 	public boolean furtherIterationsRequired() {
 
@@ -82,12 +82,12 @@ public class PageSummaryStep extends IterativeStep {
 
 		return PageSummary.newBuilder(summary).build() ;
 	}
-	
+
 	public static LinkSummary clone(LinkSummary summary) {
 
 		return LinkSummary.newBuilder(summary).build() ;
 	}
-	
+
 	public static PageDetail clone(PageDetail pageDetail) {
 
 		return PageDetail.newBuilder(pageDetail).build() ;
@@ -112,28 +112,28 @@ public class PageSummaryStep extends IterativeStep {
 
 	@Override
 	public int run(String[] args) throws UncompletedStepException, IOException, ClassNotFoundException, InterruptedException {
-		
-		
+
+
 		logger.info("Starting page summary step (iteration " + getIteration() + ")");
-		
+
 		if (isFinished()) {
 			logger.info(" - already completed");
 			loadUnforwardedCounts() ;
-			
+
 			return 0 ;
 		} else
 			reset() ;
-		
+
 		Job job = Job.getInstance(getConf());
 		job.setJarByClass(PageSummaryStep.class);
 		Configuration conf = job.getConfiguration();
-				
+
 		DumpExtractor.configureJob(job, args) ;
 
 		job.setJobName("WM: page summary (" + getIteration() + ")");
-		
+
 		if (getIteration() == 0) {
-			
+
 			job.setMapperClass(InitialMapper.class);
 
 			/*job.setOutputKeyClass(AvroKey.class);
@@ -142,110 +142,114 @@ public class PageSummaryStep extends IterativeStep {
 			job.setInputFormatClass(XmlInputFormat.class);
 			job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;
 			job.getConfiguration().set(XmlInputFormat.END_TAG_KEY, "</page>") ;
-			
+
 			FileInputFormat.setInputPaths(job, conf.get(DumpExtractor.KEY_INPUT_FILE));
 			DistributedCache.addCacheFile(new Path(job.getConfiguration()
 					.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
-			
+
 		} else {
-			
+
 			job.setMapperClass(SubsequentMapper.class);
 			AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
 			AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
-		
+
 			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
-			
+
 		}
-		
+
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_OUTPUT_DIR) + "/" + DumpExtractor.OUTPUT_SITEINFO).toUri(), conf);
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
-		
+
 		job.setCombinerClass(MyCombiner.class) ;
 		job.setReducerClass(MyReducer.class);
 		AvroJob.setOutputKeySchema(job, PageKey.getClassSchema());
 		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
-		
+
 		FileOutputFormat.setOutputPath(job, getDir());
 
 		logger.info("Finished setting up..");
-		
-		job.waitForCompletion(true);
-	
+
+		try {
+			job.waitForCompletion(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		if (job.isSuccessful()) {	
 			finish(job) ;
 			return 0 ;
 		}
-		
+
 		throw new UncompletedStepException() ;
 	}
 
 
 	@Override
 	public String getDirName(int iteration) {
-		
+
 		return "pageSummary_" + iteration ;
 	}
-	
+
 	private Path getUnforwardedCountsPath() {
 		return new Path(getDir() + Path.SEPARATOR + "unforwarded") ;
 	}
-	
+
 	private void saveUnforwardedCounts() throws IOException {
 		FSDataOutputStream out = getHdfs().create(getUnforwardedCountsPath());
-		
+
 		for (Unforwarded u:Unforwarded.values()) {
-			
+
 			out.writeUTF(u.name()) ;
-			
+
 			Long count = unforwardedCounts.get(u) ;
 			if (count != null)
 				out.writeLong(count) ;
 			else
 				out.writeLong(0L) ;
 		}
-		
+
 		out.close();
 	}
-	
+
 	private void loadUnforwardedCounts() throws IOException {
-		
+
 		unforwardedCounts = new HashMap<Unforwarded,Long>() ;
-		
-		
+
+
 		FSDataInputStream in = getHdfs().open(getUnforwardedCountsPath());
-		
+
 		while (in.available() > 0) {
-			
+
 			String u = in.readUTF() ;
-			
+
 			Long count = in.readLong() ;
-			
+
 			unforwardedCounts.put(Unforwarded.valueOf(u), count) ;
 		}
-	
+
 		in.close() ;
-		
+
 	}
-	
-	
-	
+
+
+
 	public void finish(Job runningJob) throws IOException {
-		
+
 		super.finish(runningJob) ;
-	
+
 		unforwardedCounts = new HashMap<Unforwarded,Long>() ;
 
 		for (Unforwarded u:Unforwarded.values()) {
-			
+
 			Counter counter = runningJob.getCounters().findCounter(u) ;
 			if (counter != null)
 				unforwardedCounts.put(u, counter.getValue()) ;
 			else
 				unforwardedCounts.put(u, 0L) ;
 		}
-		
+
 		saveUnforwardedCounts() ;
-		
+
 	}
 
 }
