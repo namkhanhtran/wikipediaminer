@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.avro.mapred.AvroCollector;
+import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroMapper;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 import org.wikipedia.miner.extract.model.struct.LabelSummary;
@@ -17,16 +18,13 @@ import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.util.SiteInfo;
 
-public class Mapper extends AvroMapper<Pair<Integer, PageDetail>, Pair<CharSequence, LabelSenseList>> {
+public class MyMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 
 
 	@Override
-	public void map(Pair<Integer, PageDetail> pair,
-			AvroCollector<Pair<CharSequence, LabelSenseList>> collector,
-			Reporter reporter) throws IOException {
+	public void map(AvroKey<Integer> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 		
-	
-		PageDetail page = pair.value() ;
+		PageDetail page = pageValue.datum() ;
 		
 		//we only care about articles
 		if (!page.getNamespace().equals(SiteInfo.MAIN_KEY))
@@ -92,7 +90,7 @@ public class Mapper extends AvroMapper<Pair<Integer, PageDetail>, Pair<CharSeque
 			s.setSenses(new ArrayList<LabelSense>()) ;
 			s.getSenses().add(e.getValue()) ;
 			
-			collector.collect(new Pair<CharSequence,LabelSenseList>(e.getKey(), s));
+			context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelSenseList>(s));
 		}
 		
 	}

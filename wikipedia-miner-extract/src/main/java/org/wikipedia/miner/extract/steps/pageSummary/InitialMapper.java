@@ -11,15 +11,12 @@ import java.util.Vector;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.DumpLink;
@@ -40,7 +37,7 @@ import org.wikipedia.miner.model.Page.PageType;
 import org.wikipedia.miner.util.MarkupStripper;
 
 
-public class InitialMapper extends MapReduceBase implements Mapper<LongWritable, Text, AvroKey<PageKey>, AvroValue<PageDetail>> {
+public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, AvroValue<PageDetail>> {
 
 	private static Logger logger = Logger.getLogger(InitialMapper.class) ;
 
@@ -56,17 +53,17 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 	
 	private String[] debugTitles = {"Atheist","Atheism","Atheists","Athiest","People by religion"} ;
 
-
-
 	@Override
-	public void configure(JobConf job) {
+	public void setup(Context context) {
 
+		Configuration conf = context.getConfiguration();
+		
 		try {
 
 			language = null ;
 			siteInfo = null ;
 
-			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
+			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
 
 			for (Path cf:cacheFiles) {
 
@@ -74,11 +71,11 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 					siteInfo = SiteInfo.load(new File(cf.toString())) ;
 				}
 
-				if (cf.getName().equals(new Path(job.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
-					language = Languages.load(new File(cf.toString())).get(job.get(DumpExtractor.KEY_LANG_CODE)) ;
+				if (cf.getName().equals(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
+					language = Languages.load(new File(cf.toString())).get(conf.get(DumpExtractor.KEY_LANG_CODE)) ;
 				}
 
-				if (cf.getName().equals(new Path(job.get(DumpExtractor.KEY_SENTENCE_MODEL)).getName())) {
+				if (cf.getName().equals(new Path(conf.get(DumpExtractor.KEY_SENTENCE_MODEL)).getName())) {
 					sentenceExtractor = new PageSentenceExtractor(cf) ;
 				}
 			}
@@ -87,7 +84,7 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 				throw new Exception("Could not locate '" + DumpExtractor.OUTPUT_SITEINFO + "' in DistributedCache") ;
 
 			if (language == null) 
-				throw new Exception("Could not locate '" + job.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
+				throw new Exception("Could not locate '" + conf.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
 
 			pageParser = new DumpPageParser(language, siteInfo) ;
 			linkParser = new DumpLinkParser(language, siteInfo) ;
@@ -101,19 +98,14 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 	}
 
 
-
-
-
-
-
-	public void map(LongWritable key, Text value, OutputCollector<AvroKey<PageKey>, AvroValue<PageDetail>> collector, Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 		DumpPage parsedPage = null ;
 
 		try {
 			parsedPage = pageParser.parsePage(value.toString()) ;
 		} catch (Exception e) {
-			reporter.incrCounter(SummaryPageType.unparseable, 1);
+			context.getCounter(SummaryPageType.unparseable).increment(1);
 			logger.error("Could not parse dump page " , e) ;
 		}
 
@@ -123,30 +115,30 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 		switch (parsedPage.getType()) {
 
 		case article :
-			reporter.incrCounter(SummaryPageType.article, 1);
-			handleArticleOrCategory(parsedPage, collector, reporter) ;
+			context.getCounter(SummaryPageType.article).increment(1);
+			handleArticleOrCategory(parsedPage, context) ;
 
 			break ;
 		case category :
-			reporter.incrCounter(SummaryPageType.category, 1);
-			handleArticleOrCategory(parsedPage, collector, reporter) ;
+			context.getCounter(SummaryPageType.category).increment(1);
+			handleArticleOrCategory(parsedPage, context) ;
 
 			break ;
 		case disambiguation :
-			reporter.incrCounter(SummaryPageType.disambiguation, 1);
+			context.getCounter(SummaryPageType.disambiguation).increment(1);
 
 			//apart from the counting, don't treat disambig pages any different from ordinary articles
-			handleArticleOrCategory(parsedPage, collector, reporter) ;
+			handleArticleOrCategory(parsedPage, context) ;
 
 			break ;
 		case redirect :
 			if (parsedPage.getNamespace().getKey() == SiteInfo.MAIN_KEY)
-				reporter.incrCounter(SummaryPageType.articleRedirect, 1);
+				context.getCounter(SummaryPageType.articleRedirect).increment(1);
 
 			if (parsedPage.getNamespace().getKey() == SiteInfo.CATEGORY_KEY)
-				reporter.incrCounter(SummaryPageType.categoryRedirect, 1);
+				context.getCounter(SummaryPageType.categoryRedirect).increment(1);
 
-			handleRedirect(parsedPage, collector, reporter) ;
+			handleRedirect(parsedPage, context) ;
 
 			break ;
 		default:
@@ -213,7 +205,7 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 		handleLinks(page,  parsedPage.getMarkup(), collector, reporter) ;
 	}*/
 
-	private void handleArticleOrCategory(DumpPage parsedPage, OutputCollector<AvroKey<PageKey>, AvroValue<PageDetail>> collector, Reporter reporter) throws IOException {
+	private void handleArticleOrCategory(DumpPage parsedPage, Context context) throws IOException, InterruptedException {
 
 		boolean debug = false ;
 		for(String debugTitle:debugTitles) {
@@ -232,9 +224,9 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 			logger.info(parsedPage.getMarkup());
 		}
 	
-		collect(key, page, collector) ;
+		collect(key, page, context) ;
 
-		handleLinks(key, page,  parsedPage.getMarkup(), collector, reporter) ;
+		handleLinks(key, page,  parsedPage.getMarkup(), context) ;
 
 		if (debug)
 			logger.info(page);
@@ -245,11 +237,11 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 	
 
 
-	private void handleRedirect(DumpPage parsedPage, OutputCollector<AvroKey<PageKey>, AvroValue<PageDetail>> collector, Reporter reporter) throws IOException {
+	private void handleRedirect(DumpPage parsedPage, Context context) throws IOException, InterruptedException {
 
 
 		PageDetail page = buildBasePageDetails(parsedPage) ;
-		collect(buildKey(parsedPage), page, collector) ;
+		collect(buildKey(parsedPage), page, context) ;
 
 		String targetTitle = parsedPage.getTarget() ;
 
@@ -261,11 +253,11 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 		PageDetail target = PageSummaryStep.buildEmptyPageDetail() ;
 		target.getRedirects().add(source);
 
-		collect(new PageKey(parsedPage.getNamespace().getKey(), targetTitle), target, collector) ;
+		collect(new PageKey(parsedPage.getNamespace().getKey(), targetTitle), target, context) ;
 	}
 
 
-	public void handleLinks(PageKey key, PageDetail page, String markup, OutputCollector<AvroKey<PageKey>, AvroValue<PageDetail>> collector, Reporter reporter) throws IOException {
+	public void handleLinks(PageKey key, PageDetail page, String markup, Context context) throws IOException, InterruptedException {
 
 		String strippedMarkup = null ;
 
@@ -337,13 +329,13 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 		//emit collected link targets
 		for (Map.Entry<String,PageDetail> e:linkTargets.entrySet()) {
 			PageKey targetKey = new PageKey(SiteInfo.MAIN_KEY, e.getKey()) ;
-			collect(targetKey, e.getValue(), collector) ;
+			collect(targetKey, e.getValue(), context) ;
 		}
 		
 		//emit collected category parents
 		for (Map.Entry<String,PageDetail> e:categoryParents.entrySet()) {
 			PageKey parentKey = new PageKey(SiteInfo.CATEGORY_KEY, e.getKey()) ;
-			collect(parentKey, e.getValue(), collector) ;
+			collect(parentKey, e.getValue(), context) ;
 		}
 		
 		
@@ -442,11 +434,11 @@ public class InitialMapper extends MapReduceBase implements Mapper<LongWritable,
 
 	
 
-	private void collect(PageKey key, PageDetail value, OutputCollector<AvroKey<PageKey>, AvroValue<PageDetail>> collector) throws IOException {
+	private void collect(PageKey key, PageDetail value, Context context) throws IOException, InterruptedException {
 
 		AvroKey<PageKey> k = new AvroKey<PageKey>(key) ;
 		AvroValue<PageDetail> v = new AvroValue<PageDetail>(value) ;
 
-		collector.collect(k,v) ;
+		context.write(k,v) ;
 	}
 }

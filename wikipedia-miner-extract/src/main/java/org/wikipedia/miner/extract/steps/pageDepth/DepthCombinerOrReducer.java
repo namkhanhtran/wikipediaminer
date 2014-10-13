@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
 
-public abstract class DepthCombinerOrReducer extends AvroReducer<Integer, PageDepthSummary, Pair<Integer, PageDepthSummary>> {
+public abstract class DepthCombinerOrReducer extends Reducer<Integer, PageDepthSummary, AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 	public enum Counts {unforwarded, withDepth,withoutDepth} ;
 	
@@ -19,9 +18,7 @@ public abstract class DepthCombinerOrReducer extends AvroReducer<Integer, PageDe
 	
 
 	@Override
-	public void reduce(Integer pageId, Iterable<PageDepthSummary> partials,
-			AvroCollector<Pair<Integer, PageDepthSummary>> collector,
-			Reporter reporter) throws IOException {
+	public void reduce(Integer pageId, Iterable<PageDepthSummary> partials,Context context) throws IOException, InterruptedException {
 		
 		Integer minDepth = null ;
 		boolean depthForwarded = false ;
@@ -49,9 +46,9 @@ public abstract class DepthCombinerOrReducer extends AvroReducer<Integer, PageDe
 		if (minDepth == null) {
 			
 			if (isReducer())
-				reporter.getCounter(Counts.withoutDepth).increment(1);
+				context.getCounter(Counts.withoutDepth).increment(1);
 			
-			InitialDepthMapper.collect(pageId, new PageDepthSummary(minDepth, depthForwarded, childIds), collector);
+			context.write(new AvroKey<Integer>(pageId), new AvroValue<PageDepthSummary>(new PageDepthSummary(minDepth, depthForwarded, childIds)));
 			return ;
 		}
 	
@@ -66,14 +63,14 @@ public abstract class DepthCombinerOrReducer extends AvroReducer<Integer, PageDe
 				childIds = new ArrayList<Integer>() ;
 			
 			//count stuff
-			reporter.getCounter(Counts.withDepth).increment(1);
+			context.getCounter(Counts.withDepth).increment(1);
 				
 			if (!depthForwarded) 
-				reporter.getCounter(Counts.unforwarded).increment(1);		
-		}
-		
-		InitialDepthMapper.collect(pageId, new PageDepthSummary(minDepth, depthForwarded, childIds), collector);	
-		
+				context.getCounter(Counts.unforwarded).increment(1);		
+		}	
+
+		//InitialDepthMapper.collect(pageId, new PageDepthSummary(minDepth, depthForwarded, childIds), context);	
+		context.write(new AvroKey<Integer>(pageId), new AvroValue<PageDepthSummary>(new PageDepthSummary(minDepth, depthForwarded, childIds)));
 	}
 	
 	public static class DepthCombiner extends DepthCombinerOrReducer {

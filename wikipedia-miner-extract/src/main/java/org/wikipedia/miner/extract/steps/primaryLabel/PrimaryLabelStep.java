@@ -5,19 +5,16 @@ import java.util.ArrayList;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroJob;
-import org.apache.avro.mapred.AvroMapper;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
@@ -54,29 +51,32 @@ public class PrimaryLabelStep extends Step {
 			reset() ;
 		}
 		
-		JobConf conf = new JobConf(PageDepthStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		//JobConf conf = new JobConf(PageDepthStep.class);
+		Job job = Job.getInstance(getConf());
+		job.setJarByClass(PrimaryLabelStep.class);
+		Configuration conf = job.getConfiguration();
+		
+		DumpExtractor.configureJob(job, args) ;
 
-		conf.setJobName("WM: primary labels");
+		job.setJobName("WM: primary labels");
 		
 		
-		
-		
-		FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + labelSensesStep.getDirName());
-		AvroJob.setInputSchema(conf, Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()));
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + labelSensesStep.getDirName());
+		AvroJob.setInputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setInputValueSchema(job, LabelSenseList.getClassSchema());
 			
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT), PrimaryLabels.getClassSchema()));
+		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setOutputValueSchema(job, PrimaryLabels.getClassSchema());
 		
-		AvroJob.setMapperClass(conf, Mapper.class);
-		AvroJob.setCombinerClass(conf, Reducer.class);
-		AvroJob.setReducerClass(conf, Reducer.class);
+		job.setMapperClass(MyMapper.class);
+		job.setCombinerClass(MyReducer.class);
+		job.setReducerClass(MyReducer.class);
 		
-		FileOutputFormat.setOutputPath(conf, getDir());
+		FileOutputFormat.setOutputPath(job, getDir());
 		
-		RunningJob runningJob = JobClient.runJob(conf);
-	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		job.waitForCompletion(true);	
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -88,18 +88,13 @@ public class PrimaryLabelStep extends Step {
 		return "primaryLabels" ;
 	}
 	
-	
-	
-	
-	public static class Mapper extends AvroMapper<Pair<CharSequence, LabelSenseList>, Pair<Integer, PrimaryLabels>>{
+	public static class MyMapper extends Mapper<AvroKey<CharSequence>, AvroValue<LabelSenseList>, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
 		
 		@Override
-		public void map(Pair<CharSequence, LabelSenseList> pair,
-				AvroCollector<Pair<Integer, PrimaryLabels>> collector,
-				Reporter reporter) throws IOException {
+		public void map(AvroKey<CharSequence> pageKey, AvroValue<LabelSenseList> pageValue, Context context) throws IOException, InterruptedException {
 			
-			CharSequence label = pair.key() ;
-			LabelSenseList senses = pair.value() ;
+			CharSequence label = pageKey.datum();
+			LabelSenseList senses = pageValue.datum();
 			
 			if (senses.getSenses().isEmpty())
 				return ;
@@ -109,16 +104,14 @@ public class PrimaryLabelStep extends Step {
 			ArrayList<CharSequence> primaryLabels = new ArrayList<CharSequence>() ;
 			primaryLabels.add(label) ;
 			
-			collector.collect(new Pair<Integer, PrimaryLabels>(firstSense.getId(), new PrimaryLabels(primaryLabels)));
+			context.write(new AvroKey<Integer>(firstSense.getId()), new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
 		}
 	}
 	
-	public static class Reducer extends AvroReducer<Integer, PrimaryLabels, Pair<Integer,PrimaryLabels>>{
+	public static class MyReducer extends Reducer<Integer, PrimaryLabels, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
 		
 		@Override
-		public void reduce(Integer pageId, Iterable<PrimaryLabels> partials,
-				AvroCollector<Pair<Integer, PrimaryLabels>> collector,
-				Reporter reporter) throws IOException {
+		public void reduce(Integer pageId, Iterable<PrimaryLabels> partials,Context context) throws IOException, InterruptedException {
 			
 			ArrayList<CharSequence> primaryLabels = new ArrayList<CharSequence>() ;
 			
@@ -128,7 +121,7 @@ public class PrimaryLabelStep extends Step {
 				primaryLabels.addAll(clone.getLabels()) ;
 			}
 			
-			collector.collect(new Pair<Integer, PrimaryLabels>(pageId, new PrimaryLabels(primaryLabels)));
+			context.write(new AvroKey<Integer>(pageId), new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
 		}
 	}
 	

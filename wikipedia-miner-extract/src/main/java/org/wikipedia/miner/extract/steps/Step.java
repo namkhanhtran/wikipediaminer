@@ -7,8 +7,8 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
 
 public abstract class Step extends Configured implements Tool {
@@ -38,7 +38,7 @@ public abstract class Step extends Configured implements Tool {
 		return hdfs.exists(getFinishPath()) ;
 	}
 	
-	public void finish(RunningJob job) throws IOException {
+	public void finish(Job job) throws IOException {
 		
 		
 		if (job != null)

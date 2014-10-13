@@ -5,21 +5,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.avro.mapred.AvroJob;
+import org.apache.avro.Schema;
+import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.apache.avro.mapred.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.LabelSummary;
@@ -28,8 +27,8 @@ import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.model.struct.PageKey;
 import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.steps.IterativeStep;
-import org.wikipedia.miner.extract.steps.pageSummary.CombinerOrReducer.Combiner;
-import org.wikipedia.miner.extract.steps.pageSummary.CombinerOrReducer.Reducer;
+import org.wikipedia.miner.extract.steps.pageSummary.CombinerOrReducer.MyCombiner;
+import org.wikipedia.miner.extract.steps.pageSummary.CombinerOrReducer.MyReducer;
 import org.wikipedia.miner.extract.util.UncompletedStepException;
 import org.wikipedia.miner.extract.util.XmlInputFormat;
 
@@ -114,7 +113,7 @@ public class PageSummaryStep extends IterativeStep {
 
 
 	@Override
-	public int run(String[] args) throws UncompletedStepException, IOException {
+	public int run(String[] args) throws UncompletedStepException, IOException, ClassNotFoundException, InterruptedException {
 		
 		
 		logger.info("Starting page summary step (iteration " + getIteration() + ")");
@@ -127,50 +126,55 @@ public class PageSummaryStep extends IterativeStep {
 		} else
 			reset() ;
 		
-		JobConf conf = new JobConf(PageSummaryStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		Job job = Job.getInstance(getConf());
+		job.setJarByClass(PageSummaryStep.class);
+		Configuration conf = job.getConfiguration();
+				
+		DumpExtractor.configureJob(job, args) ;
 
-		conf.setJobName("WM: page summary (" + getIteration() + ")");
+		job.setJobName("WM: page summary (" + getIteration() + ")");
 		
 		if (getIteration() == 0) {
 			
-			conf.setMapperClass(InitialMapper.class);
+			job.setMapperClass(InitialMapper.class);
 
-			conf.setOutputKeyClass(AvroKey.class);
-			conf.setOutputValueClass(AvroValue.class);
+			job.setOutputKeyClass(AvroKey.class);
+			job.setOutputValueClass(AvroValue.class);
 
 			
-			conf.setInputFormat(XmlInputFormat.class);
-			conf.set(XmlInputFormat.START_TAG_KEY, "<page>") ;
-			conf.set(XmlInputFormat.END_TAG_KEY, "</page>") ;
+			job.setInputFormatClass(XmlInputFormat.class);
+			job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;
+			job.getConfiguration().set(XmlInputFormat.END_TAG_KEY, "</page>") ;
 			
-			FileInputFormat.setInputPaths(conf, conf.get(DumpExtractor.KEY_INPUT_FILE));
-			DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
+			FileInputFormat.setInputPaths(job, conf.get(DumpExtractor.KEY_INPUT_FILE));
+			DistributedCache.addCacheFile(new Path(job.getConfiguration()
+					.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
 			
 			
 		} else {
 			
-			AvroJob.setMapperClass(conf, SubsequentMapper.class);
-			AvroJob.setInputSchema(conf, Pair.getPairSchema(PageKey.getClassSchema(),PageDetail.getClassSchema()));
+			job.setMapperClass(SubsequentMapper.class);
+			AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
+			AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 		
-			FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
 			
 		}
 		
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_OUTPUT_DIR) + "/" + DumpExtractor.OUTPUT_SITEINFO).toUri(), conf);
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
 		
-		AvroJob.setCombinerClass(conf, Combiner.class) ;
-		AvroJob.setReducerClass(conf, Reducer.class);
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(PageKey.getClassSchema(),PageDetail.getClassSchema()));
+		job.setCombinerClass(MyCombiner.class) ;
+		job.setReducerClass(MyReducer.class);
+		AvroJob.setOutputKeySchema(job, PageKey.getClassSchema());
+		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 		
-		FileOutputFormat.setOutputPath(conf, getDir());
+		FileOutputFormat.setOutputPath(job, getDir());
 
-		
-		RunningJob runningJob = JobClient.runJob(conf);
+		job.waitForCompletion(true);
 	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -227,7 +231,7 @@ public class PageSummaryStep extends IterativeStep {
 	
 	
 	
-	public void finish(RunningJob runningJob) throws IOException {
+	public void finish(Job runningJob) throws IOException {
 		
 		super.finish(runningJob) ;
 	
@@ -235,9 +239,9 @@ public class PageSummaryStep extends IterativeStep {
 
 		for (Unforwarded u:Unforwarded.values()) {
 			
-			Counters.Counter counter = runningJob.getCounters().findCounter(u) ;
+			Counter counter = runningJob.getCounters().findCounter(u) ;
 			if (counter != null)
-				unforwardedCounts.put(u, counter.getCounter()) ;
+				unforwardedCounts.put(u, counter.getValue()) ;
 			else
 				unforwardedCounts.put(u, 0L) ;
 		}

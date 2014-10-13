@@ -2,22 +2,19 @@ package org.wikipedia.miner.extract.steps.labelOccurrences;
 
 import java.io.IOException;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.wikipedia.miner.extract.model.struct.LabelOccurrences;
 
-public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelOccurrences, Pair<CharSequence, LabelOccurrences>> {
+public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelOccurrences, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
 	
 	public enum Counts {falsePositives, truePositives} ;
 	
 	public abstract boolean isReducer() ;
 	
 	@Override
-	public void reduce(CharSequence label, Iterable<LabelOccurrences> partials,
-			AvroCollector<Pair<CharSequence, LabelOccurrences>> collector,
-			Reporter reporter) throws IOException {
+	public void reduce(CharSequence label, Iterable<LabelOccurrences> partials, Context context) throws IOException, InterruptedException {
 	
 		LabelOccurrences allOccurrences = new LabelOccurrences(0,0,0,0) ;
 		
@@ -31,17 +28,17 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelO
 		if (isReducer()) {
 			
 			if (allOccurrences.getLinkOccCount() == 0) {
-				reporter.getCounter(Counts.falsePositives).increment(1L);
+				context.getCounter(Counts.falsePositives).increment(1L);
 				return ; 
 			} else {
-				reporter.getCounter(Counts.truePositives).increment(1L);
+				context.getCounter(Counts.truePositives).increment(1L);
 			}
 		}
 
-		collector.collect(new Pair<CharSequence, LabelOccurrences>(label, allOccurrences));
+		context.write(new AvroKey<CharSequence>(label), new AvroValue<LabelOccurrences>(allOccurrences));
 	}
 
-	public static class Combiner extends CombinerOrReducer {
+	public static class MyCombiner extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {
@@ -50,7 +47,7 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelO
 
 	}
 
-	public static class Reducer extends CombinerOrReducer {
+	public static class MyReducer extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {

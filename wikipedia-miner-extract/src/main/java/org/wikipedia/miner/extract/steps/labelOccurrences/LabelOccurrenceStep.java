@@ -6,30 +6,27 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroJob;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.LabelOccurrences;
 import org.wikipedia.miner.extract.steps.Step;
-import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.Combiner;
 import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.Counts;
-import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.Reducer;
+import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.MyCombiner;
+import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.MyReducer;
 import org.wikipedia.miner.extract.steps.labelSenses.LabelSensesStep;
 import org.wikipedia.miner.extract.util.UncompletedStepException;
 import org.wikipedia.miner.extract.util.XmlInputFormat;
@@ -63,27 +60,30 @@ public class LabelOccurrenceStep extends Step{
 			reset() ;
 		
 		
-		JobConf conf = new JobConf(LabelOccurrenceStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		// JobConf conf = new JobConf(LabelOccurrenceStep.class);
+		Job job = Job.getInstance(getConf());
+		Configuration conf = job.getConfiguration();
+		job.setJarByClass(LabelOccurrenceStep.class);
+		DumpExtractor.configureJob(job, args) ;
 		
 		if (sensesStep.getTotalLabels() >= Integer.MAX_VALUE)
 			throw new Exception("Waay to many distinct labels (this must be less than " + Integer.MAX_VALUE + ")") ;
 		
 		conf.setInt(KEY_TOTAL_LABELS, (int)sensesStep.getTotalLabels());
 
-		conf.setJobName("WM: label occurrences");
+		job.setJobName("WM: label occurrences");
 
 			
-		conf.setMapperClass(Mapper.class);
-		conf.setOutputKeyClass(AvroKey.class);
-		conf.setOutputValueClass(AvroValue.class);
+		job.setMapperClass(MyMapper.class);
+		job.setOutputKeyClass(AvroKey.class);
+		job.setOutputValueClass(AvroValue.class);
 
 			
-		conf.setInputFormat(XmlInputFormat.class);
+		job.setInputFormatClass(XmlInputFormat.class);
 		conf.set(XmlInputFormat.START_TAG_KEY, "<page>") ;
 		conf.set(XmlInputFormat.END_TAG_KEY, "</page>") ;
 			
-		FileInputFormat.setInputPaths(conf, conf.get(DumpExtractor.KEY_INPUT_FILE));
+		FileInputFormat.setInputPaths(job, conf.get(DumpExtractor.KEY_INPUT_FILE));
 		
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_OUTPUT_DIR) + "/" + DumpExtractor.OUTPUT_SITEINFO).toUri(), conf);
@@ -98,16 +98,17 @@ public class LabelOccurrenceStep extends Step{
 			}
 		}
 		
-		AvroJob.setCombinerClass(conf, Combiner.class) ;
-		AvroJob.setReducerClass(conf, Reducer.class);
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()));
+		job.setCombinerClass(MyCombiner.class) ;
+		job.setReducerClass(MyReducer.class);
+		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setOutputValueSchema(job,LabelOccurrences.getClassSchema());
 		
-		FileOutputFormat.setOutputPath(conf, getDir());
+		FileOutputFormat.setOutputPath(job, getDir());
 
-		RunningJob runningJob = JobClient.runJob(conf);
-	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		job.waitForCompletion(true);
+		
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -161,7 +162,7 @@ public class LabelOccurrenceStep extends Step{
 	
 	
 	
-	public void finish(RunningJob runningJob) throws IOException {
+	public void finish(Job runningJob) throws IOException {
 		
 		super.finish(runningJob) ;
 	
@@ -169,9 +170,9 @@ public class LabelOccurrenceStep extends Step{
 
 		for (Counts c:Counts.values()) {
 			
-			Counters.Counter counter = runningJob.getCounters().findCounter(c) ;
+			Counter counter = runningJob.getCounters().findCounter(c) ;
 			if (counter != null)
-				counts.put(c, counter.getCounter()) ;
+				counts.put(c, counter.getValue()) ;
 			else
 				counts.put(c, 0L) ;
 		}
