@@ -3,26 +3,22 @@ package org.wikipedia.miner.extract.steps.pageSummary;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroMapper;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.wikipedia.miner.extract.model.struct.LabelSummary;
 import org.wikipedia.miner.extract.model.struct.LinkSummary;
 import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.model.struct.PageKey;
 import org.wikipedia.miner.extract.model.struct.PageSummary;
 
-public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair<PageKey, PageDetail>> {
+public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDetail>, AvroKey<PageKey>, AvroValue<PageDetail>> {
 
 	@Override
-	public void map(Pair<PageKey, PageDetail> pair,
-			AvroCollector<Pair<PageKey, PageDetail>> collector,
-			Reporter reporter) throws IOException {
+	public void map(AvroKey<PageKey> key, AvroValue<PageDetail> val, Context context) throws IOException, InterruptedException {
 		
-		PageKey pageKey = pair.key() ;
-		PageDetail page = pair.value() ;
-		
+		PageKey pageKey = key.datum();
+		PageDetail page = val.datum();
 		
 		if (page.getRedirectsTo() != null) {
 			
@@ -47,7 +43,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 					PageDetail redirectDetail = PageSummaryStep.buildEmptyPageDetail() ;
 					redirectDetail.setRedirectsTo(PageSummaryStep.clone(page.getRedirectsTo())) ;
 					
-					collector.collect(new Pair<PageKey,PageDetail>(redirectKey, redirectDetail));
+					context.write(new AvroKey<PageKey>(redirectKey), new AvroValue<PageDetail>(redirectDetail));
 				}
 				
 				//and record that it has been backtracked
@@ -113,7 +109,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 			page.setLabels(new HashMap<CharSequence,LabelSummary>()) ;
 			
 			//emit the details of the target that we have built up
-			collector.collect(new Pair<PageKey,PageDetail>(targetKey, target));
+			context.write(new AvroKey<PageKey>(targetKey), new AvroValue<PageDetail>(target));
 			
 		} else {
 			
@@ -127,7 +123,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 				PageDetail redirectDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				redirectDetail.setRedirectsTo(new PageSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false));
 				
-				collector.collect(new Pair<PageKey,PageDetail>(redirectKey, redirectDetail));
+				context.write(new AvroKey<PageKey>(redirectKey), new AvroValue<PageDetail>(redirectDetail));
 				
 				//and record that it has been forwarded
 				redirect.setForwarded(true);
@@ -143,7 +139,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 				PageDetail sourceDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				sourceDetail.getLinksOut().add(new LinkSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false, linkIn.getSentenceIndexes()));
 				
-				collector.collect(new Pair<PageKey,PageDetail>(sourceKey, sourceDetail));
+				context.write(new AvroKey<PageKey>(sourceKey), new AvroValue<PageDetail>(sourceDetail));
 				
 				//and record that it has been forwarded
 				linkIn.setForwarded(true);
@@ -165,7 +161,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 				PageDetail childDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				childDetail.getParentCategories().add(new PageSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false));
 				
-				collector.collect(new Pair<PageKey,PageDetail>(childKey, childDetail));
+				context.write(new AvroKey<PageKey>(childKey), new AvroValue<PageDetail>(childDetail));
 				
 				//and record that it has been forwarded
 				childCategory.setForwarded(true);
@@ -181,7 +177,7 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 				PageDetail childDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				childDetail.getParentCategories().add(new PageSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false));
 				
-				collector.collect(new Pair<PageKey,PageDetail>(childKey, childDetail));
+				context.write(new AvroKey<PageKey>(childKey), new AvroValue<PageDetail>(childDetail));
 				
 				//and record that it has been forwarded
 				childArticle.setForwarded(true);
@@ -195,6 +191,6 @@ public class SubsequentMapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair
 		}
 		
 		//emit the page, so we can pick it up again in the reducer
-		collector.collect(new Pair<PageKey,PageDetail>(pageKey, page));
+		context.write(new AvroKey<PageKey>(pageKey), new AvroValue<PageDetail>(page));
 	}
 }

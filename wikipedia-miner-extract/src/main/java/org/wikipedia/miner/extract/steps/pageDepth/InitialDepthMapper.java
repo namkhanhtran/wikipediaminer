@@ -4,13 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroMapper;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
@@ -21,7 +20,8 @@ import org.wikipedia.miner.extract.util.Languages.Language;
 import org.wikipedia.miner.extract.util.SiteInfo;
 import org.wikipedia.miner.extract.util.Util;
 
-public class InitialDepthMapper extends AvroMapper<Pair<Integer, PageDetail>, Pair<Integer, PageDepthSummary>> {
+public class InitialDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, 
+		AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 	private static Logger logger = Logger.getLogger(SubsequentDepthMapper.class) ;
 	
@@ -29,24 +29,25 @@ public class InitialDepthMapper extends AvroMapper<Pair<Integer, PageDetail>, Pa
 	
 	
 	@Override
-	public void configure(JobConf job) {
+	public void setup(Context context) {
 
+		Configuration conf = context.getConfiguration();
 		try {
 
 			Language language = null ;
 
-			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
+			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
 
 			for (Path cf:cacheFiles) {
 
-				if (cf.getName().equals(new Path(job.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
-					language = Languages.load(new File(cf.toString())).get(job.get(DumpExtractor.KEY_LANG_CODE)) ;
+				if (cf.getName().equals(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
+					language = Languages.load(new File(cf.toString())).get(conf.get(DumpExtractor.KEY_LANG_CODE)) ;
 				}
 
 			}
 
 			if (language == null) 
-				throw new Exception("Could not locate '" + job.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
+				throw new Exception("Could not locate '" + conf.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
 
 			rootCategoryTitle = Util.normaliseTitle(language.getRootCategory()) ;
 
@@ -62,14 +63,12 @@ public class InitialDepthMapper extends AvroMapper<Pair<Integer, PageDetail>, Pa
 	
 	
 	@Override
-	public void map(Pair<Integer, PageDetail> pair,
-			AvroCollector<Pair<Integer, PageDepthSummary>> collector,
-			Reporter reporter) throws IOException {
+	public void map(AvroKey<Integer> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 		
 		if (rootCategoryTitle == null)
 			throw new IOException("Mapper not configured with root category title") ;
 		
-		PageDetail page = pair.value() ;
+		PageDetail page = pageValue.datum() ;
 		
 		if (!page.getNamespace().equals(SiteInfo.CATEGORY_KEY) && !page.getNamespace().equals(SiteInfo.MAIN_KEY)) {
 			//this only effects articles and categories, just discard other page types
@@ -92,13 +91,13 @@ public class InitialDepthMapper extends AvroMapper<Pair<Integer, PageDetail>, Pa
 		
 		if (rootCategoryTitle.equals(page.getTitle().toString())) {
 			depthSummary.setDepth(0) ;
-			shareDepth(depthSummary, collector, reporter) ;
+			shareDepth(depthSummary, context) ;
 		} 
 		
-		collect(page.getId(), depthSummary, collector);		
+		context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDepthSummary>(depthSummary)) ;
 	}
 	
-	public static void shareDepth(PageDepthSummary page, AvroCollector<Pair<Integer, PageDepthSummary>> collector, Reporter reporter) throws IOException {
+	public static void shareDepth(PageDepthSummary page, org.apache.hadoop.mapreduce.Mapper.Context context) throws IOException, InterruptedException {
 		
 		if (page.getDepth() == null)
 			return ;
@@ -114,15 +113,9 @@ public class InitialDepthMapper extends AvroMapper<Pair<Integer, PageDetail>, Pa
 			child.setDepthForwarded(false);
 			child.setChildIds(new ArrayList<Integer>());
 			
-			collect(childId, child, collector) ;
+			context.write(new AvroKey<Integer>(childId), new AvroValue<PageDepthSummary>(child)) ;
 		}
 		
 		page.setDepthForwarded(true);
-	}
-	
-	public static void collect(Integer pageId, PageDepthSummary pageDepth, AvroCollector<Pair<Integer, PageDepthSummary>> collector) throws IOException {
-		collector.collect(new Pair<Integer,PageDepthSummary>(pageId,pageDepth));
-	}
-		
-	
+	}	
 }

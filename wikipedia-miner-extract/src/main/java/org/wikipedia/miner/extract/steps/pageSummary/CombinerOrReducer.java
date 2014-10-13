@@ -8,10 +8,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.model.struct.LabelSummary;
 import org.wikipedia.miner.extract.model.struct.LinkSummary;
@@ -21,7 +20,8 @@ import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep.Unforwarded;
 
 
-public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail, Pair<PageKey, PageDetail>> {
+public abstract class CombinerOrReducer extends Reducer<
+		PageKey, PageDetail, AvroKey<PageKey>, AvroValue<PageDetail>> {
 
 	private static Logger logger = Logger.getLogger(CombinerOrReducer.class) ;
 
@@ -30,9 +30,7 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 	private CharSequence[] debugTitles = {"Atheist","Atheism","Atheists","Athiest","People by religion"} ;
 
 	@Override
-	public void reduce(PageKey key, Iterable<PageDetail> pagePartials,
-			AvroCollector<Pair<PageKey, PageDetail>> collector,
-			Reporter reporter) throws IOException {
+	public void reduce(PageKey key, Iterable<PageDetail> pagePartials, Context context) throws IOException, InterruptedException {
 
 		Integer id = null;
 		//Integer namespace = key.getNamespace() ;
@@ -177,24 +175,24 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 
 		if (isReducer()) {
 
-			countUnforwardedPages(Unforwarded.redirect, combinedPage.getRedirects(), reporter) ;
+			countUnforwardedPages(Unforwarded.redirect, combinedPage.getRedirects(), context) ;
 
 			if (redirectsTo != null && redirectsTo.getId() >= 0 && !redirectsTo.getForwarded())
-				reporter.incrCounter(Unforwarded.redirect, 1);
+				context.getCounter(Unforwarded.redirect).increment(1);
 
-			countUnforwardedLinks(Unforwarded.linkIn, combinedPage.getLinksIn(), reporter) ;
-			countUnforwardedLinks(Unforwarded.linkOut, combinedPage.getLinksOut(), reporter) ;
+			countUnforwardedLinks(Unforwarded.linkIn, combinedPage.getLinksIn(), context) ;
+			countUnforwardedLinks(Unforwarded.linkOut, combinedPage.getLinksOut(), context) ;
 
-			countUnforwardedPages(Unforwarded.parentCategory, combinedPage.getParentCategories(), reporter) ;
-			countUnforwardedPages(Unforwarded.childCategory, combinedPage.getChildCategories(), reporter) ;
-			countUnforwardedPages(Unforwarded.childArticle, combinedPage.getChildArticles(), reporter) ;
+			countUnforwardedPages(Unforwarded.parentCategory, combinedPage.getParentCategories(), context) ;
+			countUnforwardedPages(Unforwarded.childCategory, combinedPage.getChildCategories(), context) ;
+			countUnforwardedPages(Unforwarded.childArticle, combinedPage.getChildArticles(), context) ;
 
 		}
 
 		if (debug)
 			logger.info("combined: " + combinedPage.toString());
 
-		collector.collect(new Pair<PageKey,PageDetail>(key, combinedPage));
+		context.write(new AvroKey<PageKey>(key), new AvroValue<PageDetail>(combinedPage));
 	}
 
 	private SortedMap<Integer,PageSummary> addToPageMap(List<PageSummary> pages, SortedMap<Integer,PageSummary> pageMap) {
@@ -289,22 +287,22 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 		return links ;
 	}
 
-	private void countUnforwardedPages(Unforwarded counter, List<PageSummary> pages, Reporter reporter) {
+	private void countUnforwardedPages(Unforwarded counter, List<PageSummary> pages, Context context) {
 
 		for (PageSummary page:pages) 				
 			if (!page.getForwarded()) 
-				reporter.incrCounter(counter, 1);
+				context.getCounter(counter).increment(1);
 	}
 	
-	private void countUnforwardedLinks(Unforwarded counter, List<LinkSummary> links, Reporter reporter) {
+	private void countUnforwardedLinks(Unforwarded counter, List<LinkSummary> links, Context context) {
 
 		for (LinkSummary link:links) 				
 			if (!link.getForwarded()) 
-				reporter.incrCounter(counter, 1);
+				context.getCounter(counter).increment(1);
 	}
 
 
-	public static class Combiner extends CombinerOrReducer {
+	public static class MyCombiner extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {
@@ -313,7 +311,7 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 
 	}
 
-	public static class Reducer extends CombinerOrReducer {
+	public static class MyReducer extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {

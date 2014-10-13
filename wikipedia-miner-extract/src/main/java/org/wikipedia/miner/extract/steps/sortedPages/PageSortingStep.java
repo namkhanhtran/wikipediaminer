@@ -4,19 +4,18 @@ import java.io.IOException;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroJob;
-import org.apache.avro.mapred.AvroMapper;
-import org.apache.avro.mapred.AvroReducer;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.PageDetail;
@@ -53,26 +52,31 @@ public class PageSortingStep extends Step {
 			reset() ;
 		}
 		
-		JobConf conf = new JobConf(PageDepthStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		// JobConf conf = Job.get(PageDepthStep.class);
+		Job job = Job.getInstance(getConf());
+		Configuration conf = job.getConfiguration();
+		job.setJarByClass(PageSortingStep.class);
+		DumpExtractor.configureJob(job, args) ;
 
-		conf.setJobName("WM: sorted pages");
+		job.setJobName("WM: sorted pages");
 		
 		
-		FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
-		AvroJob.setInputSchema(conf, Pair.getPairSchema(PageKey.getClassSchema(),PageDetail.getClassSchema()));
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+		AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
+		AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 			
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()));
+		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 		
-		AvroJob.setMapperClass(conf, Mapper.class);
-		AvroJob.setReducerClass(conf, Reducer.class);
+		job.setMapperClass(MyMapper.class);
+		job.setReducerClass(MyReducer.class);
 		
-		FileOutputFormat.setOutputPath(conf, getDir());
+		FileOutputFormat.setOutputPath(job, getDir());
 		
-		RunningJob runningJob = JobClient.runJob(conf);
+		job.waitForCompletion(true);
 	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -85,34 +89,30 @@ public class PageSortingStep extends Step {
 	}
 	
 	
-	public static class Mapper extends AvroMapper<Pair<PageKey, PageDetail>, Pair<Integer, PageDetail>>{
+	public static class MyMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDetail>, AvroKey<Integer>, AvroValue<PageDetail>>{
 		
 		@Override
-		public void map(Pair<PageKey, PageDetail> pair,
-				AvroCollector<Pair<Integer, PageDetail>> collector,
-				Reporter reporter) throws IOException {
+		public void map(AvroKey<PageKey> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 			
-			PageKey key = pair.key() ;
-			PageDetail page = pair.value() ;
+			PageKey key = pageKey.datum();
+			PageDetail page = pageValue.datum();
 			
 			
 			page.setNamespace(key.getNamespace());
 			page.setTitle(key.getTitle());
 			
-			collector.collect(new Pair<Integer, PageDetail>(page.getId(), page));
+			context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDetail>(page));
 		}
 	}
 	
 	
-	public static class Reducer extends AvroReducer<Integer, PageDetail, Pair<Integer,PageDetail>>{
+	public static class MyReducer extends Reducer<Integer, PageDetail, AvroKey<Integer>, AvroValue<PageDetail>>{
 		
 		@Override
-		public void reduce(Integer pageId, Iterable<PageDetail> pages,
-				AvroCollector<Pair<Integer,PageDetail>> collector,
-				Reporter reporter) throws IOException {
+		public void reduce(Integer pageId, Iterable<PageDetail> pages,Context context) throws IOException, InterruptedException {
 			
 			for (PageDetail page:pages)
-				collector.collect(new Pair<Integer, PageDetail>(page.getId(), page));
+				context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDetail>(page));
 		}
 	}
 	

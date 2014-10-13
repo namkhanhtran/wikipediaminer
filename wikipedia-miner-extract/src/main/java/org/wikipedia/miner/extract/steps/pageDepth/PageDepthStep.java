@@ -6,19 +6,16 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroJob;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
@@ -60,39 +57,43 @@ public class PageDepthStep extends IterativeStep {
 			reset() ;
 		}
 		
-		JobConf conf = new JobConf(PageDepthStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		//JobConf conf = new JobConf(PageDepthStep.class);
+		Job job = Job.getInstance(getConf());
+		job.setJarByClass(PageDepthStep.class);
+		Configuration conf = job.getConfiguration();
+		DumpExtractor.configureJob(job, args) ;
 
-		conf.setJobName("WM: page depth (" + getIteration() + ")");
+		job.setJobName("WM: page depth (" + getIteration() + ")");
 		
 		if (getIteration() == 0) {
 		
-			FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
-			AvroJob.setInputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()));
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
+			AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 			
 			DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
 			
-			AvroJob.setMapperClass(conf, InitialDepthMapper.class);
+			job.setMapperClass(InitialDepthMapper.class);
 			
 		} else {
 			
-			FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1));
-			AvroJob.setInputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()));
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1));
+			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
+			AvroJob.setInputValueSchema(job, PageDepthSummary.getClassSchema());
 			
-			AvroJob.setMapperClass(conf, SubsequentDepthMapper.class);
+			job.setMapperClass(SubsequentDepthMapper.class);
 		}
 			
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()));
-				
-		AvroJob.setCombinerClass(conf, DepthCombiner.class) ;
-		AvroJob.setReducerClass(conf, DepthReducer.class);
+		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setOutputValueSchema(job, PageDepthSummary.getClassSchema());				
+		job.setCombinerClass(DepthCombiner.class) ;
+		job.setReducerClass(DepthReducer.class);
 		
-		FileOutputFormat.setOutputPath(conf, getDir());
+		FileOutputFormat.setOutputPath(job, getDir());
 		
-		RunningJob runningJob = JobClient.runJob(conf);
-	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		job.waitForCompletion(true);	
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -154,7 +155,7 @@ public class PageDepthStep extends IterativeStep {
 
 
 
-	public void finish(RunningJob runningJob) throws IOException {
+	public void finish(Job runningJob) throws IOException {
 
 		super.finish(runningJob) ;
 
@@ -162,9 +163,9 @@ public class PageDepthStep extends IterativeStep {
 
 		for (Counts count:Counts.values()) {
 			
-			Counters.Counter counter = runningJob.getCounters().findCounter(count) ;
+			Counter counter = runningJob.getCounters().findCounter(count) ;
 			if (counter != null)
-				counts.put(count, counter.getCounter()) ;
+				counts.put(count, counter.getValue()) ;
 			else
 				counts.put(count, 0L) ;
 		}
