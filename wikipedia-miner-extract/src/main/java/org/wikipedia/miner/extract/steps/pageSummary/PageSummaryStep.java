@@ -135,7 +135,7 @@ public class PageSummaryStep extends IterativeStep {
 			if (getIteration() == 0) {
 
 				job.setMapperClass(InitialMapper.class);
-
+				
 				/*job.setOutputKeyClass(AvroKey.class);
 			job.setOutputValueClass(AvroValue.class);*/
 
