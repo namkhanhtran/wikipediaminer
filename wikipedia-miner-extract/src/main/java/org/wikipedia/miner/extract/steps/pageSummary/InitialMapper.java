@@ -150,7 +150,7 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 
 	private PageKey buildKey(DumpPage parsedPage) {
 		
-		PageKey key = new PageKey() ;
+		PageKey key = new PageKey();
 		
 		key.setNamespace(parsedPage.getNamespace().getKey());
 		key.setTitle(parsedPage.getTitle());

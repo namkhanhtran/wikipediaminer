@@ -53,7 +53,7 @@ public class DumpExtractor {
 	private Path workingDir  ;
 	private Path finalDir ;
 
-	//private Logger logger ;
+	private static Logger logger = Logger.getLogger(DumpExtractor.class);
 
 
 	public static final String KEY_INPUT_FILE = "wm.inputDir" ;
@@ -81,8 +81,6 @@ public class DumpExtractor {
 
 		GenericOptionsParser gop = new GenericOptionsParser(args) ;
 		conf = gop.getConfiguration() ;
-
-
 
 		//outputFileSystem = FileSystem.get(conf);
 		this.args = gop.getRemainingArgs() ;
@@ -204,12 +202,11 @@ public class DumpExtractor {
 
 	private int run() throws Exception {
 
-		Logger.getLogger(DumpExtractor.class).info("Extracting site info") ;
+		logger.info("Extracting site info") ;
 		extractSiteInfo() ;
 
-		
 		//extract basic page summaries
-		int summaryIteration = 0 ;
+		/*int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
 			
@@ -228,8 +225,7 @@ public class DumpExtractor {
 		
 		PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
 		ToolRunner.run(sortingStep, args);
-		
-		
+				
 		//calculate page depths
 		int depthIteration = 0 ;
 		PageDepthStep depthStep ;
@@ -257,12 +253,14 @@ public class DumpExtractor {
 		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		finalStep.run() ;
+		finalStep.run() ;*/
 		
 		return 0 ;
 	}
 
 	private void extractSiteInfo() throws IOException {
+		
+		logger.info("Extracting site info...");
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(getFileSystem(inputFile).open(inputFile))) ;
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(getFileSystem(workingDir).create(new Path(workingDir + "/" + OUTPUT_SITEINFO)))) ;
