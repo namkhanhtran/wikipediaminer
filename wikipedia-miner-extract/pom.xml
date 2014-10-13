@@ -108,6 +108,7 @@
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro-maven-plugin</artifactId>
 			<version>${avro.version}</version>
+			<type>maven-plugin</type>
 		</dependency>
 
 		<dependency>
@@ -215,6 +216,10 @@
     <repository>
       <id>cloudera</id>
       <url>https://repository.cloudera.com/artifactory/repo/</url>
+    </repository>
+    <repository>
+      <id>cloudera-avro175</id>
+      <url>https://repository.cloudera.com/artifactory/repo/org/apache/avro/avro-maven-plugin/1.7.5-cdh5.1.0/</url>
     </repository>
   </repositories>
 
