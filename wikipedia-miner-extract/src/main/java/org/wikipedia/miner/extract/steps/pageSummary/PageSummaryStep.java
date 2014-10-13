@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.mapreduce.AvroJob;
-import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapred.AvroValue;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
