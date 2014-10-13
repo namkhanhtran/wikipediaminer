@@ -136,10 +136,9 @@ public class PageSummaryStep extends IterativeStep {
 			
 			job.setMapperClass(InitialMapper.class);
 
-			job.setOutputKeyClass(AvroKey.class);
-			job.setOutputValueClass(AvroValue.class);
+			/*job.setOutputKeyClass(AvroKey.class);
+			job.setOutputValueClass(AvroValue.class);*/
 
-			
 			job.setInputFormatClass(XmlInputFormat.class);
 			job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;
 			job.getConfiguration().set(XmlInputFormat.END_TAG_KEY, "</page>") ;

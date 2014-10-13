@@ -75,8 +75,8 @@ public class LabelOccurrenceStep extends Step{
 
 			
 		job.setMapperClass(MyMapper.class);
-		job.setOutputKeyClass(AvroKey.class);
-		job.setOutputValueClass(AvroValue.class);
+		/*job.setOutputKeyClass(AvroKey.class);
+		job.setOutputValueClass(AvroValue.class);*/
 
 			
 		job.setInputFormatClass(XmlInputFormat.class);

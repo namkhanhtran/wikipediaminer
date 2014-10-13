@@ -202,11 +202,10 @@ public class DumpExtractor {
 
 	private int run() throws Exception {
 
-		logger.info("Extracting site info") ;
 		extractSiteInfo() ;
 
 		//extract basic page summaries
-		/*int summaryIteration = 0 ;
+		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
 			
@@ -253,7 +252,7 @@ public class DumpExtractor {
 		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		finalStep.run() ;*/
+		finalStep.run() ;
 		
 		return 0 ;
 	}
