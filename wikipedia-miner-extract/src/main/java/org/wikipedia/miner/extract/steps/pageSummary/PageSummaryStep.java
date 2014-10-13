@@ -112,75 +112,79 @@ public class PageSummaryStep extends IterativeStep {
 
 	@Override
 	public int run(String[] args) throws UncompletedStepException, IOException, ClassNotFoundException, InterruptedException {
+		try {
 
+			logger.info("Starting page summary step (iteration " + getIteration() + ")");
 
-		logger.info("Starting page summary step (iteration " + getIteration() + ")");
+			if (isFinished()) {
+				logger.info(" - already completed");
+				loadUnforwardedCounts() ;
 
-		if (isFinished()) {
-			logger.info(" - already completed");
-			loadUnforwardedCounts() ;
+				return 0 ;
+			} else
+				reset() ;
 
-			return 0 ;
-		} else
-			reset() ;
+			Job job = Job.getInstance(getConf());
+			job.setJarByClass(PageSummaryStep.class);
+			Configuration conf = job.getConfiguration();
 
-		Job job = Job.getInstance(getConf());
-		job.setJarByClass(PageSummaryStep.class);
-		Configuration conf = job.getConfiguration();
+			DumpExtractor.configureJob(job, args) ;
 
-		DumpExtractor.configureJob(job, args) ;
+			job.setJobName("WM: page summary (" + getIteration() + ")");
 
-		job.setJobName("WM: page summary (" + getIteration() + ")");
+			if (getIteration() == 0) {
 
-		if (getIteration() == 0) {
+				job.setMapperClass(InitialMapper.class);
 
-			job.setMapperClass(InitialMapper.class);
-
-			/*job.setOutputKeyClass(AvroKey.class);
+				/*job.setOutputKeyClass(AvroKey.class);
 			job.setOutputValueClass(AvroValue.class);*/
 
-			job.setInputFormatClass(XmlInputFormat.class);
-			job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;
-			job.getConfiguration().set(XmlInputFormat.END_TAG_KEY, "</page>") ;
+				job.setInputFormatClass(XmlInputFormat.class);
+				job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;
+				job.getConfiguration().set(XmlInputFormat.END_TAG_KEY, "</page>") ;
 
-			FileInputFormat.setInputPaths(job, conf.get(DumpExtractor.KEY_INPUT_FILE));
-			DistributedCache.addCacheFile(new Path(job.getConfiguration()
-					.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
+				FileInputFormat.setInputPaths(job, conf.get(DumpExtractor.KEY_INPUT_FILE));
+				DistributedCache.addCacheFile(new Path(job.getConfiguration()
+						.get(DumpExtractor.KEY_SENTENCE_MODEL)).toUri(), conf);
 
-		} else {
+			} else {
 
-			job.setMapperClass(SubsequentMapper.class);
-			AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
-			AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
+				job.setMapperClass(SubsequentMapper.class);
+				AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
+				AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 
-			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+				FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
 
-		}
+			}
 
-		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_OUTPUT_DIR) + "/" + DumpExtractor.OUTPUT_SITEINFO).toUri(), conf);
-		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
+			DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_OUTPUT_DIR) + "/" + DumpExtractor.OUTPUT_SITEINFO).toUri(), conf);
+			DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
 
-		job.setCombinerClass(MyCombiner.class) ;
-		job.setReducerClass(MyReducer.class);
-		AvroJob.setOutputKeySchema(job, PageKey.getClassSchema());
-		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
+			job.setCombinerClass(MyCombiner.class) ;
+			job.setReducerClass(MyReducer.class);
+			AvroJob.setOutputKeySchema(job, PageKey.getClassSchema());
+			AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 
-		FileOutputFormat.setOutputPath(job, getDir());
+			FileOutputFormat.setOutputPath(job, getDir());
 
-		logger.info("Finished setting up..");
+			logger.info("Finished setting up..");
 
-		try {
-			job.waitForCompletion(true);
+			try {
+				job.waitForCompletion(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			if (job.isSuccessful()) {	
+				finish(job) ;
+				return 0 ;
+			}
+
+			// throw new UncompletedStepException() ;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		if (job.isSuccessful()) {	
-			finish(job) ;
-			return 0 ;
-		}
-
-		throw new UncompletedStepException() ;
+		return 0;
 	}
 
 
