@@ -178,7 +178,8 @@ public class PageSummaryStep extends IterativeStep {
 				e.printStackTrace();
 			}
 
-			if (job.isSuccessful()) {	
+			if (job.isComplete()) {	
+				logger.info("Job" + job.getJobName() + " has been completed.");
 				finish(job) ;
 				return 0 ;
 			}
@@ -242,6 +243,8 @@ public class PageSummaryStep extends IterativeStep {
 
 	public void finish(Job runningJob) throws IOException {
 
+		logger.info("Clean up the job");
+		
 		super.finish(runningJob) ;
 
 		unforwardedCounts = new HashMap<Unforwarded,Long>() ;
