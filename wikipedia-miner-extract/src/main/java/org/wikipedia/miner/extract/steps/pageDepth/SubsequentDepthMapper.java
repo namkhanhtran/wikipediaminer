@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
 
@@ -23,7 +22,7 @@ public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<Pa
 			return ;
 		}
 		
-		if (depthSummary.getDepth() == Integer.MIN_VALUE) { 
+		if (depthSummary.getDepth() == null) { 
 			//if we haven't reached this node yet, just pass it along directly
 			context.write(pageKey, new AvroValue<PageDepthSummary>(depthSummary));
 			return ;

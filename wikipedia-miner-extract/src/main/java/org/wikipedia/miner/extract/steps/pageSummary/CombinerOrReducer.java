@@ -1,7 +1,5 @@
 package org.wikipedia.miner.extract.steps.pageSummary;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +39,7 @@ public abstract class CombinerOrReducer extends Reducer<
 		Long lastEdited = null ;
 		boolean isDisambiguation = false ;
 		
-		TIntArrayList sentenceSplits = new TIntArrayList() ;
+		ArrayList<Integer> sentenceSplits = new ArrayList<Integer>() ;
 
 		SortedMap<Integer,PageSummary> redirects = new TreeMap<Integer, PageSummary>() ;
 		PageSummary redirectsTo = null ;
@@ -70,7 +68,7 @@ public abstract class CombinerOrReducer extends Reducer<
 			if (debug)
 				logger.info("partial: " + pagePartial.toString());
 
-			if (pagePartial.getId() != Integer.MIN_VALUE)
+			if (pagePartial.getId() != null)
 				id = pagePartial.getId() ;
 
 			if (pagePartial.getLastEdited() != null)
@@ -235,7 +233,7 @@ public abstract class CombinerOrReducer extends Reducer<
 		for (LinkSummary link:links) {
 
 			//only overwrite if previous entry has not been forwarded
-			final LinkSummary existingLink = linkMap.get(link.getId()) ;
+			LinkSummary existingLink = linkMap.get(link.getId()) ;
 			if (existingLink == null) {
 
 				//the clone is needed because avro seems to reuse these instances.
@@ -245,14 +243,13 @@ public abstract class CombinerOrReducer extends Reducer<
 			} else {
 
 				//merge lists of sentence indexes
-				link.getSentenceIndexes().forEach(new TIntProcedure() {
-					public boolean execute(int sentenceIndex) {
-						int pos = existingLink.getSentenceIndexes().binarySearch(sentenceIndex) ;
-						if (pos<0) 
-							existingLink.getSentenceIndexes().insert((-pos) - 1, sentenceIndex) ;
-						return true;
-					}
-				});
+				for (Integer sentenceIndex:link.getSentenceIndexes()) {
+					
+					int pos = Collections.binarySearch(existingLink.getSentenceIndexes(), sentenceIndex) ;
+					if (pos<0) 
+						existingLink.getSentenceIndexes().add((-pos) - 1, sentenceIndex) ;
+					
+				}
 
 				//overwrite forwarded flag
 				if (link.getForwarded())

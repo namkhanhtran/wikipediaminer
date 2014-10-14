@@ -4,31 +4,16 @@
  * DO NOT EDIT DIRECTLY
  */
 package org.wikipedia.miner.extract.model.struct;  
-
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
-		  "{\"type\":\"record\",\"name\":\"LinkSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":["
-		  + "{\"name\":\"id\",\"type\":\"int\"}"
-		  + ",{\"name\":\"title\",\"type\":\"string\"}"
-		  + ",{\"name\":\"namespace\",\"type\":\"int\"}"
-		  + ",{\"name\":\"forwarded\",\"type\":\"boolean\"}"
-		  
-		  //+ ",{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
-		  
-		  + ",{\"name\":\"sentenceIndexes\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"namespace\":\"gnu.trove.list.array\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
-		  
-		  + "]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"LinkSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"namespace\",\"type\":\"int\"},{\"name\":\"forwarded\",\"type\":\"boolean\"},{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public int id;
   @Deprecated public java.lang.CharSequence title;
   @Deprecated public int namespace;
   @Deprecated public boolean forwarded;
-  @Deprecated public gnu.trove.list.array.TIntArrayList sentenceIndexes;
+  @Deprecated public java.util.List<java.lang.Integer> sentenceIndexes;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -40,12 +25,12 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * All-args constructor.
    */
-  public LinkSummary(int id, java.lang.CharSequence title, int namespace, java.lang.Boolean forwarded, TIntList sentenceIndexes) {
+  public LinkSummary(java.lang.Integer id, java.lang.CharSequence title, java.lang.Integer namespace, java.lang.Boolean forwarded, java.util.List<java.lang.Integer> sentenceIndexes) {
     this.id = id;
     this.title = title;
     this.namespace = namespace;
     this.forwarded = forwarded;
-    this.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) sentenceIndexes;
+    this.sentenceIndexes = sentenceIndexes;
   }
 
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
@@ -68,7 +53,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     case 1: title = (java.lang.CharSequence)value$; break;
     case 2: namespace = (java.lang.Integer)value$; break;
     case 3: forwarded = (java.lang.Boolean)value$; break;
-    case 4: sentenceIndexes = (gnu.trove.list.array.TIntArrayList)value$; break;
+    case 4: sentenceIndexes = (java.util.List<java.lang.Integer>)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -76,7 +61,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'id' field.
    */
-  public int getId() {
+  public java.lang.Integer getId() {
     return id;
   }
 
@@ -84,7 +69,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(int value) {
+  public void setId(java.lang.Integer value) {
     this.id = value;
   }
 
@@ -106,7 +91,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'namespace' field.
    */
-  public int getNamespace() {
+  public java.lang.Integer getNamespace() {
     return namespace;
   }
 
@@ -114,7 +99,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(int value) {
+  public void setNamespace(java.lang.Integer value) {
     this.namespace = value;
   }
 
@@ -136,7 +121,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'sentenceIndexes' field.
    */
-  public TIntList getSentenceIndexes() {
+  public java.util.List<java.lang.Integer> getSentenceIndexes() {
     return sentenceIndexes;
   }
 
@@ -144,8 +129,8 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'sentenceIndexes' field.
    * @param value the value to set.
    */
-  public void setSentenceIndexes(TIntList value) {
-    this.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) value;
+  public void setSentenceIndexes(java.util.List<java.lang.Integer> value) {
+    this.sentenceIndexes = value;
   }
 
   /** Creates a new LinkSummary RecordBuilder */
@@ -173,7 +158,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     private java.lang.CharSequence title;
     private int namespace;
     private boolean forwarded;
-    private TIntList sentenceIndexes;
+    private java.util.List<java.lang.Integer> sentenceIndexes;
 
     /** Creates a new Builder */
     private Builder() {
@@ -231,7 +216,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'id' field */
-    public int getId() {
+    public java.lang.Integer getId() {
       return id;
     }
     
@@ -280,7 +265,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'namespace' field */
-    public int getNamespace() {
+    public java.lang.Integer getNamespace() {
       return namespace;
     }
     
@@ -328,12 +313,12 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'sentenceIndexes' field */
-    public TIntList getSentenceIndexes() {
+    public java.util.List<java.lang.Integer> getSentenceIndexes() {
       return sentenceIndexes;
     }
     
     /** Sets the value of the 'sentenceIndexes' field */
-    public org.wikipedia.miner.extract.model.struct.LinkSummary.Builder setSentenceIndexes(TIntList value) {
+    public org.wikipedia.miner.extract.model.struct.LinkSummary.Builder setSentenceIndexes(java.util.List<java.lang.Integer> value) {
       validate(fields()[4], value);
       this.sentenceIndexes = value;
       fieldSetFlags()[4] = true;
@@ -360,7 +345,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.namespace = fieldSetFlags()[2] ? this.namespace : (java.lang.Integer) defaultValue(fields()[2]);
         record.forwarded = fieldSetFlags()[3] ? this.forwarded : (java.lang.Boolean) defaultValue(fields()[3]);
-        record.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) (fieldSetFlags()[4] ? this.sentenceIndexes : (gnu.trove.list.array.TIntArrayList) defaultValue(fields()[4]));
+        record.sentenceIndexes = fieldSetFlags()[4] ? this.sentenceIndexes : (java.util.List<java.lang.Integer>) defaultValue(fields()[4]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
