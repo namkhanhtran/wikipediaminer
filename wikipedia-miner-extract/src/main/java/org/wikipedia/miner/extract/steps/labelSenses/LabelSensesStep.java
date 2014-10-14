@@ -64,7 +64,7 @@ public class LabelSensesStep extends Step {
 
 		job.setJobName("WM: label senses");
 		
-		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000");
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
 		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		
 		AvroJob.setInputKeySchema(job, Schema.create(Type.INT));

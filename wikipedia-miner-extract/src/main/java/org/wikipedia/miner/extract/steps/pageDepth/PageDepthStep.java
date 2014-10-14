@@ -70,7 +70,7 @@ public class PageDepthStep extends IterativeStep {
 		
 		if (getIteration() == 0) {
 		
-			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000");
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
 			job.setInputFormatClass(AvroKeyValueInputFormat.class);
 			
 			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
@@ -82,7 +82,7 @@ public class PageDepthStep extends IterativeStep {
 			
 		} else {
 			
-			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1) + Path.SEPARATOR + "part-r-00000");
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1) + Path.SEPARATOR + "part-r-00000.avro");
 			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
 			AvroJob.setInputValueSchema(job, PageDepthSummary.getClassSchema());
 			job.setMapperClass(SubsequentDepthMapper.class);

@@ -63,7 +63,7 @@ public class PageSortingStep extends Step {
 		job.setJobName("WM: sorted pages");
 		
 		
-		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000");
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
 		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		
 		AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
