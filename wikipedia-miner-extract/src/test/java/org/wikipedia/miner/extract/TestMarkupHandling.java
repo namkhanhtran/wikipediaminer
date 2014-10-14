@@ -1,7 +1,6 @@
 package org.wikipedia.miner.extract;
 
 import static org.junit.Assert.assertEquals;
-import gnu.trove.list.TIntList;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +48,7 @@ public class TestMarkupHandling extends MarkupTestCase {
 		
 		assertEquals(markup.length(), strippedMarkup.length()) ;
 		
-		TIntList sentenceSplits = sentenceExtractor.getSentenceSplits(page) ;
+		List<Integer> sentenceSplits = sentenceExtractor.getSentenceSplits(page) ;
 		//System.out.println(StringUtils.join(sentenceSplits, ",")) ;
 		
 		assertEquals(sentenceSplits.size(), 34) ;
