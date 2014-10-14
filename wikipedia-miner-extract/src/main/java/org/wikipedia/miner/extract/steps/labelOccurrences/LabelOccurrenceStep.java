@@ -73,7 +73,6 @@ public class LabelOccurrenceStep extends Step{
 		conf.setInt(KEY_TOTAL_LABELS, (int)sensesStep.getTotalLabels());
 
 		job.setJobName("WM: label occurrences");
-
 			
 		job.setMapperClass(MyMapper.class);
 		/*job.setOutputKeyClass(AvroKey.class);

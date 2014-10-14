@@ -63,7 +63,7 @@ public class PrimaryLabelStep extends Step {
 		job.setJobName("WM: primary labels");
 		
 		
-		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + labelSensesStep.getDirName());
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + labelSensesStep.getDirName() + Path.SEPARATOR + "part-r-00000");
 		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		
 		AvroJob.setInputKeySchema(job, Schema.create(Type.STRING));

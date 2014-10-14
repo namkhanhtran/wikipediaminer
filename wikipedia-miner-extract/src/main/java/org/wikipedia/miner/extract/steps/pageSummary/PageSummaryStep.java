@@ -154,9 +154,9 @@ public class PageSummaryStep extends IterativeStep {
 				AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
 				AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 
-				logger.info("Working from: " + getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+				logger.info("Working from: " + getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1) + Path.SEPARATOR + "part-r-00000");
 				
-				FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+				FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1) + Path.SEPARATOR + "part-r-00000");
 				job.setInputFormatClass(AvroKeyValueInputFormat.class);
 
 			}
