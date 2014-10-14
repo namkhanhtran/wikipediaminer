@@ -64,7 +64,7 @@
 									<mainClass>org.wikipedia.miner.training.SnippetAnnotator</mainClass>
 								</manifest>
 							</archive>
-							<finalName>${project.artifactId}</finalName>
+							<finalName>${project.artifactId}-annotator</finalName>
 						</configuration>						
 						<phase>package</phase>
 						<goals>

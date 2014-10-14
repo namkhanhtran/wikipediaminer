@@ -125,14 +125,18 @@ public class SnippetAnnotator {
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String line = null;
+		int debugLine = 0;
 		while ((line = reader.readLine()) != null) {
 			if (line.length() == 0) {
 				continue;
 			}
+			System.out.println("DEBUGGING line: " + ++debugLine);
+			String[] token = line.split("\t");
+			String raw_content = token[4];
 
 			JSONParser parser = new JSONParser();
 			try {
-				Object obj = parser.parse(line);
+				Object obj = parser.parse(raw_content);
 
 				JSONObject jsonObject = (JSONObject) obj;
 
