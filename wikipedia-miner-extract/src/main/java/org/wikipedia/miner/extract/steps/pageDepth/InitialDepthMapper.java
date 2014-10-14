@@ -22,7 +22,7 @@ import org.wikipedia.miner.extract.util.Languages.Language;
 import org.wikipedia.miner.extract.util.SiteInfo;
 import org.wikipedia.miner.extract.util.Util;
 
-public class InitialDepthMapper extends Mapper<IntWritable, AvroValue<PageDetail>, 
+public class InitialDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, 
 AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 	private static Logger logger = Logger.getLogger(SubsequentDepthMapper.class) ;
@@ -66,7 +66,7 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 
 	@Override
-	public void map(IntWritable pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
+	public void map(AvroKey<Integer> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 
 		if (rootCategoryTitle == null)
 			throw new IOException("Mapper not configured with root category title") ;
@@ -100,7 +100,7 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 		context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDepthSummary>(depthSummary)) ;
 	}
 
-	public static void shareDepth(final PageDepthSummary page, final org.apache.hadoop.mapreduce.Mapper.Context context) throws IOException, InterruptedException {
+	public static void shareDepth(final PageDepthSummary page, final Context context) throws IOException, InterruptedException {
 
 		if (page.getDepth() == null)
 			return ;

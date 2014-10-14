@@ -8,6 +8,8 @@ import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapred.Pair;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyValueInputFormat;
+import org.apache.avro.mapreduce.AvroKeyValueOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -61,7 +63,9 @@ public class PageSortingStep extends Step {
 		job.setJobName("WM: sorted pages");
 		
 		
-		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
+		job.setInputFormatClass(AvroKeyValueInputFormat.class);
+		
 		AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
 		AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 		job.setMapperClass(MyMapper.class);
@@ -73,9 +77,8 @@ public class PageSortingStep extends Step {
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 		
-
-		
 		FileOutputFormat.setOutputPath(job, getDir());
+		job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 		
 		job.waitForCompletion(true);
 	

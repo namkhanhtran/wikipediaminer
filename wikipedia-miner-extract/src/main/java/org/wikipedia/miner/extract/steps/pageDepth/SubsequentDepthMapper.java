@@ -1,10 +1,12 @@
 package org.wikipedia.miner.extract.steps.pageDepth;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
 
 public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDepthSummary>, AvroKey<Integer>, AvroValue<PageDepthSummary>> {
@@ -28,8 +30,36 @@ public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<Pa
 			return ;
 		}
 	
-		InitialDepthMapper.shareDepth(depthSummary, context) ;		
+		shareDepth(depthSummary, context) ;		
 		context.write(pageKey, new AvroValue<PageDepthSummary>(depthSummary));
+	}
+	
+	public static void shareDepth(final PageDepthSummary page, final Context context) throws IOException, InterruptedException {
+
+		if (page.getDepth() == null)
+			return ;
+
+		if (page.getDepthForwarded())
+			return ;
+
+		//logger.info("sharing depths for " + page.getTitle() + ": " + page.getDepth());
+		for (Integer childId:page.getChildIds()) {
+
+			PageDepthSummary child = new PageDepthSummary() ;
+			child.setDepth(page.getDepth() + 1);
+			child.setDepthForwarded(false);
+			child.setChildIds(new ArrayList<Integer>());
+
+			try {
+				context.write(new AvroKey<Integer>(childId), new AvroValue<PageDepthSummary>(child)) ;
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		page.setDepthForwarded(true);
 	}
 	
 }

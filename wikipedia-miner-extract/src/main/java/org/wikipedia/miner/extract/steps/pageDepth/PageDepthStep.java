@@ -7,12 +7,13 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyValueInputFormat;
+import org.apache.avro.mapreduce.AvroKeyValueOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -68,7 +69,9 @@ public class PageDepthStep extends IterativeStep {
 		
 		if (getIteration() == 0) {
 		
-			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
+			job.setInputFormatClass(AvroKeyValueInputFormat.class);
+			
 			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
 			AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 			
@@ -78,22 +81,25 @@ public class PageDepthStep extends IterativeStep {
 			
 		} else {
 			
-			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1));
+			FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + getDirName(getIteration()-1) + Path.SEPARATOR + "part-r-00000.avro");
 			AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
 			AvroJob.setInputValueSchema(job, PageDepthSummary.getClassSchema());
-			
 			job.setMapperClass(SubsequentDepthMapper.class);
 		}
-			
+		
+		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setMapOutputValueSchema(job, PageDepthSummary.getClassSchema());	
 		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
-		AvroJob.setOutputValueSchema(job, PageDepthSummary.getClassSchema());				
+		AvroJob.setOutputValueSchema(job, PageDepthSummary.getClassSchema());
+		
 		job.setCombinerClass(DepthCombiner.class) ;
 		job.setReducerClass(DepthReducer.class);
 		
 		FileOutputFormat.setOutputPath(job, getDir());
+		
+		job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 		
 		job.waitForCompletion(true);	
 		if (job.isSuccessful()) {	
