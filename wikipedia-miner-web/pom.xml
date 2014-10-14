@@ -84,7 +84,7 @@
                     <packagingExcludes>WEB-INF/lib/servlet-api*.jar,
                         WEB-INF/lib/jsp-api*.jar
                     </packagingExcludes>
-
+					<webXml>/home/ntran/workspace/github-lib/wikipediaminer/configs/web.xml</webXml>  
                 </configuration>
             </plugin>
 

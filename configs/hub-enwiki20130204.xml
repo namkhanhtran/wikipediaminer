@@ -1,0 +1,16 @@
+<!-- This configuration file defines properties for a service hub -->
+
+<wikipediaHubConfiguration>
+
+    <!-- Options required to allow retrieval of web content via proxy (just leave blank if not needed) -->
+    <proxy host="" port="" user="" password=""/>
+
+    <!-- 
+	A version of Wikipedia that will be made available via the service hub. 
+	You may specify multiple Wikipedias, in which case one should be specified as the default
+    -->
+    <wikipedia name="" description="" default="true">
+		/home/ntran/workspace/github-lib/wikipediaminer/wikipedia-miner-train/src/main/resources/enwiki20130204.xml
+    </wikipedia>
+
+</wikipediaHubConfiguration> 
