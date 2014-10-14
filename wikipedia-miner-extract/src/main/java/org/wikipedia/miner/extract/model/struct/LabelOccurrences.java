@@ -46,10 +46,10 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: linkDocCount = ((Integer)value$).intValue(); break;
-    case 1: linkOccCount = ((Integer)value$).intValue(); break;
-    case 2: textDocCount = ((Integer)value$).intValue(); break;
-    case 3: textOccCount = ((Integer)value$).intValue(); break;
+    case 0: linkDocCount = ((java.lang.Integer)value$).intValue(); break;
+    case 1: linkOccCount = ((java.lang.Integer)value$).intValue(); break;
+    case 2: textDocCount = ((java.lang.Integer)value$).intValue(); break;
+    case 3: textOccCount = ((java.lang.Integer)value$).intValue(); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -287,10 +287,10 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     public LabelOccurrences build() {
       try {
         LabelOccurrences record = new LabelOccurrences();
-        record.linkDocCount = fieldSetFlags()[0] ? this.linkDocCount : ((Integer) defaultValue(fields()[0])).intValue();
-        record.linkOccCount = fieldSetFlags()[1] ? this.linkOccCount : ((Integer) defaultValue(fields()[1])).intValue();
-        record.textDocCount = fieldSetFlags()[2] ? this.textDocCount : ((Integer) defaultValue(fields()[2])).intValue();
-        record.textOccCount = fieldSetFlags()[3] ? this.textOccCount : ((Integer) defaultValue(fields()[3])).intValue();
+        record.linkDocCount = fieldSetFlags()[0] ? this.linkDocCount : ((java.lang.Integer) defaultValue(fields()[0])).intValue();
+        record.linkOccCount = fieldSetFlags()[1] ? this.linkOccCount : ((java.lang.Integer) defaultValue(fields()[1])).intValue();
+        record.textDocCount = fieldSetFlags()[2] ? this.textDocCount : ((java.lang.Integer) defaultValue(fields()[2])).intValue();
+        record.textOccCount = fieldSetFlags()[3] ? this.textOccCount : ((java.lang.Integer) defaultValue(fields()[3])).intValue();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

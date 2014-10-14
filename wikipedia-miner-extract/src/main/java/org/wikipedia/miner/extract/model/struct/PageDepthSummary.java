@@ -6,15 +6,24 @@
 package org.wikipedia.miner.extract.model.struct;  
 
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PageDepthSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":[{\"name\":\"depth\",\"type\":[\"int\",\"null\"]},{\"name\":\"depthForwarded\",\"type\":\"boolean\"},{\"name\":\"childIds\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
+		  "{\"type\":\"record\",\"name\":\"PageDepthSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":["
+		  + "{\"name\":\"depth\",\"type\":[\"int\",\"null\"]}"
+		  + ",{\"name\":\"depthForwarded\",\"type\":\"boolean\"}"
+		  
+		 // + ",{\"name\":\"childIds\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
+		  + ",{\"name\":\"childIds\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
+
+		  + "]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public int depth;
   @Deprecated public boolean depthForwarded;
-  @Deprecated public TIntList childIds;
+  @Deprecated public gnu.trove.list.array.TIntArrayList childIds;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -26,10 +35,10 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   /**
    * All-args constructor.
    */
-  public PageDepthSummary(int depth, java.lang.Boolean depthForwarded, TIntList childIds) {
+  public PageDepthSummary(int depth, boolean depthForwarded, TIntList childIds) {
     this.depth = depth;
     this.depthForwarded = depthForwarded;
-    this.childIds = childIds;
+    this.childIds = (gnu.trove.list.array.TIntArrayList) childIds;
   }
 
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
@@ -46,9 +55,9 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: depth = (Integer)value$; break;
+    case 0: depth = (java.lang.Integer)value$; break;
     case 1: depthForwarded = (java.lang.Boolean)value$; break;
-    case 2: childIds = (TIntList)value$; break;
+    case 2: childIds = (gnu.trove.list.array.TIntArrayList)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -95,7 +104,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
    * @param value the value to set.
    */
   public void setChildIds(TIntList value) {
-    this.childIds = value;
+    this.childIds = (gnu.trove.list.array.TIntArrayList) value;
   }
 
   /** Creates a new PageDepthSummary RecordBuilder */
@@ -240,9 +249,9 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
     public PageDepthSummary build() {
       try {
         PageDepthSummary record = new PageDepthSummary();
-        record.depth = fieldSetFlags()[0] ? this.depth : (Integer) defaultValue(fields()[0]);
+        record.depth = fieldSetFlags()[0] ? this.depth : (java.lang.Integer) defaultValue(fields()[0]);
         record.depthForwarded = fieldSetFlags()[1] ? this.depthForwarded : (java.lang.Boolean) defaultValue(fields()[1]);
-        record.childIds = fieldSetFlags()[2] ? this.childIds : (TIntList) defaultValue(fields()[2]);
+        record.childIds = (gnu.trove.list.array.TIntArrayList) (fieldSetFlags()[2] ? this.childIds : (gnu.trove.list.array.TIntArrayList) defaultValue(fields()[2]));
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

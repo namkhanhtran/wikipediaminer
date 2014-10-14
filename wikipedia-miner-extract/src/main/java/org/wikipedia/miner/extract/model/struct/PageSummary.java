@@ -46,10 +46,10 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (Integer)value$; break;
+    case 0: id = (java.lang.Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
-    case 2: namespace = (Integer)value$; break;
-    case 3: forwarded = (Boolean)value$; break;
+    case 2: namespace = (java.lang.Integer)value$; break;
+    case 3: forwarded = (java.lang.Boolean)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -110,7 +110,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'forwarded' field.
    * @param value the value to set.
    */
-  public void setForwarded(boolean value) {
+  public void setForwarded(java.lang.Boolean value) {
     this.forwarded = value;
   }
 
@@ -266,7 +266,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
     
     /** Sets the value of the 'forwarded' field */
-    public org.wikipedia.miner.extract.model.struct.PageSummary.Builder setForwarded(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.PageSummary.Builder setForwarded(java.lang.Boolean value) {
       validate(fields()[3], value);
       this.forwarded = value;
       fieldSetFlags()[3] = true;
@@ -288,10 +288,10 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     public PageSummary build() {
       try {
         PageSummary record = new PageSummary();
-        record.id = fieldSetFlags()[0] ? this.id : (Integer) defaultValue(fields()[0]);
+        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.namespace = fieldSetFlags()[2] ? this.namespace : (Integer) defaultValue(fields()[2]);
-        record.forwarded = fieldSetFlags()[3] ? this.forwarded : (Boolean) defaultValue(fields()[3]);
+        record.namespace = fieldSetFlags()[2] ? this.namespace : (java.lang.Integer) defaultValue(fields()[2]);
+        record.forwarded = fieldSetFlags()[3] ? this.forwarded : (java.lang.Boolean) defaultValue(fields()[3]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

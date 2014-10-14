@@ -40,8 +40,8 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: docCount = (Integer)value$; break;
-    case 1: occCount = (Integer)value$; break;
+    case 0: docCount = (java.lang.Integer)value$; break;
+    case 1: occCount = (java.lang.Integer)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -183,8 +183,8 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
     public LabelSummary build() {
       try {
         LabelSummary record = new LabelSummary();
-        record.docCount = fieldSetFlags()[0] ? this.docCount : (Integer) defaultValue(fields()[0]);
-        record.occCount = fieldSetFlags()[1] ? this.occCount : (Integer) defaultValue(fields()[1]);
+        record.docCount = fieldSetFlags()[0] ? this.docCount : (java.lang.Integer) defaultValue(fields()[0]);
+        record.occCount = fieldSetFlags()[1] ? this.occCount : (java.lang.Integer) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

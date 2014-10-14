@@ -6,17 +6,29 @@
 package org.wikipedia.miner.extract.model.struct;  
 
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"LinkSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"namespace\",\"type\":\"int\"},{\"name\":\"forwarded\",\"type\":\"boolean\"},{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
+		  "{\"type\":\"record\",\"name\":\"LinkSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":["
+		  + "{\"name\":\"id\",\"type\":\"int\"}"
+		  + ",{\"name\":\"title\",\"type\":\"string\"}"
+		  + ",{\"name\":\"namespace\",\"type\":\"int\"}"
+		  + ",{\"name\":\"forwarded\",\"type\":\"boolean\"}"
+		  
+		  //+ ",{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
+		  
+		  + ",{\"name\":\"sentenceIndexes\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
+		  
+		  + "]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public int id;
   @Deprecated public java.lang.CharSequence title;
   @Deprecated public int namespace;
   @Deprecated public boolean forwarded;
-  @Deprecated public TIntList sentenceIndexes;
+  @Deprecated public gnu.trove.list.array.TIntArrayList sentenceIndexes;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -33,7 +45,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     this.title = title;
     this.namespace = namespace;
     this.forwarded = forwarded;
-    this.sentenceIndexes = sentenceIndexes;
+    this.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) sentenceIndexes;
   }
 
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
@@ -52,11 +64,11 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (Integer)value$; break;
+    case 0: id = (java.lang.Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
-    case 2: namespace = (Integer)value$; break;
+    case 2: namespace = (java.lang.Integer)value$; break;
     case 3: forwarded = (java.lang.Boolean)value$; break;
-    case 4: sentenceIndexes = (TIntList)value$; break;
+    case 4: sentenceIndexes = (gnu.trove.list.array.TIntArrayList)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -133,7 +145,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * @param value the value to set.
    */
   public void setSentenceIndexes(TIntList value) {
-    this.sentenceIndexes = value;
+    this.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) value;
   }
 
   /** Creates a new LinkSummary RecordBuilder */
@@ -344,11 +356,11 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
     public LinkSummary build() {
       try {
         LinkSummary record = new LinkSummary();
-        record.id = fieldSetFlags()[0] ? this.id : (Integer) defaultValue(fields()[0]);
+        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.namespace = fieldSetFlags()[2] ? this.namespace : (Integer) defaultValue(fields()[2]);
+        record.namespace = fieldSetFlags()[2] ? this.namespace : (java.lang.Integer) defaultValue(fields()[2]);
         record.forwarded = fieldSetFlags()[3] ? this.forwarded : (java.lang.Boolean) defaultValue(fields()[3]);
-        record.sentenceIndexes = fieldSetFlags()[4] ? this.sentenceIndexes : (TIntList) defaultValue(fields()[4]);
+        record.sentenceIndexes = (gnu.trove.list.array.TIntArrayList) (fieldSetFlags()[4] ? this.sentenceIndexes : (gnu.trove.list.array.TIntArrayList) defaultValue(fields()[4]));
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

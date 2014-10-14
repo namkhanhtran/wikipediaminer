@@ -49,11 +49,11 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (Integer)value$; break;
-    case 1: docCount = (Integer)value$; break;
-    case 2: occCount = (Integer)value$; break;
-    case 3: fromTitle = (Boolean)value$; break;
-    case 4: fromRedirect = (Boolean)value$; break;
+    case 0: id = (java.lang.Integer)value$; break;
+    case 1: docCount = (java.lang.Integer)value$; break;
+    case 2: occCount = (java.lang.Integer)value$; break;
+    case 3: fromTitle = (java.lang.Boolean)value$; break;
+    case 4: fromRedirect = (java.lang.Boolean)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -114,7 +114,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'fromTitle' field.
    * @param value the value to set.
    */
-  public void setFromTitle(boolean value) {
+  public void setFromTitle(java.lang.Boolean value) {
     this.fromTitle = value;
   }
 
@@ -129,7 +129,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'fromRedirect' field.
    * @param value the value to set.
    */
-  public void setFromRedirect(boolean value) {
+  public void setFromRedirect(java.lang.Boolean value) {
     this.fromRedirect = value;
   }
 
@@ -293,7 +293,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
     
     /** Sets the value of the 'fromTitle' field */
-    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromTitle(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromTitle(java.lang.Boolean value) {
       validate(fields()[3], value);
       this.fromTitle = value;
       fieldSetFlags()[3] = true;
@@ -317,7 +317,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
     
     /** Sets the value of the 'fromRedirect' field */
-    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromRedirect(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromRedirect(java.lang.Boolean value) {
       validate(fields()[4], value);
       this.fromRedirect = value;
       fieldSetFlags()[4] = true;
@@ -339,11 +339,11 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     public LabelSense build() {
       try {
         LabelSense record = new LabelSense();
-        record.id = fieldSetFlags()[0] ? this.id : ((Integer) defaultValue(fields()[0])).intValue();
-        record.docCount = fieldSetFlags()[1] ? this.docCount : ((Integer) defaultValue(fields()[1])).intValue();
-        record.occCount = fieldSetFlags()[2] ? this.occCount : ((Integer) defaultValue(fields()[2])).intValue();
-        record.fromTitle = fieldSetFlags()[3] ? this.fromTitle : ((Boolean) defaultValue(fields()[3])).booleanValue();
-        record.fromRedirect = fieldSetFlags()[4] ? this.fromRedirect : ((Boolean) defaultValue(fields()[4])).booleanValue();
+        record.id = fieldSetFlags()[0] ? this.id : ((java.lang.Integer) defaultValue(fields()[0])).intValue();
+        record.docCount = fieldSetFlags()[1] ? this.docCount : ((java.lang.Integer) defaultValue(fields()[1])).intValue();
+        record.occCount = fieldSetFlags()[2] ? this.occCount : ((java.lang.Integer) defaultValue(fields()[2])).intValue();
+        record.fromTitle = fieldSetFlags()[3] ? this.fromTitle : ((java.lang.Boolean) defaultValue(fields()[3])).booleanValue();
+        record.fromRedirect = fieldSetFlags()[4] ? this.fromRedirect : ((java.lang.Boolean) defaultValue(fields()[4])).booleanValue();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

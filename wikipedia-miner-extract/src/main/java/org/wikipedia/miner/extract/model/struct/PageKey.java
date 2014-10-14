@@ -40,7 +40,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: namespace = (Integer)value$; break;
+    case 0: namespace = (java.lang.Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
@@ -184,7 +184,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
     public PageKey build() {
       try {
         PageKey record = new PageKey();
-        record.namespace = fieldSetFlags()[0] ? this.namespace : (Integer) defaultValue(fields()[0]);
+        record.namespace = fieldSetFlags()[0] ? this.namespace : (java.lang.Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {
