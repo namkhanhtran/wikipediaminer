@@ -22,7 +22,7 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
   /**
    * All-args constructor.
    */
-  public LabelSummary(java.lang.Integer docCount, java.lang.Integer occCount) {
+  public LabelSummary(int docCount, int occCount) {
     this.docCount = docCount;
     this.occCount = occCount;
   }
@@ -40,8 +40,8 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: docCount = (java.lang.Integer)value$; break;
-    case 1: occCount = (java.lang.Integer)value$; break;
+    case 0: docCount = (Integer)value$; break;
+    case 1: occCount = (Integer)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -49,7 +49,7 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
   /**
    * Gets the value of the 'docCount' field.
    */
-  public java.lang.Integer getDocCount() {
+  public int getDocCount() {
     return docCount;
   }
 
@@ -57,14 +57,14 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
    * Sets the value of the 'docCount' field.
    * @param value the value to set.
    */
-  public void setDocCount(java.lang.Integer value) {
+  public void setDocCount(int value) {
     this.docCount = value;
   }
 
   /**
    * Gets the value of the 'occCount' field.
    */
-  public java.lang.Integer getOccCount() {
+  public int getOccCount() {
     return occCount;
   }
 
@@ -72,7 +72,7 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
    * Sets the value of the 'occCount' field.
    * @param value the value to set.
    */
-  public void setOccCount(java.lang.Integer value) {
+  public void setOccCount(int value) {
     this.occCount = value;
   }
 
@@ -132,7 +132,7 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
     }
 
     /** Gets the value of the 'docCount' field */
-    public java.lang.Integer getDocCount() {
+    public int getDocCount() {
       return docCount;
     }
     
@@ -156,7 +156,7 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
     }
 
     /** Gets the value of the 'occCount' field */
-    public java.lang.Integer getOccCount() {
+    public int getOccCount() {
       return occCount;
     }
     
@@ -183,8 +183,8 @@ public class LabelSummary extends org.apache.avro.specific.SpecificRecordBase im
     public LabelSummary build() {
       try {
         LabelSummary record = new LabelSummary();
-        record.docCount = fieldSetFlags()[0] ? this.docCount : (java.lang.Integer) defaultValue(fields()[0]);
-        record.occCount = fieldSetFlags()[1] ? this.occCount : (java.lang.Integer) defaultValue(fields()[1]);
+        record.docCount = fieldSetFlags()[0] ? this.docCount : (Integer) defaultValue(fields()[0]);
+        record.occCount = fieldSetFlags()[1] ? this.occCount : (Integer) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

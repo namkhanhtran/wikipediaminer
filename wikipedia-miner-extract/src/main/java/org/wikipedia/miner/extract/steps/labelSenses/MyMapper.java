@@ -10,6 +10,7 @@ import org.apache.avro.mapred.AvroCollector;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroMapper;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
@@ -20,14 +21,13 @@ import org.wikipedia.miner.extract.util.SiteInfo;
 
 public class MyMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 
-
 	@Override
 	public void map(AvroKey<Integer> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 		
 		PageDetail page = pageValue.datum() ;
 		
 		//we only care about articles
-		if (!page.getNamespace().equals(SiteInfo.MAIN_KEY))
+		if (page.getNamespace() != SiteInfo.MAIN_KEY)
 			return ;
 		
 		//we don't care about redirects

@@ -22,7 +22,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * All-args constructor.
    */
-  public PageKey(java.lang.Integer namespace, java.lang.CharSequence title) {
+  public PageKey(int namespace, java.lang.CharSequence title) {
     this.namespace = namespace;
     this.title = title;
   }
@@ -40,7 +40,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: namespace = (java.lang.Integer)value$; break;
+    case 0: namespace = (Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
@@ -49,7 +49,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * Gets the value of the 'namespace' field.
    */
-  public java.lang.Integer getNamespace() {
+  public int getNamespace() {
     return namespace;
   }
 
@@ -57,7 +57,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(java.lang.Integer value) {
+  public void setNamespace(int value) {
     this.namespace = value;
   }
 
@@ -132,7 +132,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
     }
 
     /** Gets the value of the 'namespace' field */
-    public java.lang.Integer getNamespace() {
+    public int getNamespace() {
       return namespace;
     }
     
@@ -184,7 +184,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
     public PageKey build() {
       try {
         PageKey record = new PageKey();
-        record.namespace = fieldSetFlags()[0] ? this.namespace : (java.lang.Integer) defaultValue(fields()[0]);
+        record.namespace = fieldSetFlags()[0] ? this.namespace : (Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {

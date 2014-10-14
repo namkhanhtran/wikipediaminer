@@ -1,5 +1,7 @@
 package org.wikipedia.miner.extract.steps.pageSummary;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,7 +97,7 @@ public class PageSummaryStep extends IterativeStep {
 
 		PageDetail p = new PageDetail() ;
 		p.setIsDisambiguation(false);
-		p.setSentenceSplits(new ArrayList<Integer>());
+		p.setSentenceSplits(new TIntArrayList());
 		p.setRedirects(new ArrayList<PageSummary>()) ;
 		p.setLinksIn(new ArrayList<LinkSummary>());
 		p.setLinksOut(new ArrayList<LinkSummary>());
@@ -135,7 +137,7 @@ public class PageSummaryStep extends IterativeStep {
 				job.setMapperClass(InitialMapper.class);
 				
 				/*job.setOutputKeyClass(AvroKey.class);
-			job.setOutputValueClass(AvroValue.class);*/
+				job.setOutputValueClass(AvroValue.class);*/
 
 				job.setInputFormatClass(XmlInputFormat.class);
 				job.getConfiguration().set(XmlInputFormat.START_TAG_KEY, "<page>") ;

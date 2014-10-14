@@ -24,7 +24,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * All-args constructor.
    */
-  public PageSummary(java.lang.Integer id, java.lang.CharSequence title, java.lang.Integer namespace, java.lang.Boolean forwarded) {
+  public PageSummary(int id, java.lang.CharSequence title, int namespace, boolean forwarded) {
     this.id = id;
     this.title = title;
     this.namespace = namespace;
@@ -46,10 +46,10 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = (java.lang.Integer)value$; break;
+    case 0: id = (Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
-    case 2: namespace = (java.lang.Integer)value$; break;
-    case 3: forwarded = (java.lang.Boolean)value$; break;
+    case 2: namespace = (Integer)value$; break;
+    case 3: forwarded = (Boolean)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -57,7 +57,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'id' field.
    */
-  public java.lang.Integer getId() {
+  public int getId() {
     return id;
   }
 
@@ -65,7 +65,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(java.lang.Integer value) {
+  public void setId(int value) {
     this.id = value;
   }
 
@@ -87,7 +87,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'namespace' field.
    */
-  public java.lang.Integer getNamespace() {
+  public int getNamespace() {
     return namespace;
   }
 
@@ -95,14 +95,14 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(java.lang.Integer value) {
+  public void setNamespace(int value) {
     this.namespace = value;
   }
 
   /**
    * Gets the value of the 'forwarded' field.
    */
-  public java.lang.Boolean getForwarded() {
+  public boolean getForwarded() {
     return forwarded;
   }
 
@@ -110,7 +110,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'forwarded' field.
    * @param value the value to set.
    */
-  public void setForwarded(java.lang.Boolean value) {
+  public void setForwarded(boolean value) {
     this.forwarded = value;
   }
 
@@ -188,7 +188,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'id' field */
-    public java.lang.Integer getId() {
+    public int getId() {
       return id;
     }
     
@@ -237,7 +237,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'namespace' field */
-    public java.lang.Integer getNamespace() {
+    public int getNamespace() {
       return namespace;
     }
     
@@ -261,7 +261,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'forwarded' field */
-    public java.lang.Boolean getForwarded() {
+    public boolean getForwarded() {
       return forwarded;
     }
     
@@ -288,10 +288,10 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     public PageSummary build() {
       try {
         PageSummary record = new PageSummary();
-        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Integer) defaultValue(fields()[0]);
+        record.id = fieldSetFlags()[0] ? this.id : (Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.namespace = fieldSetFlags()[2] ? this.namespace : (java.lang.Integer) defaultValue(fields()[2]);
-        record.forwarded = fieldSetFlags()[3] ? this.forwarded : (java.lang.Boolean) defaultValue(fields()[3]);
+        record.namespace = fieldSetFlags()[2] ? this.namespace : (Integer) defaultValue(fields()[2]);
+        record.forwarded = fieldSetFlags()[3] ? this.forwarded : (Boolean) defaultValue(fields()[3]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

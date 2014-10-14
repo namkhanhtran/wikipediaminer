@@ -16,6 +16,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -100,7 +101,7 @@ public class LabelOccurrenceStep extends Step{
 		
 		job.setCombinerClass(MyCombiner.class) ;
 		job.setReducerClass(MyReducer.class);
-		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.STRING));		
 		AvroJob.setMapOutputValueSchema(job,LabelOccurrences.getClassSchema());
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setOutputValueSchema(job,LabelOccurrences.getClassSchema());

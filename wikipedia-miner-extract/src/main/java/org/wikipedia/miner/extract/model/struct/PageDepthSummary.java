@@ -4,14 +4,17 @@
  * DO NOT EDIT DIRECTLY
  */
 package org.wikipedia.miner.extract.model.struct;  
+
+import gnu.trove.list.TIntList;
+
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PageDepthSummary\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":[{\"name\":\"depth\",\"type\":[\"int\",\"null\"]},{\"name\":\"depthForwarded\",\"type\":\"boolean\"},{\"name\":\"childIds\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-  @Deprecated public java.lang.Integer depth;
+  @Deprecated public int depth;
   @Deprecated public boolean depthForwarded;
-  @Deprecated public java.util.List<java.lang.Integer> childIds;
+  @Deprecated public TIntList childIds;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -23,7 +26,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   /**
    * All-args constructor.
    */
-  public PageDepthSummary(java.lang.Integer depth, java.lang.Boolean depthForwarded, java.util.List<java.lang.Integer> childIds) {
+  public PageDepthSummary(int depth, java.lang.Boolean depthForwarded, TIntList childIds) {
     this.depth = depth;
     this.depthForwarded = depthForwarded;
     this.childIds = childIds;
@@ -43,9 +46,9 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: depth = (java.lang.Integer)value$; break;
+    case 0: depth = (Integer)value$; break;
     case 1: depthForwarded = (java.lang.Boolean)value$; break;
-    case 2: childIds = (java.util.List<java.lang.Integer>)value$; break;
+    case 2: childIds = (TIntList)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -53,7 +56,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   /**
    * Gets the value of the 'depth' field.
    */
-  public java.lang.Integer getDepth() {
+  public int getDepth() {
     return depth;
   }
 
@@ -61,7 +64,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'depth' field.
    * @param value the value to set.
    */
-  public void setDepth(java.lang.Integer value) {
+  public void setDepth(int value) {
     this.depth = value;
   }
 
@@ -83,7 +86,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   /**
    * Gets the value of the 'childIds' field.
    */
-  public java.util.List<java.lang.Integer> getChildIds() {
+  public TIntList getChildIds() {
     return childIds;
   }
 
@@ -91,7 +94,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'childIds' field.
    * @param value the value to set.
    */
-  public void setChildIds(java.util.List<java.lang.Integer> value) {
+  public void setChildIds(TIntList value) {
     this.childIds = value;
   }
 
@@ -116,9 +119,9 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<PageDepthSummary>
     implements org.apache.avro.data.RecordBuilder<PageDepthSummary> {
 
-    private java.lang.Integer depth;
+    private int depth;
     private boolean depthForwarded;
-    private java.util.List<java.lang.Integer> childIds;
+    private TIntList childIds;
 
     /** Creates a new Builder */
     private Builder() {
@@ -160,12 +163,12 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'depth' field */
-    public java.lang.Integer getDepth() {
+    public int getDepth() {
       return depth;
     }
     
     /** Sets the value of the 'depth' field */
-    public org.wikipedia.miner.extract.model.struct.PageDepthSummary.Builder setDepth(java.lang.Integer value) {
+    public org.wikipedia.miner.extract.model.struct.PageDepthSummary.Builder setDepth(int value) {
       validate(fields()[0], value);
       this.depth = value;
       fieldSetFlags()[0] = true;
@@ -179,7 +182,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
     
     /** Clears the value of the 'depth' field */
     public org.wikipedia.miner.extract.model.struct.PageDepthSummary.Builder clearDepth() {
-      depth = null;
+      depth = Integer.MIN_VALUE;
       fieldSetFlags()[0] = false;
       return this;
     }
@@ -209,12 +212,12 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'childIds' field */
-    public java.util.List<java.lang.Integer> getChildIds() {
+    public TIntList getChildIds() {
       return childIds;
     }
     
     /** Sets the value of the 'childIds' field */
-    public org.wikipedia.miner.extract.model.struct.PageDepthSummary.Builder setChildIds(java.util.List<java.lang.Integer> value) {
+    public org.wikipedia.miner.extract.model.struct.PageDepthSummary.Builder setChildIds(TIntList value) {
       validate(fields()[2], value);
       this.childIds = value;
       fieldSetFlags()[2] = true;
@@ -237,9 +240,9 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
     public PageDepthSummary build() {
       try {
         PageDepthSummary record = new PageDepthSummary();
-        record.depth = fieldSetFlags()[0] ? this.depth : (java.lang.Integer) defaultValue(fields()[0]);
+        record.depth = fieldSetFlags()[0] ? this.depth : (Integer) defaultValue(fields()[0]);
         record.depthForwarded = fieldSetFlags()[1] ? this.depthForwarded : (java.lang.Boolean) defaultValue(fields()[1]);
-        record.childIds = fieldSetFlags()[2] ? this.childIds : (java.util.List<java.lang.Integer>) defaultValue(fields()[2]);
+        record.childIds = fieldSetFlags()[2] ? this.childIds : (TIntList) defaultValue(fields()[2]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

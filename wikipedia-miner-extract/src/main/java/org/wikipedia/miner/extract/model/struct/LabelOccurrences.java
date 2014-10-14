@@ -24,7 +24,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
   /**
    * All-args constructor.
    */
-  public LabelOccurrences(java.lang.Integer linkDocCount, java.lang.Integer linkOccCount, java.lang.Integer textDocCount, java.lang.Integer textOccCount) {
+  public LabelOccurrences(int linkDocCount, int linkOccCount, int textDocCount, int textOccCount) {
     this.linkDocCount = linkDocCount;
     this.linkOccCount = linkOccCount;
     this.textDocCount = textDocCount;
@@ -46,10 +46,10 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: linkDocCount = (java.lang.Integer)value$; break;
-    case 1: linkOccCount = (java.lang.Integer)value$; break;
-    case 2: textDocCount = (java.lang.Integer)value$; break;
-    case 3: textOccCount = (java.lang.Integer)value$; break;
+    case 0: linkDocCount = ((Integer)value$).intValue(); break;
+    case 1: linkOccCount = ((Integer)value$).intValue(); break;
+    case 2: textDocCount = ((Integer)value$).intValue(); break;
+    case 3: textOccCount = ((Integer)value$).intValue(); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -57,7 +57,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
   /**
    * Gets the value of the 'linkDocCount' field.
    */
-  public java.lang.Integer getLinkDocCount() {
+  public int getLinkDocCount() {
     return linkDocCount;
   }
 
@@ -65,14 +65,14 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'linkDocCount' field.
    * @param value the value to set.
    */
-  public void setLinkDocCount(java.lang.Integer value) {
+  public void setLinkDocCount(int value) {
     this.linkDocCount = value;
   }
 
   /**
    * Gets the value of the 'linkOccCount' field.
    */
-  public java.lang.Integer getLinkOccCount() {
+  public int getLinkOccCount() {
     return linkOccCount;
   }
 
@@ -80,14 +80,14 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'linkOccCount' field.
    * @param value the value to set.
    */
-  public void setLinkOccCount(java.lang.Integer value) {
+  public void setLinkOccCount(int value) {
     this.linkOccCount = value;
   }
 
   /**
    * Gets the value of the 'textDocCount' field.
    */
-  public java.lang.Integer getTextDocCount() {
+  public int getTextDocCount() {
     return textDocCount;
   }
 
@@ -95,14 +95,14 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'textDocCount' field.
    * @param value the value to set.
    */
-  public void setTextDocCount(java.lang.Integer value) {
+  public void setTextDocCount(int value) {
     this.textDocCount = value;
   }
 
   /**
    * Gets the value of the 'textOccCount' field.
    */
-  public java.lang.Integer getTextOccCount() {
+  public int getTextOccCount() {
     return textOccCount;
   }
 
@@ -110,7 +110,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
    * Sets the value of the 'textOccCount' field.
    * @param value the value to set.
    */
-  public void setTextOccCount(java.lang.Integer value) {
+  public void setTextOccCount(int value) {
     this.textOccCount = value;
   }
 
@@ -188,7 +188,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'linkDocCount' field */
-    public java.lang.Integer getLinkDocCount() {
+    public int getLinkDocCount() {
       return linkDocCount;
     }
     
@@ -212,7 +212,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'linkOccCount' field */
-    public java.lang.Integer getLinkOccCount() {
+    public int getLinkOccCount() {
       return linkOccCount;
     }
     
@@ -236,7 +236,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'textDocCount' field */
-    public java.lang.Integer getTextDocCount() {
+    public int getTextDocCount() {
       return textDocCount;
     }
     
@@ -260,7 +260,7 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     }
 
     /** Gets the value of the 'textOccCount' field */
-    public java.lang.Integer getTextOccCount() {
+    public int getTextOccCount() {
       return textOccCount;
     }
     
@@ -287,10 +287,10 @@ public class LabelOccurrences extends org.apache.avro.specific.SpecificRecordBas
     public LabelOccurrences build() {
       try {
         LabelOccurrences record = new LabelOccurrences();
-        record.linkDocCount = fieldSetFlags()[0] ? this.linkDocCount : (java.lang.Integer) defaultValue(fields()[0]);
-        record.linkOccCount = fieldSetFlags()[1] ? this.linkOccCount : (java.lang.Integer) defaultValue(fields()[1]);
-        record.textDocCount = fieldSetFlags()[2] ? this.textDocCount : (java.lang.Integer) defaultValue(fields()[2]);
-        record.textOccCount = fieldSetFlags()[3] ? this.textOccCount : (java.lang.Integer) defaultValue(fields()[3]);
+        record.linkDocCount = fieldSetFlags()[0] ? this.linkDocCount : ((Integer) defaultValue(fields()[0])).intValue();
+        record.linkOccCount = fieldSetFlags()[1] ? this.linkOccCount : ((Integer) defaultValue(fields()[1])).intValue();
+        record.textDocCount = fieldSetFlags()[2] ? this.textDocCount : ((Integer) defaultValue(fields()[2])).intValue();
+        record.textOccCount = fieldSetFlags()[3] ? this.textOccCount : ((Integer) defaultValue(fields()[3])).intValue();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

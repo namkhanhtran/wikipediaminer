@@ -110,13 +110,15 @@ public class PageSortingStep extends Step {
 	}
 	
 	
-	public static class MyReducer extends Reducer<Integer, PageDetail, AvroKey<Integer>, AvroValue<PageDetail>>{
+	public static class MyReducer extends Reducer<AvroKey<Integer>, AvroValue<PageDetail>, AvroKey<Integer>, AvroValue<PageDetail>>{
 		
 		@Override
-		public void reduce(Integer pageId, Iterable<PageDetail> pages,Context context) throws IOException, InterruptedException {
+		public void reduce(AvroKey<Integer> pageId, Iterable<AvroValue<PageDetail>> pages,Context context) throws IOException, InterruptedException {
 			
-			for (PageDetail page:pages)
-				context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDetail>(page));
+			for (AvroValue<PageDetail> pageProxy:pages) {
+				PageDetail page = pageProxy.datum();
+				context.write(pageId, new AvroValue<PageDetail>(page));
+			}
 		}
 	}
 	
