@@ -20,7 +20,7 @@ public class LinkSummary extends org.apache.avro.specific.SpecificRecordBase imp
 		  
 		  //+ ",{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
 		  
-		  + ",{\"name\":\"sentenceIndexes\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
+		  + ",{\"name\":\"sentenceIndexes\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"namespace\":\"gnu.trove.list.array\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
 		  
 		  + "]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }

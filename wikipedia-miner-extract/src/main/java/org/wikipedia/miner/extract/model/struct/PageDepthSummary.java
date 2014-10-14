@@ -17,7 +17,7 @@ public class PageDepthSummary extends org.apache.avro.specific.SpecificRecordBas
 		  + ",{\"name\":\"depthForwarded\",\"type\":\"boolean\"}"
 		  
 		 // + ",{\"name\":\"childIds\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
-		  + ",{\"name\":\"childIds\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
+		  + ",{\"name\":\"childIds\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"namespace\":\"gnu.trove.list.array\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
 
 		  + "]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
