@@ -9,6 +9,8 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyValueInputFormat;
+import org.apache.avro.mapreduce.AvroKeyValueOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -63,6 +65,8 @@ public class LabelSensesStep extends Step {
 		job.setJobName("WM: label senses");
 		
 		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+		job.setInputFormatClass(AvroKeyValueInputFormat.class);
+		
 		AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 				
@@ -76,6 +80,7 @@ public class LabelSensesStep extends Step {
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setOutputValueSchema(job, LabelSenseList.getClassSchema());
 		FileOutputFormat.setOutputPath(job, getDir());
+		job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 		
 		job.waitForCompletion(true);
 		if (job.isSuccessful()) {	

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyValueInputFormat;
+import org.apache.avro.mapreduce.AvroKeyValueOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -155,6 +157,7 @@ public class PageSummaryStep extends IterativeStep {
 				logger.info("Working from: " + getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
 				
 				FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+				job.setInputFormatClass(AvroKeyValueInputFormat.class);
 
 			}
 
@@ -171,6 +174,8 @@ public class PageSummaryStep extends IterativeStep {
 			AvroJob.setOutputValueSchema(job, PageDetail.getClassSchema());
 
 			FileOutputFormat.setOutputPath(job, getDir());
+			
+			job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 
 			logger.info("Finished setting up..");
 
