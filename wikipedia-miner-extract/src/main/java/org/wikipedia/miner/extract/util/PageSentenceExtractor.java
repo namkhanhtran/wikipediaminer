@@ -1,8 +1,5 @@
 package org.wikipedia.miner.extract.util;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -69,7 +66,7 @@ public class PageSentenceExtractor {
 	}
 
 
-	public TIntList getSentenceSplits(DumpPage page) {
+	public List<Integer> getSentenceSplits(DumpPage page) {
 
 	
 		String maskedMarkup = stripper.stripAllButInternalLinksAndEmphasis(page.getMarkup(), ' ') ;
@@ -82,9 +79,9 @@ public class PageSentenceExtractor {
 		
 	}
 	
-	public TIntList getSentenceSplits(String strippedMarkup) {
+	public List<Integer> getSentenceSplits(String strippedMarkup) {
 		
-		TIntList sentenceSplits = new TIntArrayList() ;
+		List<Integer> sentenceSplits = new ArrayList<Integer>() ;
 		
 		//also mask content in brackets, so it is impossible to split within these. 
 		String maskedMarkup = stripper.stripRegions(strippedMarkup, stripper.gatherComplexRegions(strippedMarkup, "\\(", "\\)"), 'a') ;
@@ -112,7 +109,7 @@ public class PageSentenceExtractor {
 				
 	}
 	
-	public TIntList handleParagraph(String paragraph, int paragraphStart, TIntList sentenceSplits) {
+	public List<Integer> handleParagraph(String paragraph, int paragraphStart, List<Integer> sentenceSplits) {
 	
 		if (paragraphStart > 0)
 			sentenceSplits.add(paragraphStart) ;

@@ -1,7 +1,5 @@
 package org.wikipedia.miner.extract.steps.pageDepth;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,32 +20,31 @@ public abstract class DepthCombinerOrReducer extends Reducer<AvroKey<Integer>, A
 
 	public void reduce(AvroKey<Integer> pageId, Iterable<AvroValue<PageDepthSummary>> partials,Context context) throws IOException, InterruptedException {
 		
-		int minDepth = Integer.MIN_VALUE ;
+		Integer minDepth = null ;
 		boolean depthForwarded = false ;
 		
-		TIntList childIds = new TIntArrayList();
+		List<Integer> childIds = new ArrayList<Integer>();
 		
+
 		for (AvroValue<PageDepthSummary> partialProxy:partials) {
 			PageDepthSummary partial = partialProxy.datum();
-				
-			if (partial.getDepth() != Integer.MIN_VALUE) {
-				if (minDepth == Integer.MIN_VALUE || minDepth > partial.getDepth())  {
-					minDepth = partial.getDepth() ;
+			
+			if (partial.getDepth() != null) {
+				if (minDepth == null || minDepth > partial.getDepth())  {
+					minDepth = partial.getDepth().intValue() ;
 					depthForwarded = partial.getDepthForwarded() ;
 				}
 			}
 			
-			if (!partial.getChildIds().isEmpty()) {
-				childIds = new TIntArrayList(partial.getChildIds());
-			}
-				
+			if (!partial.getChildIds().isEmpty())
+				childIds.addAll(partial.getChildIds()) ;
 		}
 		
 		
 		
 		
 		//if we haven't reached this node yet, just pass on as it is
-		if (minDepth == Integer.MIN_VALUE) {
+		if (minDepth == null) {
 			
 			if (isReducer())
 				context.getCounter(Counts.withoutDepth).increment(1);

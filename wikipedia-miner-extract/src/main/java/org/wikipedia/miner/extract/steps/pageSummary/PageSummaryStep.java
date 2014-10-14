@@ -1,6 +1,5 @@
 package org.wikipedia.miner.extract.steps.pageSummary;
 
-import gnu.trove.list.array.TIntArrayList;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,7 +96,7 @@ public class PageSummaryStep extends IterativeStep {
 
 		PageDetail p = new PageDetail() ;
 		p.setIsDisambiguation(false);
-		p.setSentenceSplits(new TIntArrayList());
+		p.setSentenceSplits(new ArrayList<Integer>());
 		p.setRedirects(new ArrayList<PageSummary>()) ;
 		p.setLinksIn(new ArrayList<LinkSummary>());
 		p.setLinksOut(new ArrayList<LinkSummary>());

@@ -1,7 +1,5 @@
 package org.wikipedia.miner.extract.steps.pageSummary;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 
 import java.io.File;
 import java.io.IOException;
@@ -220,7 +218,7 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 		PageDetail page = buildBasePageDetails(parsedPage) ;
 		
 		try {
-			TIntList sentenceSplits = sentenceExtractor.getSentenceSplits(parsedPage) ;	
+			List<Integer> sentenceSplits = sentenceExtractor.getSentenceSplits(parsedPage) ;	
 			page.setSentenceSplits(sentenceSplits);
 		} catch (Exception e) {
 			logger.warn("Could not gather sentence splits for " + parsedPage.getTitle(), e) ;	
@@ -368,7 +366,7 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 			source.setTitle(currKey.getTitle());
 			source.setNamespace(currKey.getNamespace()) ;
 			source.setForwarded(false) ;
-			source.setSentenceIndexes(new TIntArrayList());
+			source.setSentenceIndexes(new ArrayList<Integer>());
 		
 			targetPage.getLinksIn().add(source) ;
 		} else {
@@ -376,7 +374,7 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 		}
 		
 		//sentence index of the link
-		int sentenceIndex = currPage.getSentenceSplits().binarySearch(linkStart) ;
+		int sentenceIndex = Collections.binarySearch(currPage.getSentenceSplits(), linkStart) ;
 		if (sentenceIndex < 0)
 			sentenceIndex = ((1-sentenceIndex) - 1) ;
 		

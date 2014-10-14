@@ -4,59 +4,17 @@
  * DO NOT EDIT DIRECTLY
  */
 package org.wikipedia.miner.extract.model.struct;  
-
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class PageDetail extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse(
-		  "{\"type\":\"record\",\"name\":\"PageDetail\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":["
-		  + "{\"name\":\"id\",\"type\":[\"int\",\"null\"]}"
-		  + ",{\"name\":\"title\",\"type\":[\"string\",\"null\"]}"
-		  + ",{\"name\":\"namespace\",\"type\":[\"int\",\"null\"]}"
-		  + ",{\"name\":\"isDisambiguation\",\"type\":\"boolean\"}"
-		  + ",{\"name\":\"lastEdited\",\"type\":[\"long\",\"null\"]}"
-		  
-		  //+ ",{\"name\":\"sentenceSplits\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
-		  
-		  + ",{\"name\":\"sentenceSplits\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
-		  
-		  + ",{\"name\":\"redirectsTo\",\"type\":[{\"type\":\"record\",\"name\":\"PageSummary\",\"fields\":["
-		  	+ "{\"name\":\"id\",\"type\":\"int\"}"
-		  	+ ",{\"name\":\"title\",\"type\":\"string\"}"
-		  	+ ",{\"name\":\"namespace\",\"type\":\"int\"}"
-		  	+ ",{\"name\":\"forwarded\",\"type\":\"boolean\"}]}"
-		  	+ ",\"null\""
-		  + "]}"
-		  
-		  + ",{\"name\":\"redirects\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}}"
-		  	
-		  + ",{\"name\":\"linksOut\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"record\",\"name\":\"LinkSummary\",\"fields\":["
-		  	+ "{\"name\":\"id\",\"type\":\"int\"}"
-		  	+ ",{\"name\":\"title\",\"type\":\"string\"}"
-		  	+ ",{\"name\":\"namespace\",\"type\":\"int\"}"
-		  	+ ",{\"name\":\"forwarded\",\"type\":\"boolean\"}"
-		  	
-		  	//+ ",{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}"
-			+ ",{\"name\":\"sentenceIndexes\",\"type\":[{\"type\":\"record\",\"name\":\"TIntArrayList\",\"namespace\":\"gnu.trove.list.array\",\"fields\":[{\"name\":\"_data\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"_pos\",\"type\":\"int\"},{\"name\":\"no_entry_value\",\"type\":\"int\"}]},\"null\"]}"
-
-		  + "]}}}"		  	
-		  
-		  + ",{\"name\":\"linksIn\",\"type\":{\"type\":\"array\",\"items\":\"LinkSummary\"}}"
-		  + ",{\"name\":\"parentCategories\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}}"
-		  + ",{\"name\":\"childCategories\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}}"
-		  + ",{\"name\":\"childArticles\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}}"
-		  + ",{\"name\":\"labels\",\"type\":{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"LabelSummary\",\"fields\":[{\"name\":\"docCount\",\"type\":\"int\"},{\"name\":\"occCount\",\"type\":\"int\"}]}}}"
-		  + "]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PageDetail\",\"namespace\":\"org.wikipedia.miner.extract.model.struct\",\"fields\":[{\"name\":\"id\",\"type\":[\"int\",\"null\"]},{\"name\":\"title\",\"type\":[\"string\",\"null\"]},{\"name\":\"namespace\",\"type\":[\"int\",\"null\"]},{\"name\":\"isDisambiguation\",\"type\":\"boolean\"},{\"name\":\"lastEdited\",\"type\":[\"long\",\"null\"]},{\"name\":\"sentenceSplits\",\"type\":{\"type\":\"array\",\"items\":\"int\"}},{\"name\":\"redirectsTo\",\"type\":[{\"type\":\"record\",\"name\":\"PageSummary\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"namespace\",\"type\":\"int\"},{\"name\":\"forwarded\",\"type\":\"boolean\"}]},\"null\"]},{\"name\":\"redirects\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}},{\"name\":\"linksOut\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"record\",\"name\":\"LinkSummary\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"title\",\"type\":\"string\"},{\"name\":\"namespace\",\"type\":\"int\"},{\"name\":\"forwarded\",\"type\":\"boolean\"},{\"name\":\"sentenceIndexes\",\"type\":{\"type\":\"array\",\"items\":\"int\"}}]}}},{\"name\":\"linksIn\",\"type\":{\"type\":\"array\",\"items\":\"LinkSummary\"}},{\"name\":\"parentCategories\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}},{\"name\":\"childCategories\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}},{\"name\":\"childArticles\",\"type\":{\"type\":\"array\",\"items\":\"PageSummary\"}},{\"name\":\"labels\",\"type\":{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"LabelSummary\",\"fields\":[{\"name\":\"docCount\",\"type\":\"int\"},{\"name\":\"occCount\",\"type\":\"int\"}]}}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-  @Deprecated public int id;
+  @Deprecated public java.lang.Integer id;
   @Deprecated public java.lang.CharSequence title;
-  @Deprecated public int namespace;
+  @Deprecated public java.lang.Integer namespace;
   @Deprecated public boolean isDisambiguation;
-  @Deprecated public long lastEdited;
-  @Deprecated public gnu.trove.list.array.TIntArrayList sentenceSplits;
+  @Deprecated public java.lang.Long lastEdited;
+  @Deprecated public java.util.List<java.lang.Integer> sentenceSplits;
   @Deprecated public org.wikipedia.miner.extract.model.struct.PageSummary redirectsTo;
   @Deprecated public java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> redirects;
   @Deprecated public java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksOut;
@@ -76,13 +34,13 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * All-args constructor.
    */
-  public PageDetail(int id, java.lang.CharSequence title, int namespace, boolean isDisambiguation, java.lang.Long lastEdited, TIntList sentenceSplits, org.wikipedia.miner.extract.model.struct.PageSummary redirectsTo, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> redirects, java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksOut, java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksIn, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> parentCategories, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> childCategories, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> childArticles, java.util.Map<java.lang.CharSequence,org.wikipedia.miner.extract.model.struct.LabelSummary> labels) {
+  public PageDetail(java.lang.Integer id, java.lang.CharSequence title, java.lang.Integer namespace, java.lang.Boolean isDisambiguation, java.lang.Long lastEdited, java.util.List<java.lang.Integer> sentenceSplits, org.wikipedia.miner.extract.model.struct.PageSummary redirectsTo, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> redirects, java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksOut, java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksIn, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> parentCategories, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> childCategories, java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> childArticles, java.util.Map<java.lang.CharSequence,org.wikipedia.miner.extract.model.struct.LabelSummary> labels) {
     this.id = id;
     this.title = title;
     this.namespace = namespace;
     this.isDisambiguation = isDisambiguation;
     this.lastEdited = lastEdited;
-    this.sentenceSplits = (gnu.trove.list.array.TIntArrayList) sentenceSplits;
+    this.sentenceSplits = sentenceSplits;
     this.redirectsTo = redirectsTo;
     this.redirects = redirects;
     this.linksOut = linksOut;
@@ -118,12 +76,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: id = ((java.lang.Integer)value$).intValue(); break;
+    case 0: id = (java.lang.Integer)value$; break;
     case 1: title = (java.lang.CharSequence)value$; break;
-    case 2: namespace = ((java.lang.Integer)value$).intValue(); break;
+    case 2: namespace = (java.lang.Integer)value$; break;
     case 3: isDisambiguation = (java.lang.Boolean)value$; break;
     case 4: lastEdited = (java.lang.Long)value$; break;
-    case 5: sentenceSplits = (gnu.trove.list.array.TIntArrayList)value$; break;
+    case 5: sentenceSplits = (java.util.List<java.lang.Integer>)value$; break;
     case 6: redirectsTo = (org.wikipedia.miner.extract.model.struct.PageSummary)value$; break;
     case 7: redirects = (java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary>)value$; break;
     case 8: linksOut = (java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary>)value$; break;
@@ -139,7 +97,7 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * Gets the value of the 'id' field.
    */
-  public int getId() {
+  public java.lang.Integer getId() {
     return id;
   }
 
@@ -147,7 +105,7 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(int value) {
+  public void setId(java.lang.Integer value) {
     this.id = value;
   }
 
@@ -169,7 +127,7 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * Gets the value of the 'namespace' field.
    */
-  public int getNamespace() {
+  public java.lang.Integer getNamespace() {
     return namespace;
   }
 
@@ -177,14 +135,14 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(int value) {
+  public void setNamespace(java.lang.Integer value) {
     this.namespace = value;
   }
 
   /**
    * Gets the value of the 'isDisambiguation' field.
    */
-  public boolean getIsDisambiguation() {
+  public java.lang.Boolean getIsDisambiguation() {
     return isDisambiguation;
   }
 
@@ -214,7 +172,7 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * Gets the value of the 'sentenceSplits' field.
    */
-  public TIntList getSentenceSplits() {
+  public java.util.List<java.lang.Integer> getSentenceSplits() {
     return sentenceSplits;
   }
 
@@ -222,8 +180,8 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'sentenceSplits' field.
    * @param value the value to set.
    */
-  public void setSentenceSplits(TIntList value) {
-    this.sentenceSplits = (gnu.trove.list.array.TIntArrayList) value;
+  public void setSentenceSplits(java.util.List<java.lang.Integer> value) {
+    this.sentenceSplits = value;
   }
 
   /**
@@ -367,12 +325,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<PageDetail>
     implements org.apache.avro.data.RecordBuilder<PageDetail> {
 
-    private int id;
+    private java.lang.Integer id;
     private java.lang.CharSequence title;
-    private int namespace;
+    private java.lang.Integer namespace;
     private boolean isDisambiguation;
     private java.lang.Long lastEdited;
-    private TIntList sentenceSplits;
+    private java.util.List<java.lang.Integer> sentenceSplits;
     private org.wikipedia.miner.extract.model.struct.PageSummary redirectsTo;
     private java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary> redirects;
     private java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary> linksOut;
@@ -510,12 +468,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'id' field */
-    public int getId() {
+    public java.lang.Integer getId() {
       return id;
     }
     
     /** Sets the value of the 'id' field */
-    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setId(int value) {
+    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setId(java.lang.Integer value) {
       validate(fields()[0], value);
       this.id = value;
       fieldSetFlags()[0] = true;
@@ -529,7 +487,7 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     
     /** Clears the value of the 'id' field */
     public org.wikipedia.miner.extract.model.struct.PageDetail.Builder clearId() {
-      id = Integer.MIN_VALUE;
+      id = null;
       fieldSetFlags()[0] = false;
       return this;
     }
@@ -560,12 +518,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'namespace' field */
-    public int getNamespace() {
+    public java.lang.Integer getNamespace() {
       return namespace;
     }
     
     /** Sets the value of the 'namespace' field */
-    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setNamespace(int value) {
+    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setNamespace(java.lang.Integer value) {
       validate(fields()[2], value);
       this.namespace = value;
       fieldSetFlags()[2] = true;
@@ -579,18 +537,18 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     
     /** Clears the value of the 'namespace' field */
     public org.wikipedia.miner.extract.model.struct.PageDetail.Builder clearNamespace() {
-      namespace = Integer.MIN_VALUE;
+      namespace = null;
       fieldSetFlags()[2] = false;
       return this;
     }
 
     /** Gets the value of the 'isDisambiguation' field */
-    public boolean getIsDisambiguation() {
+    public java.lang.Boolean getIsDisambiguation() {
       return isDisambiguation;
     }
     
     /** Sets the value of the 'isDisambiguation' field */
-    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setIsDisambiguation(java.lang.Boolean value) {
+    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setIsDisambiguation(boolean value) {
       validate(fields()[3], value);
       this.isDisambiguation = value;
       fieldSetFlags()[3] = true;
@@ -634,12 +592,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'sentenceSplits' field */
-    public TIntList getSentenceSplits() {
+    public java.util.List<java.lang.Integer> getSentenceSplits() {
       return sentenceSplits;
     }
     
     /** Sets the value of the 'sentenceSplits' field */
-    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setSentenceSplits(TIntList value) {
+    public org.wikipedia.miner.extract.model.struct.PageDetail.Builder setSentenceSplits(java.util.List<java.lang.Integer> value) {
       validate(fields()[5], value);
       this.sentenceSplits = value;
       fieldSetFlags()[5] = true;
@@ -862,12 +820,12 @@ public class PageDetail extends org.apache.avro.specific.SpecificRecordBase impl
     public PageDetail build() {
       try {
         PageDetail record = new PageDetail();
-        record.id = fieldSetFlags()[0] ? this.id : ((java.lang.Integer) defaultValue(fields()[0])).intValue();
+        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Integer) defaultValue(fields()[0]);
         record.title = fieldSetFlags()[1] ? this.title : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.namespace = fieldSetFlags()[2] ? this.namespace : ((java.lang.Integer) defaultValue(fields()[2])).intValue();
+        record.namespace = fieldSetFlags()[2] ? this.namespace : (java.lang.Integer) defaultValue(fields()[2]);
         record.isDisambiguation = fieldSetFlags()[3] ? this.isDisambiguation : (java.lang.Boolean) defaultValue(fields()[3]);
         record.lastEdited = fieldSetFlags()[4] ? this.lastEdited : (java.lang.Long) defaultValue(fields()[4]);
-        record.sentenceSplits = (gnu.trove.list.array.TIntArrayList) (fieldSetFlags()[5] ? this.sentenceSplits : (gnu.trove.list.array.TIntArrayList) defaultValue(fields()[5]));
+        record.sentenceSplits = fieldSetFlags()[5] ? this.sentenceSplits : (java.util.List<java.lang.Integer>) defaultValue(fields()[5]);
         record.redirectsTo = fieldSetFlags()[6] ? this.redirectsTo : (org.wikipedia.miner.extract.model.struct.PageSummary) defaultValue(fields()[6]);
         record.redirects = fieldSetFlags()[7] ? this.redirects : (java.util.List<org.wikipedia.miner.extract.model.struct.PageSummary>) defaultValue(fields()[7]);
         record.linksOut = fieldSetFlags()[8] ? this.linksOut : (java.util.List<org.wikipedia.miner.extract.model.struct.LinkSummary>) defaultValue(fields()[8]);
