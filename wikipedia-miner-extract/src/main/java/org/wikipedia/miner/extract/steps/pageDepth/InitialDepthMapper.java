@@ -30,6 +30,7 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 	private String rootCategoryTitle ;
 
 
+	
 	@Override
 	public void setup(Context context) {
 
