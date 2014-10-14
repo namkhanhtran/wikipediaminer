@@ -13,7 +13,7 @@ import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 
 
-public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, AvroKey<LabelSenseList>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
+public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, AvroValue<LabelSenseList>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 	
 	public enum Counts {ambiguous, unambiguous} ;
 	
@@ -23,12 +23,12 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 	
 	
 	@Override
-	public void reduce(AvroKey<CharSequence> label, Iterable<AvroKey<LabelSenseList>> senseLists, Context context) throws IOException, InterruptedException {
+	public void reduce(AvroKey<CharSequence> label, Iterable<AvroValue<LabelSenseList>> senseLists, Context context) throws IOException, InterruptedException {
 	
 		LabelSenseList allSenses = new LabelSenseList() ;
 		allSenses.setSenses(new ArrayList<LabelSense>()) ;
 		
-		for (AvroKey<LabelSenseList> senseProxy:senseLists) {
+		for (AvroValue<LabelSenseList> senseProxy:senseLists) {
 			LabelSenseList senses = senseProxy.datum();
 			for (LabelSense sense:senses.getSenses()) {
 				allSenses.getSenses().add(LabelSense.newBuilder(sense).build()) ;
