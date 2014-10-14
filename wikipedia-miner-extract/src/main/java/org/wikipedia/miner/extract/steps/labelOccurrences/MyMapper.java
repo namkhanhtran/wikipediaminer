@@ -14,13 +14,12 @@ import opennlp.tools.util.Span;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.DumpLink;
@@ -36,7 +35,7 @@ import org.wikipedia.miner.util.MarkupStripper;
 
 
 
-public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Text, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
+public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
 
 	private static Logger logger = Logger.getLogger(Mapper.class) ;
 
@@ -52,10 +51,11 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 	private int totalLabels ;
 	private List<Path> labelPaths ;
 	LabelCache labelCache ;
-	
-
+		
 	@Override
-	public void configure(JobConf job) {
+	public void setup(Context context) {
+		
+		Configuration conf = context.getConfiguration();
 
 		try {
 
@@ -64,15 +64,15 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 
 			labelPaths = new ArrayList<Path>() ;
 			
-			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(job);
+			Path[] cacheFiles = DistributedCache.getLocalCacheFiles(conf);
 
 			for (Path cf:cacheFiles) {
 
 				if (cf.getName().equals(new Path(DumpExtractor.OUTPUT_SITEINFO).getName())) {
 					siteInfo = SiteInfo.load(new File(cf.toString())) ;
-				} else if (cf.getName().equals(new Path(job.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
-					language = Languages.load(new File(cf.toString())).get(job.get(DumpExtractor.KEY_LANG_CODE)) ;
-				} else if (cf.getName().equals(new Path(job.get(DumpExtractor.KEY_SENTENCE_MODEL)).getName())) {
+				} else if (cf.getName().equals(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).getName())) {
+					language = Languages.load(new File(cf.toString())).get(conf.get(DumpExtractor.KEY_LANG_CODE)) ;
+				} else if (cf.getName().equals(new Path(conf.get(DumpExtractor.KEY_SENTENCE_MODEL)).getName())) {
 					sentenceExtractor = new PageSentenceExtractor(cf) ;
 				} else {
 					//assume this contains the labels and senses
@@ -84,7 +84,7 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 				throw new Exception("Could not locate '" + DumpExtractor.OUTPUT_SITEINFO + "' in DistributedCache") ;
 
 			if (language == null) 
-				throw new Exception("Could not locate '" + job.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
+				throw new Exception("Could not locate '" + conf.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
 
 			if (labelPaths.isEmpty())
 				throw new Exception("Could not locate any label files in DistributedCache") ;
@@ -93,7 +93,7 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 			pageParser = new DumpPageParser(language, siteInfo) ;
 			linkParser = new DumpLinkParser(language, siteInfo) ;
 			
-			totalLabels = job.getInt(LabelOccurrenceStep.KEY_TOTAL_LABELS, 0) ;
+			totalLabels = conf.getInt(LabelOccurrenceStep.KEY_TOTAL_LABELS, 0) ;
 
 			if (totalLabels == 0)
 				throw new Exception("Could not retrieve total number of labels") ;
@@ -103,22 +103,13 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 			logger.error("Could not configure mapper", e);
 		}
 		
-		labelCache = LabelCache.get();
-		
-		
+		labelCache = LabelCache.get();		
 	}
 
-
-
-
-
-
-
-	public void map(LongWritable key, Text value, OutputCollector<AvroKey<CharSequence>, AvroValue<LabelOccurrences>> collector, Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 		if (!labelCache.isLoaded()) 
-			labelCache.load(labelPaths, totalLabels, reporter);
-				
+			labelCache.load(labelPaths, totalLabels, context);
 		
 		DumpPage parsedPage = null ;
 
@@ -154,37 +145,38 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 			return ;
 		}
 		
-		labels = handleLinks(parsedPage, markup, labels, reporter) ;
+		labels = handleLinks(parsedPage, markup, labels, context) ;
 		
 		markup = stripper.stripInternalLinks(markup, null) ;
 		
 
 		int lastSplit = 0 ;
 		
-		for (int split:sentenceExtractor.getSentenceSplits(markup)) {
+		
+		int[] splits = sentenceExtractor.getSentenceSplits(markup).toArray(new int[sentenceExtractor.getSentenceSplits(markup).size()]);
+		for (int split:splits) {
 			
-			labels = handleSentence(markup.substring(lastSplit, split), labels, reporter) ;
+			labels = handleSentence(markup.substring(lastSplit, split), labels, context) ;
 			lastSplit = split ;
 		}
-		labels = handleSentence(markup.substring(lastSplit), labels, reporter) ;
+		labels = handleSentence(markup.substring(lastSplit), labels, context) ;
 		
-		
-		for (Map.Entry<CharSequence, LabelOccurrences> e:labels.entrySet()) 
-			collector.collect(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelOccurrences>(e.getValue()));
-
+		for (Map.Entry<CharSequence, LabelOccurrences> e:labels.entrySet()) {
+			context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelOccurrences>(e.getValue()));
+		}
 		logger.info(parsedPage.getTitle() + ": " + labels.size() + " labels");
 		
 	}
 
 
-	public Map<CharSequence,LabelOccurrences> handleLinks(DumpPage page, String markup, Map<CharSequence,LabelOccurrences> labels, Reporter reporter)  {
+	public Map<CharSequence,LabelOccurrences> handleLinks(DumpPage page, String markup, Map<CharSequence,LabelOccurrences> labels, Context context)  {
 
 		//logger.info("markup: " + markup);
 		
 		Vector<int[]> linkRegions = stripper.gatherComplexRegions(markup, "\\[\\[", "\\]\\]") ;
 
 		for(int[] linkRegion: linkRegions) {
-			reporter.progress(); 
+			context.progress(); 
 			
 			String linkMarkup = markup.substring(linkRegion[0]+2, linkRegion[1]-2) ;
 
@@ -218,14 +210,14 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 		return labels ;
 	}
 
-	public Map<CharSequence,LabelOccurrences> handleSentence(String sentence, Map<CharSequence,LabelOccurrences> labels, Reporter reporter) {
+	public Map<CharSequence,LabelOccurrences> handleSentence(String sentence, Map<CharSequence,LabelOccurrences> labels, Context context) {
 		
 		Tokenizer tokenizer = SimpleTokenizer.INSTANCE ;
 		
 		Span[] spans = tokenizer.tokenizePos(sentence) ;
 		
 		for (int startIndex=0 ; startIndex<spans.length ; startIndex++) {
-			reporter.progress(); 
+			context.progress(); 
 			
 			for (int endIndex=startIndex ; endIndex < startIndex + labelCache.getMaxSensibleLabelLength() && endIndex < spans.length ; endIndex++) {
 				
@@ -250,23 +242,4 @@ public class Mapper implements org.apache.hadoop.mapred.Mapper<LongWritable, Tex
 		
 		return labels ;
 	}
-
-
-
-
-
-
-
-	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-	
-
-
-
-
 }

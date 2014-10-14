@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 
 
-public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelSenseList, Pair<CharSequence, LabelSenseList>> {
+public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, AvroKey<LabelSenseList>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 	
 	public enum Counts {ambiguous, unambiguous} ;
 	
@@ -23,15 +23,13 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelS
 	
 	
 	@Override
-	public void reduce(CharSequence label, Iterable<LabelSenseList> senseLists,
-			AvroCollector<Pair<CharSequence, LabelSenseList>> collector,
-			Reporter reporter) throws IOException {
+	public void reduce(AvroKey<CharSequence> label, Iterable<AvroKey<LabelSenseList>> senseLists, Context context) throws IOException, InterruptedException {
 	
 		LabelSenseList allSenses = new LabelSenseList() ;
 		allSenses.setSenses(new ArrayList<LabelSense>()) ;
 		
-		for (LabelSenseList senses:senseLists) {
-			
+		for (AvroKey<LabelSenseList> senseProxy:senseLists) {
+			LabelSenseList senses = senseProxy.datum();
 			for (LabelSense sense:senses.getSenses()) {
 				allSenses.getSenses().add(LabelSense.newBuilder(sense).build()) ;
 			}
@@ -41,18 +39,18 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelS
 		if (isReducer()) {
 			
 			if (allSenses.getSenses().size() > 1)
-				reporter.getCounter(Counts.ambiguous).increment(1L);
+				context.getCounter(Counts.ambiguous).increment(1L);
 			else
-				reporter.getCounter(Counts.unambiguous).increment(1L);
+				context.getCounter(Counts.unambiguous).increment(1L);
 			
 			Collections.sort(allSenses.getSenses(), new SenseComparator());
 			
 		}
 		
-		collector.collect(new Pair<CharSequence, LabelSenseList>(label, allSenses));
+		context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelSenseList>(allSenses));
 	}
 
-	public static class Combiner extends CombinerOrReducer {
+	public static class MyCombiner extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {
@@ -61,7 +59,7 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelS
 
 	}
 
-	public static class Reducer extends CombinerOrReducer {
+	public static class MyReducer extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {
@@ -75,18 +73,18 @@ public abstract class CombinerOrReducer extends AvroReducer<CharSequence, LabelS
 		@Override
 		public int compare(LabelSense a, LabelSense b) {
 			
-			int cmp = b.getDocCount().compareTo(a.getDocCount()) ;
+			int cmp = Integer.compare(b.getDocCount(),a.getDocCount()) ;
 			
 			if (cmp != 0) 
 				return cmp ;
 			
-			cmp = b.getOccCount().compareTo(a.getOccCount()) ;
+			cmp = Integer.compare(b.getOccCount(),a.getOccCount()) ;
 			
 			if (cmp != 0)
 				return cmp ;
 			
 			
-			return a.getId().compareTo(b.getId());
+			return Integer.compare(a.getId(),b.getId());
 			
 			
 		}

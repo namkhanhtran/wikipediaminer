@@ -24,7 +24,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * All-args constructor.
    */
-  public PageSummary(java.lang.Integer id, java.lang.CharSequence title, java.lang.Integer namespace, java.lang.Boolean forwarded) {
+  public PageSummary(int id, java.lang.CharSequence title, int namespace, boolean forwarded) {
     this.id = id;
     this.title = title;
     this.namespace = namespace;
@@ -57,7 +57,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'id' field.
    */
-  public java.lang.Integer getId() {
+  public int getId() {
     return id;
   }
 
@@ -65,7 +65,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(java.lang.Integer value) {
+  public void setId(int value) {
     this.id = value;
   }
 
@@ -87,7 +87,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
   /**
    * Gets the value of the 'namespace' field.
    */
-  public java.lang.Integer getNamespace() {
+  public int getNamespace() {
     return namespace;
   }
 
@@ -95,14 +95,14 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(java.lang.Integer value) {
+  public void setNamespace(int value) {
     this.namespace = value;
   }
 
   /**
    * Gets the value of the 'forwarded' field.
    */
-  public java.lang.Boolean getForwarded() {
+  public boolean getForwarded() {
     return forwarded;
   }
 
@@ -188,7 +188,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'id' field */
-    public java.lang.Integer getId() {
+    public int getId() {
       return id;
     }
     
@@ -237,7 +237,7 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'namespace' field */
-    public java.lang.Integer getNamespace() {
+    public int getNamespace() {
       return namespace;
     }
     
@@ -261,12 +261,12 @@ public class PageSummary extends org.apache.avro.specific.SpecificRecordBase imp
     }
 
     /** Gets the value of the 'forwarded' field */
-    public java.lang.Boolean getForwarded() {
+    public boolean getForwarded() {
       return forwarded;
     }
     
     /** Sets the value of the 'forwarded' field */
-    public org.wikipedia.miner.extract.model.struct.PageSummary.Builder setForwarded(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.PageSummary.Builder setForwarded(java.lang.Boolean value) {
       validate(fields()[3], value);
       this.forwarded = value;
       fieldSetFlags()[3] = true;

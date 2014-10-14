@@ -91,11 +91,13 @@
 
 	<!-- A file containing a Weka classifier for performing automatic disambiguation of topics in documents -->
 	<topicDisambiguationModel>
+		/home/ntran/workspace/github-lib/wikipediaminer/models/enwiki20130204/disambig.model
 	</topicDisambiguationModel>
 
 
 	<!-- A file containing a Weka classifier for performing automatic link detection -->
 	<linkDetectionModel>
+		/home/ntran/workspace/github-lib/wikipediaminer/models/enwiki20130204/detect.model
 	</linkDetectionModel>
 	
 	

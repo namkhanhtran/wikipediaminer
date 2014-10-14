@@ -6,26 +6,26 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroJob;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.avro.mapreduce.AvroJob;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobStatus;
-import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.steps.Step;
-import org.wikipedia.miner.extract.steps.labelSenses.CombinerOrReducer.Combiner;
 import org.wikipedia.miner.extract.steps.labelSenses.CombinerOrReducer.Counts;
-import org.wikipedia.miner.extract.steps.labelSenses.CombinerOrReducer.Reducer;
+import org.wikipedia.miner.extract.steps.labelSenses.CombinerOrReducer.MyCombiner;
+import org.wikipedia.miner.extract.steps.labelSenses.CombinerOrReducer.MyReducer;
 import org.wikipedia.miner.extract.steps.sortedPages.PageSortingStep;
 import org.wikipedia.miner.extract.util.UncompletedStepException;
 
@@ -54,25 +54,32 @@ public class LabelSensesStep extends Step {
 			reset() ;
 		}
 		
-		JobConf conf = new JobConf(LabelSensesStep.class);
-		DumpExtractor.configureJob(conf, args) ;
+		// JobConf conf = new JobConf(LabelSensesStep.class);
+		Job job = Job.getInstance(getConf());
+		job.setJarByClass(LabelSensesStep.class);
+		Configuration conf = job.getConfiguration();
+		DumpExtractor.configureJob(job, args) ;
 
-		conf.setJobName("WM: label senses");
+		job.setJobName("WM: label senses");
 		
-		FileInputFormat.setInputPaths(conf, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
-		AvroJob.setInputSchema(conf, Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()));
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName());
+		AvroJob.setInputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 				
-		AvroJob.setMapperClass(conf, Mapper.class);
-		AvroJob.setCombinerClass(conf, Combiner.class) ;
-		AvroJob.setReducerClass(conf, Reducer.class);
+		job.setMapperClass(MyMapper.class);
+		job.setCombinerClass(MyCombiner.class) ;
+		job.setReducerClass(MyReducer.class);
 	
-		AvroJob.setOutputSchema(conf, Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()));
-		FileOutputFormat.setOutputPath(conf, getDir());
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setMapOutputValueSchema(job, LabelSenseList.getClassSchema());
 		
-		RunningJob runningJob = JobClient.runJob(conf);
-	
-		if (runningJob.getJobState() == JobStatus.SUCCEEDED) {	
-			finish(runningJob) ;
+		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setOutputValueSchema(job, LabelSenseList.getClassSchema());
+		FileOutputFormat.setOutputPath(job, getDir());
+		
+		job.waitForCompletion(true);
+		if (job.isSuccessful()) {	
+			finish(job) ;
 			return 0 ;
 		}
 		
@@ -128,7 +135,7 @@ public class LabelSensesStep extends Step {
 		
 	}
 	
-	public void finish(RunningJob runningJob) throws IOException {
+	public void finish(Job runningJob) throws IOException {
 
 		super.finish(runningJob) ;
 
@@ -136,9 +143,9 @@ public class LabelSensesStep extends Step {
 
 		for (Counts count:Counts.values()) {
 			
-			Counters.Counter counter = runningJob.getCounters().findCounter(count) ;
+			Counter counter = runningJob.getCounters().findCounter(count) ;
 			if (counter != null)
-				counts.put(count, counter.getCounter()) ;
+				counts.put(count, counter.getValue()) ;
 			else
 				counts.put(count, 0L) ;
 		}

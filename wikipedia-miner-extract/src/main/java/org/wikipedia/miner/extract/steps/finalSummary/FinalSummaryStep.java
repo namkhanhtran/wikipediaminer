@@ -1,5 +1,10 @@
 package org.wikipedia.miner.extract.steps.finalSummary;
 
+import gnu.trove.TIntCollection;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,10 +23,11 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
+import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.hadoop.util.AvroCharSequenceComparator;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.mapred.FsInput;
-import org.apache.avro.mapred.Pair;
+import org.apache.avro.mapreduce.AvroKeyValueRecordReader;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -66,6 +72,7 @@ public class FinalSummaryStep extends LocalStep {
 	private PageSortingStep pageSortingStep ;
 	private PageDepthStep pageDepthStep ;
 	private PrimaryLabelStep primaryLabelStep ;
+	private Configuration conf;
 	
 	private LabelSensesStep labelSensesStep ;
 	private LabelOccurrenceStep labelOccurrenceStep ;
@@ -92,6 +99,7 @@ public class FinalSummaryStep extends LocalStep {
 
 	public FinalSummaryStep(Path workingDir, PageSortingStep pageSortingStep, PageDepthStep pageDepthStep, PrimaryLabelStep primaryLabelStep, LabelSensesStep labelSensesStep, LabelOccurrenceStep labelOccurrenceStep) throws IOException {
 		super(workingDir);
+		this.conf = labelOccurrenceStep.getConf();
 		this.pageSortingStep = pageSortingStep ;
 		this.pageDepthStep = pageDepthStep ;
 		this.primaryLabelStep = primaryLabelStep ;
@@ -142,56 +150,60 @@ public class FinalSummaryStep extends LocalStep {
 
 
 		Path pageDetailPath = getMainAvroResultPath(pageSortingStep) ;
-		SeekableInput pageDetailInput = new FsInput(pageDetailPath, new Configuration());
+		SeekableInput pageDetailInput = new FsInput(pageDetailPath, conf);
 
-		Schema pageDetailSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()) ;
-		DatumReader<Pair<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<Pair<Integer,PageDetail>>(pageDetailSchema);
-		FileReader<Pair<Integer,PageDetail>> pageDetailReader = DataFileReader.openReader(pageDetailInput, pageDetailDatumReader) ;
-
-
-
+		//Schema pageDetailSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()) ;
+		// DatumReader<Pair<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<Pair<Integer,PageDetail>>(pageDetailSchema);
+		Schema pageDetailSchema = AvroKeyValue.getSchema(Schema.create(Type.INT),PageDetail.getClassSchema());
+		DatumReader<AvroKeyValue<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PageDetail>>(pageDetailSchema);
+		FileReader<AvroKeyValue<Integer,PageDetail>> pageDetailReader = DataFileReader.openReader(pageDetailInput, pageDetailDatumReader) ;
+		
 		Path pageDepthsPath = getMainAvroResultPath(pageDepthStep) ;
-		SeekableInput pageDepthsInput = new FsInput(pageDepthsPath, new Configuration());
+		SeekableInput pageDepthsInput = new FsInput(pageDepthsPath, conf);
 
-		Schema pageDepthsSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
-		DatumReader<Pair<Integer,PageDepthSummary>> pageDepthsDatumReader = new SpecificDatumReader<Pair<Integer,PageDepthSummary>>(pageDepthsSchema);
-		FileReader<Pair<Integer,PageDepthSummary>> pageDepthsReader = DataFileReader.openReader(pageDepthsInput, pageDepthsDatumReader) ;
+		//Schema pageDepthsSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
+		//DatumReader<Pair<Integer,PageDepthSummary>> pageDepthsDatumReader = new SpecificDatumReader<Pair<Integer,PageDepthSummary>>(pageDepthsSchema);
+		Schema pageDepthsSchema = AvroKeyValue.getSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
+		DatumReader<AvroKeyValue<Integer,PageDepthSummary>> pageDepthsDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PageDepthSummary>>(pageDepthsSchema);
+		FileReader<AvroKeyValue<Integer,PageDepthSummary>> pageDepthsReader = DataFileReader.openReader(pageDepthsInput, pageDepthsDatumReader) ;
 		
 		
 		Path primaryLabelPath = getMainAvroResultPath(primaryLabelStep) ;
 		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, new Configuration());
 
-		Schema primaryLabelSchema = Pair.getPairSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
-		DatumReader<Pair<Integer,PrimaryLabels>> primaryLabelDatumReader = new SpecificDatumReader<Pair<Integer,PrimaryLabels>>(primaryLabelSchema);
-		FileReader<Pair<Integer,PrimaryLabels>> primaryLabelReader = DataFileReader.openReader(primaryLabelInput, primaryLabelDatumReader) ;
+		//Schema primaryLabelSchema = Pair.getPairSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
+		//DatumReader<Pair<Integer,PrimaryLabels>> primaryLabelDatumReader = new SpecificDatumReader<Pair<Integer,PrimaryLabels>>(primaryLabelSchema);
+		Schema primaryLabelSchema = AvroKeyValue.getSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
+		DatumReader<AvroKeyValue<Integer,PrimaryLabels>> primaryLabelDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PrimaryLabels>>(primaryLabelSchema);
+		FileReader<AvroKeyValue<Integer,PrimaryLabels>> primaryLabelReader = DataFileReader.openReader(primaryLabelInput, primaryLabelDatumReader) ;
 
 
 		//read through pageDetail and pageDepth files simultaneously.
 		//both are sorted by id, but pageDepth will be missing many entries.
 
-		Pair<Integer,PageDetail> detailPair = null ;
-		Pair<Integer,PageDepthSummary> depthPair = null ;
-		Pair<Integer,PrimaryLabels> primaryLabelPair = null ;
+		AvroKeyValue<Integer,PageDetail> detailPair = null ;
+		AvroKeyValue<Integer,PageDepthSummary> depthPair = null ;
+		AvroKeyValue<Integer,PrimaryLabels> primaryLabelPair = null ;
 		while (pageDetailReader.hasNext()) {
 
 			detailPair = pageDetailReader.next();
-			PageDetail detail = detailPair.value() ;
+			PageDetail detail = detailPair.getValue() ;
 
 			//identify page depth summary, if there is one
-			while ((depthPair == null || depthPair.key() < detailPair.key()) && pageDepthsReader.hasNext())
+			while ((depthPair == null || depthPair.getKey().intValue() < detailPair.getKey().intValue()) && pageDepthsReader.hasNext())
 				depthPair = pageDepthsReader.next();
 			
 			PageDepthSummary depth = null ;
-			if (depthPair.key().equals(detailPair.key()))
-				depth = depthPair.value() ;
+			if (depthPair.getKey().intValue() == (detailPair.getKey().intValue()))
+				depth = depthPair.getValue() ;
 			
 			//identify primary label summary, if there is one
-			while ((primaryLabelPair == null || primaryLabelPair.key() < detailPair.key()) && primaryLabelReader.hasNext())
+			while ((primaryLabelPair == null || primaryLabelPair.getKey().intValue() < detailPair.getKey().intValue()) && primaryLabelReader.hasNext())
 				primaryLabelPair = primaryLabelReader.next();
 
 			Set<CharSequence> primaryLabels = new HashSet<CharSequence>() ;
-			if (primaryLabelPair.key().equals(detailPair.key())) 
-				primaryLabels.addAll(primaryLabelPair.value().getLabels()) ;
+			if (primaryLabelPair.getKey().equals(detailPair.getKey())) 
+				primaryLabels.addAll(primaryLabelPair.getValue().getLabels()) ;
 			
 
 			
@@ -290,42 +302,41 @@ public class FinalSummaryStep extends LocalStep {
 	public void finalizeLabelStuff() throws IOException {
 
 
-
-
-
 		BufferedWriter labelWriter = createWriter("label.csv") ;
 
 		Path labelSensesPath = getMainAvroResultPath(labelSensesStep) ;
 		SeekableInput labelSensesInput = new FsInput(labelSensesPath, new Configuration());
 
-		Schema labelSensesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
-		DatumReader<Pair<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelSenseList>>(labelSensesSchema);
-		FileReader<Pair<CharSequence,LabelSenseList>> labelSensesReader = DataFileReader.openReader(labelSensesInput, labelSensesDatumReader) ;
-
-
+		//Schema labelSensesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
+		//DatumReader<Pair<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelSenseList>>(labelSensesSchema);
+		Schema labelSensesSchema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
+		DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(labelSensesSchema);
+		FileReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesReader = DataFileReader.openReader(labelSensesInput, labelSensesDatumReader) ;
 
 		Path labelOccurrencesPath = getMainAvroResultPath(labelOccurrenceStep) ;
 		SeekableInput labelOccurrencesInput = new FsInput(labelOccurrencesPath, new Configuration());
 
-		Schema labelOccurrencesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
-		DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
-		FileReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
+		//Schema labelOccurrencesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
+		//DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
+		Schema labelOccurrencesSchema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
+		DatumReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
+		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
 
-		Pair<CharSequence,LabelSenseList> sensesPair = null ;
-		Pair<CharSequence,LabelOccurrences> occurrencesPair = null ;
+		AvroKeyValue<CharSequence,LabelSenseList> sensesPair = null ;
+		AvroKeyValue<CharSequence,LabelOccurrences> occurrencesPair = null ;
 		while (labelSensesReader.hasNext()) {
 
 			sensesPair = labelSensesReader.next();
-			CharSequence label = sensesPair.key() ;
-			LabelSenseList senses = sensesPair.value() ;
+			CharSequence label = sensesPair.getKey() ;
+			LabelSenseList senses = sensesPair.getValue() ;
 
 
-			while ((occurrencesPair == null || labelTextComparator.compare(occurrencesPair.key(), sensesPair.key()) < 0 ) && labelOccurrencesReader.hasNext())
+			while ((occurrencesPair == null || labelTextComparator.compare(occurrencesPair.getKey(), sensesPair.getKey()) < 0 ) && labelOccurrencesReader.hasNext())
 				occurrencesPair = labelOccurrencesReader.next();
 
 			LabelOccurrences occurrences = null ;
-			if (labelTextComparator.compare(occurrencesPair.key(), sensesPair.key()) == 0)
-				occurrences = occurrencesPair.value() ;
+			if (labelTextComparator.compare(occurrencesPair.getKey(), sensesPair.getKey()) == 0)
+				occurrences = occurrencesPair.getValue() ;
 
 
 			//now we definitely have a label and list of senses. If we have occurrences, then they are synchronised with label
@@ -390,7 +401,7 @@ public class FinalSummaryStep extends LocalStep {
 		dbPage.setType(getType(detail).ordinal());
 		dbPage.setTitle(detail.getTitle().toString());
 
-		if (depth != null && depth.getDepth() != null)
+		if (depth != null && depth.getDepth() != Integer.MIN_VALUE)
 			dbPage.setDepth(depth.getDepth());
 		else
 			dbPage.setDepth(-1);
@@ -400,18 +411,22 @@ public class FinalSummaryStep extends LocalStep {
 
 	private DbIntList buildIntList(List<PageSummary> summaries) {
 
-		ArrayList<Integer> ids = new ArrayList<Integer>() ;
+		ArrayList<Integer> ids = new ArrayList<Integer>(summaries.size()) ;
 		for (PageSummary summary:summaries)
 			ids.add(summary.getId()) ;
 
 		return new DbIntList(ids) ;
 	}
 
-	private DbIntList buildIntList(Collection<Integer> values) {
+	private DbIntList buildIntList(TIntCollection values) {
 
-		ArrayList<Integer> ints = new ArrayList<Integer>() ;
-		for (Integer value:values)
-			ints.add(value) ;
+		final ArrayList<Integer> ints = new ArrayList<Integer>(values.size()) ;
+		values.forEach(new TIntProcedure() {
+			public boolean execute(int c) {
+				ints.add(c);
+				return true;
+			}
+		});
 
 		return new DbIntList(ints) ;
 	}
@@ -455,7 +470,9 @@ public class FinalSummaryStep extends LocalStep {
 			link.setLinkId(summary.getId());
 
 			ArrayList<Integer> sentenceIndexes = new ArrayList<Integer>() ;
-			sentenceIndexes.addAll(summary.getSentenceIndexes()) ;
+			int[] idx = summary.getSentenceIndexes().toArray(new int[summary.getSentenceIndexes().size()]);
+			for (int i : idx)
+				sentenceIndexes.add(i);
 
 			link.setSentenceIndexes(sentenceIndexes);
 
@@ -497,7 +514,7 @@ public class FinalSummaryStep extends LocalStep {
 
 	private BufferedWriter createWriter(String fileName) throws IOException {
 
-		FileSystem fs = getDir().getFileSystem(new Configuration()) ;
+		FileSystem fs = getDir().getFileSystem(conf) ;
 
 		FSDataOutputStream stream = fs.create(new Path(getDir() + Path.SEPARATOR + fileName)) ;
 		OutputStreamWriter streamWriter = new OutputStreamWriter(stream) ;
@@ -507,7 +524,7 @@ public class FinalSummaryStep extends LocalStep {
 
 	private Path getMainAvroResultPath(Step step) throws IOException {
 
-		FileSystem fs = step.getDir().getFileSystem(new Configuration()) ;
+		FileSystem fs = step.getDir().getFileSystem(step.getConf()) ;
 
 		FileStatus[] fileStatuses = fs.listStatus(step.getDir(), new PathFilter() {
 			public boolean accept(Path path) {				

@@ -13,11 +13,11 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
+import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.io.DatumReader;
-import org.apache.avro.mapred.Pair;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 import org.wikipedia.miner.util.ProgressTracker;
@@ -68,7 +68,7 @@ public class LabelCache {
 		return labels.mightContain(label) ;
 	}
 
-	public void load(List<Path> paths, int totalLabels, Reporter reporter) throws IOException {
+	public void load(List<Path> paths, int totalLabels, Context context) throws IOException {
 
 		if (isLoaded)
 			return ;
@@ -96,25 +96,24 @@ public class LabelCache {
 			
 			File file = new File(path.toString()) ;
 			
-			Schema schema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
+			Schema schema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
 			
-			DatumReader<Pair<CharSequence,LabelSenseList>> datumReader = new SpecificDatumReader<Pair<CharSequence,LabelSenseList>>(schema);
+			DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> datumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(schema);
 
-			FileReader<Pair<CharSequence,LabelSenseList>> fileReader = DataFileReader.openReader(file, datumReader) ;
+			FileReader<AvroKeyValue<CharSequence,LabelSenseList>> fileReader = DataFileReader.openReader(file, datumReader) ;
 
 			while (fileReader.hasNext()) {
 
-				Pair<CharSequence,LabelSenseList> pair = fileReader.next();
+				AvroKeyValue<CharSequence,LabelSenseList> pair = fileReader.next();
 				
 				
 				
-				CharSequence label = pair.key() ;
+				CharSequence label = pair.getKey() ;
 				labels.put(label) ;
 				labelsInserted++ ;
 				updateLengthHistogram(label) ;
 								
-				reporter.progress() ;
-
+				context.progress();
 			}
 
 			fileReader.close() ;

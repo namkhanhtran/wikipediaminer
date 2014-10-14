@@ -1,5 +1,8 @@
 package org.wikipedia.miner.extract.steps.pageSummary;
 
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,10 +11,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.avro.mapred.AvroCollector;
-import org.apache.avro.mapred.AvroReducer;
-import org.apache.avro.mapred.Pair;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.model.struct.LabelSummary;
 import org.wikipedia.miner.extract.model.struct.LinkSummary;
@@ -21,7 +23,8 @@ import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep.Unforwarded;
 
 
-public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail, Pair<PageKey, PageDetail>> {
+public abstract class CombinerOrReducer extends Reducer<
+		AvroKey<PageKey>, AvroValue<PageDetail>, AvroKey<PageKey>, AvroValue<PageDetail>> {
 
 	private static Logger logger = Logger.getLogger(CombinerOrReducer.class) ;
 
@@ -30,17 +33,15 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 	private CharSequence[] debugTitles = {"Atheist","Atheism","Atheists","Athiest","People by religion"} ;
 
 	@Override
-	public void reduce(PageKey key, Iterable<PageDetail> pagePartials,
-			AvroCollector<Pair<PageKey, PageDetail>> collector,
-			Reporter reporter) throws IOException {
+	public void reduce(AvroKey<PageKey> key, Iterable<AvroValue<PageDetail>> pagePartials, Context context) throws IOException, InterruptedException {
 
 		Integer id = null;
 		//Integer namespace = key.getNamespace() ;
-		CharSequence title = key.getTitle() ;
+		CharSequence title = key.datum().getTitle() ;
 		Long lastEdited = null ;
 		boolean isDisambiguation = false ;
 		
-		List<Integer> sentenceSplits = new ArrayList<Integer>() ;
+		TIntArrayList sentenceSplits = new TIntArrayList() ;
 
 		SortedMap<Integer,PageSummary> redirects = new TreeMap<Integer, PageSummary>() ;
 		PageSummary redirectsTo = null ;
@@ -63,12 +64,13 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 		if (debug)
 			logger.info("Processing " + key.toString()) ;
 
-		for (PageDetail pagePartial: pagePartials) {
+		for (AvroValue<PageDetail> pagePartialProxy: pagePartials) {
+			PageDetail pagePartial = pagePartialProxy.datum();
 
 			if (debug)
 				logger.info("partial: " + pagePartial.toString());
 
-			if (pagePartial.getId() != null)
+			if (pagePartial.getId() != Integer.MIN_VALUE)
 				id = pagePartial.getId() ;
 
 			if (pagePartial.getLastEdited() != null)
@@ -177,24 +179,24 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 
 		if (isReducer()) {
 
-			countUnforwardedPages(Unforwarded.redirect, combinedPage.getRedirects(), reporter) ;
+			countUnforwardedPages(Unforwarded.redirect, combinedPage.getRedirects(), context) ;
 
 			if (redirectsTo != null && redirectsTo.getId() >= 0 && !redirectsTo.getForwarded())
-				reporter.incrCounter(Unforwarded.redirect, 1);
+				context.getCounter(Unforwarded.redirect).increment(1);
 
-			countUnforwardedLinks(Unforwarded.linkIn, combinedPage.getLinksIn(), reporter) ;
-			countUnforwardedLinks(Unforwarded.linkOut, combinedPage.getLinksOut(), reporter) ;
+			countUnforwardedLinks(Unforwarded.linkIn, combinedPage.getLinksIn(), context) ;
+			countUnforwardedLinks(Unforwarded.linkOut, combinedPage.getLinksOut(), context) ;
 
-			countUnforwardedPages(Unforwarded.parentCategory, combinedPage.getParentCategories(), reporter) ;
-			countUnforwardedPages(Unforwarded.childCategory, combinedPage.getChildCategories(), reporter) ;
-			countUnforwardedPages(Unforwarded.childArticle, combinedPage.getChildArticles(), reporter) ;
+			countUnforwardedPages(Unforwarded.parentCategory, combinedPage.getParentCategories(), context) ;
+			countUnforwardedPages(Unforwarded.childCategory, combinedPage.getChildCategories(), context) ;
+			countUnforwardedPages(Unforwarded.childArticle, combinedPage.getChildArticles(), context) ;
 
 		}
 
 		if (debug)
 			logger.info("combined: " + combinedPage.toString());
 
-		collector.collect(new Pair<PageKey,PageDetail>(key, combinedPage));
+		context.write(key, new AvroValue<PageDetail>(combinedPage));
 	}
 
 	private SortedMap<Integer,PageSummary> addToPageMap(List<PageSummary> pages, SortedMap<Integer,PageSummary> pageMap) {
@@ -233,7 +235,7 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 		for (LinkSummary link:links) {
 
 			//only overwrite if previous entry has not been forwarded
-			LinkSummary existingLink = linkMap.get(link.getId()) ;
+			final LinkSummary existingLink = linkMap.get(link.getId()) ;
 			if (existingLink == null) {
 
 				//the clone is needed because avro seems to reuse these instances.
@@ -243,13 +245,14 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 			} else {
 
 				//merge lists of sentence indexes
-				for (Integer sentenceIndex:link.getSentenceIndexes()) {
-					
-					int pos = Collections.binarySearch(existingLink.getSentenceIndexes(), sentenceIndex) ;
-					if (pos<0) 
-						existingLink.getSentenceIndexes().add((-pos) - 1, sentenceIndex) ;
-					
-				}
+				link.getSentenceIndexes().forEach(new TIntProcedure() {
+					public boolean execute(int sentenceIndex) {
+						int pos = existingLink.getSentenceIndexes().binarySearch(sentenceIndex) ;
+						if (pos<0) 
+							existingLink.getSentenceIndexes().insert((-pos) - 1, sentenceIndex) ;
+						return true;
+					}
+				});
 
 				//overwrite forwarded flag
 				if (link.getForwarded())
@@ -289,22 +292,22 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 		return links ;
 	}
 
-	private void countUnforwardedPages(Unforwarded counter, List<PageSummary> pages, Reporter reporter) {
+	private void countUnforwardedPages(Unforwarded counter, List<PageSummary> pages, Context context) {
 
 		for (PageSummary page:pages) 				
 			if (!page.getForwarded()) 
-				reporter.incrCounter(counter, 1);
+				context.getCounter(counter).increment(1);
 	}
 	
-	private void countUnforwardedLinks(Unforwarded counter, List<LinkSummary> links, Reporter reporter) {
+	private void countUnforwardedLinks(Unforwarded counter, List<LinkSummary> links, Context context) {
 
 		for (LinkSummary link:links) 				
 			if (!link.getForwarded()) 
-				reporter.incrCounter(counter, 1);
+				context.getCounter(counter).increment(1);
 	}
 
 
-	public static class Combiner extends CombinerOrReducer {
+	public static class MyCombiner extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {
@@ -313,7 +316,7 @@ public abstract class CombinerOrReducer extends AvroReducer<PageKey, PageDetail,
 
 	}
 
-	public static class Reducer extends CombinerOrReducer {
+	public static class MyReducer extends CombinerOrReducer {
 
 		@Override
 		public boolean isReducer() {

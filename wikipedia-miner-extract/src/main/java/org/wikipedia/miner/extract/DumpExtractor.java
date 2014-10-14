@@ -15,7 +15,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsAction;
-import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
@@ -26,7 +26,6 @@ import org.wikipedia.miner.extract.steps.pageDepth.PageDepthStep;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep;
 import org.wikipedia.miner.extract.steps.primaryLabel.PrimaryLabelStep;
 import org.wikipedia.miner.extract.steps.sortedPages.PageSortingStep;
-
 import org.wikipedia.miner.extract.util.Languages;
 import org.wikipedia.miner.extract.util.Languages.Language;
 
@@ -54,7 +53,7 @@ public class DumpExtractor {
 	private Path workingDir  ;
 	private Path finalDir ;
 
-	//private Logger logger ;
+	private static Logger logger = Logger.getLogger(DumpExtractor.class);
 
 
 	public static final String KEY_INPUT_FILE = "wm.inputDir" ;
@@ -83,37 +82,36 @@ public class DumpExtractor {
 		GenericOptionsParser gop = new GenericOptionsParser(args) ;
 		conf = gop.getConfiguration() ;
 
-
-
 		//outputFileSystem = FileSystem.get(conf);
 		this.args = gop.getRemainingArgs() ;
 
 		configure() ;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
 		//PropertyConfigurator.configure("log4j.properties");  
 
-		DumpExtractor de = new DumpExtractor(args) ;
-		int result = de.run();
-
-		System.exit(result) ;
+		DumpExtractor de;
+		try {
+			de = new DumpExtractor(args);
+			int result = de.run();
+			System.exit(result) ;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static JobConf configureJob(JobConf conf, String[] args) {
+	public static Job configureJob(Job job, String[] args) {
 
-		conf.set(KEY_INPUT_FILE, args[0]) ;
-		conf.set(KEY_LANG_FILE, args[1]) ;
-		conf.set(KEY_LANG_CODE, args[2]) ;
-		conf.set(KEY_SENTENCE_MODEL, args[3]) ;
-		conf.set(KEY_OUTPUT_DIR, args[4]) ;
-
-		//set a reasonable number of maps. This is going to be ignored for very large inputs (e.g. the en wiki dump) anyway. 
-		conf.setNumMapTasks(16) ;
+		job.getConfiguration().set(KEY_INPUT_FILE, args[0]) ;
+		job.getConfiguration().set(KEY_LANG_FILE, args[1]) ;
+		job.getConfiguration().set(KEY_LANG_CODE, args[2]) ;
+		job.getConfiguration().set(KEY_SENTENCE_MODEL, args[3]) ;
+		job.getConfiguration().set(KEY_OUTPUT_DIR, args[4]) ;
 		
 		//force one reducer by default. These don't take very long, and multiple reducers would make finalise file functions more complicated.  
-		conf.setNumReduceTasks(1) ;
+		job.setNumReduceTasks(1) ;
 
 		//many of our tasks require pre-loading lots of data, may as well reuse this as much as we can.
 		//conf.setNumTasksToExecutePerJvm(-1) ;
@@ -122,11 +120,11 @@ public class DumpExtractor {
 		//conf.setInt("mapred.tasktracker.reduce.tasks.maximum", 1) ;
 		
 		//TODO: really don't want this hard coded.
-		conf.set("mapred.child.java.opts", "-Xmx500M -Dapple.awt.UIElement=true") ;
+		job.getConfiguration().set("mapred.child.java.opts", "-Xmx4096M -Dapple.awt.UIElement=true") ;
 
 		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
 
-		return conf ;
+		return job ;
 	}
 
 
@@ -147,15 +145,10 @@ public class DumpExtractor {
 	}
 
 
-
-
-
-
-
 	private void configure() throws Exception {
 
 		if (args.length != 6) 
-			throw new IllegalArgumentException("Please specify a xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
+			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
 
 
 		//check input file
@@ -209,10 +202,8 @@ public class DumpExtractor {
 
 	private int run() throws Exception {
 
-		Logger.getLogger(DumpExtractor.class).info("Extracting site info") ;
 		extractSiteInfo() ;
 
-		
 		//extract basic page summaries
 		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
@@ -221,7 +212,7 @@ public class DumpExtractor {
 			//long startTime = System.currentTimeMillis() ;
 			
 			summaryStep = new PageSummaryStep(workingDir, summaryIteration) ;
-			ToolRunner.run(new Configuration(), summaryStep, args);
+			ToolRunner.run(summaryStep, args);
 			
 			//System.out.println("intitial step completed in " + timeFormat.format(System.currentTimeMillis()-startTime)) ;
 			
@@ -232,16 +223,15 @@ public class DumpExtractor {
 		}
 		
 		PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
-		ToolRunner.run(new Configuration(), sortingStep, args);
-		
-		
+		ToolRunner.run(sortingStep, args);
+				
 		//calculate page depths
 		int depthIteration = 0 ;
 		PageDepthStep depthStep ;
 		while (true) {
 			
 			depthStep = new PageDepthStep(workingDir, depthIteration, sortingStep) ;
-			ToolRunner.run(new Configuration(), depthStep, args);
+			ToolRunner.run(depthStep, args);
 			
 			if (!depthStep.furtherIterationsRequired())
 				break ;
@@ -251,15 +241,15 @@ public class DumpExtractor {
 		
 		//gather label senses
 		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
-		ToolRunner.run(new Configuration(), sensesStep, args);
+		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
 		PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
-		ToolRunner.run(new Configuration(), primaryLabelStep, args);
+		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
 		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
-		ToolRunner.run(new Configuration(), occurrencesStep, args);
+		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		finalStep.run() ;
@@ -268,6 +258,8 @@ public class DumpExtractor {
 	}
 
 	private void extractSiteInfo() throws IOException {
+		
+		logger.info("Extracting site info...");
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(getFileSystem(inputFile).open(inputFile))) ;
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(getFileSystem(workingDir).create(new Path(workingDir + "/" + OUTPUT_SITEINFO)))) ;

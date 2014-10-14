@@ -31,8 +31,11 @@
 			<version>3.0.3</version>
 		</dependency>
 
-
-
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.9.4</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -47,10 +50,40 @@
 			<version>1.2.17</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.2.1</version>
+		</dependency> -->
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs</artifactId>
+			<version>2.3.0-cdh5.1.0</version>
+			<optional>true</optional>
+		</dependency>		
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<version>2.3.0-cdh5.1.0</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>2.3.0-cdh5.1.0</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-api</artifactId>
+			<version>2.3.0-cdh5.1.0</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-yarn-common</artifactId>
+			<version>2.3.0-cdh5.1.0</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -80,6 +113,14 @@
 
 	</dependencies>
 
+  <repositories>
+    <repository>
+      <id>cloudera</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
+  </repositories>
+
+
 	<build>
 		<plugins>
 			<plugin>
@@ -108,4 +149,5 @@
 
 		</plugins>
 	</build>
+	<version>1.0-SNAPSHOT</version>
 </project>
