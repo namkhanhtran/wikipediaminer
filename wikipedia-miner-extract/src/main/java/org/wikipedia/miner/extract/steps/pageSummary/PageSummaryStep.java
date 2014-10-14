@@ -152,6 +152,8 @@ public class PageSummaryStep extends IterativeStep {
 				AvroJob.setInputKeySchema(job, PageKey.getClassSchema());
 				AvroJob.setInputValueSchema(job, PageDetail.getClassSchema());
 
+				logger.info("Working from: " + getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
+				
 				FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + "pageSummary_" + (getIteration()-1));
 
 			}
@@ -179,7 +181,7 @@ public class PageSummaryStep extends IterativeStep {
 			}
 
 			if (job.isComplete()) {	
-				logger.info("Job" + job.getJobName() + " has been completed.");
+				logger.info("Job [" + job.getJobName() + "] has been completed.");
 				finish(job) ;
 				return 0 ;
 			}
