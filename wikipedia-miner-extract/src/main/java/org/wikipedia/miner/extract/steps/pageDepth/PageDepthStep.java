@@ -12,6 +12,7 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -84,6 +85,9 @@ public class PageDepthStep extends IterativeStep {
 			job.setMapperClass(SubsequentDepthMapper.class);
 		}
 			
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setMapOutputValueSchema(job, PageDepthSummary.getClassSchema());	
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PageDepthSummary.getClassSchema());				
 		job.setCombinerClass(DepthCombiner.class) ;

@@ -4,21 +4,22 @@ import java.io.IOException;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.wikipedia.miner.extract.model.struct.LabelOccurrences;
 
-public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelOccurrences, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
+public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, AvroValue<LabelOccurrences>, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
 	
 	public enum Counts {falsePositives, truePositives} ;
 	
 	public abstract boolean isReducer() ;
-	
-	@Override
-	public void reduce(CharSequence label, Iterable<LabelOccurrences> partials, Context context) throws IOException, InterruptedException {
+		
+	public void reduce(AvroKey<CharSequence> label, Iterable<AvroKey<LabelOccurrences>> partials, Context context) throws InterruptedException, IOException {
 	
 		LabelOccurrences allOccurrences = new LabelOccurrences(0,0,0,0) ;
 		
-		for (LabelOccurrences partial:partials) {
+		for (AvroKey<LabelOccurrences> partialProxy:partials) {
+			LabelOccurrences partial = partialProxy.datum();
 			allOccurrences.setLinkDocCount(allOccurrences.getLinkDocCount() + partial.getLinkDocCount()) ;
 			allOccurrences.setLinkOccCount(allOccurrences.getLinkOccCount() + partial.getLinkOccCount()) ;
 			allOccurrences.setTextDocCount(allOccurrences.getTextDocCount() + partial.getTextDocCount()) ;
@@ -35,7 +36,7 @@ public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelOccur
 			}
 		}
 
-		context.write(new AvroKey<CharSequence>(label), new AvroValue<LabelOccurrences>(allOccurrences));
+		context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelOccurrences>(allOccurrences));
 	}
 
 	public static class MyCombiner extends CombinerOrReducer {

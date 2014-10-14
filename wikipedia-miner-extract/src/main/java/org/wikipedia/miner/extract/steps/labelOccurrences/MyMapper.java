@@ -51,8 +51,7 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 	private int totalLabels ;
 	private List<Path> labelPaths ;
 	LabelCache labelCache ;
-	
-
+		
 	@Override
 	public void setup(Context context) {
 		
@@ -104,22 +103,13 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 			logger.error("Could not configure mapper", e);
 		}
 		
-		labelCache = LabelCache.get();
-		
-		
+		labelCache = LabelCache.get();		
 	}
-
-
-
-
-
-
 
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 		if (!labelCache.isLoaded()) 
 			labelCache.load(labelPaths, totalLabels, context);
-				
 		
 		DumpPage parsedPage = null ;
 
@@ -162,17 +152,18 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 
 		int lastSplit = 0 ;
 		
-		for (int split:sentenceExtractor.getSentenceSplits(markup)) {
+		
+		int[] splits = sentenceExtractor.getSentenceSplits(markup).toArray(new int[sentenceExtractor.getSentenceSplits(markup).size()]);
+		for (int split:splits) {
 			
 			labels = handleSentence(markup.substring(lastSplit, split), labels, context) ;
 			lastSplit = split ;
 		}
 		labels = handleSentence(markup.substring(lastSplit), labels, context) ;
 		
-		
-		for (Map.Entry<CharSequence, LabelOccurrences> e:labels.entrySet()) 
+		for (Map.Entry<CharSequence, LabelOccurrences> e:labels.entrySet()) {
 			context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelOccurrences>(e.getValue()));
-
+		}
 		logger.info(parsedPage.getTitle() + ": " + labels.size() + " labels");
 		
 	}

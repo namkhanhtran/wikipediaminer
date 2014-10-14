@@ -22,7 +22,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * All-args constructor.
    */
-  public PageKey(java.lang.Integer namespace, java.lang.CharSequence title) {
+  public PageKey(int namespace, java.lang.CharSequence title) {
     this.namespace = namespace;
     this.title = title;
   }
@@ -49,7 +49,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * Gets the value of the 'namespace' field.
    */
-  public java.lang.Integer getNamespace() {
+  public int getNamespace() {
     return namespace;
   }
 
@@ -57,7 +57,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'namespace' field.
    * @param value the value to set.
    */
-  public void setNamespace(java.lang.Integer value) {
+  public void setNamespace(int value) {
     this.namespace = value;
   }
 
@@ -132,7 +132,7 @@ public class PageKey extends org.apache.avro.specific.SpecificRecordBase impleme
     }
 
     /** Gets the value of the 'namespace' field */
-    public java.lang.Integer getNamespace() {
+    public int getNamespace() {
       return namespace;
     }
     

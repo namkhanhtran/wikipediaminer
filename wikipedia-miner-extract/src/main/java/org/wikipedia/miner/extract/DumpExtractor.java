@@ -53,7 +53,7 @@ public class DumpExtractor {
 	private Path workingDir  ;
 	private Path finalDir ;
 
-	//private Logger logger ;
+	private static Logger logger = Logger.getLogger(DumpExtractor.class);
 
 
 	public static final String KEY_INPUT_FILE = "wm.inputDir" ;
@@ -82,22 +82,24 @@ public class DumpExtractor {
 		GenericOptionsParser gop = new GenericOptionsParser(args) ;
 		conf = gop.getConfiguration() ;
 
-
-
 		//outputFileSystem = FileSystem.get(conf);
 		this.args = gop.getRemainingArgs() ;
 
 		configure() ;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
 		//PropertyConfigurator.configure("log4j.properties");  
 
-		DumpExtractor de = new DumpExtractor(args) ;
-		int result = de.run();
-
-		System.exit(result) ;
+		DumpExtractor de;
+		try {
+			de = new DumpExtractor(args);
+			int result = de.run();
+			System.exit(result) ;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static Job configureJob(Job job, String[] args) {
@@ -146,7 +148,7 @@ public class DumpExtractor {
 	private void configure() throws Exception {
 
 		if (args.length != 6) 
-			throw new IllegalArgumentException("Please specify a xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
+			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
 
 
 		//check input file
@@ -200,10 +202,8 @@ public class DumpExtractor {
 
 	private int run() throws Exception {
 
-		Logger.getLogger(DumpExtractor.class).info("Extracting site info") ;
 		extractSiteInfo() ;
 
-		
 		//extract basic page summaries
 		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
@@ -212,7 +212,7 @@ public class DumpExtractor {
 			//long startTime = System.currentTimeMillis() ;
 			
 			summaryStep = new PageSummaryStep(workingDir, summaryIteration) ;
-			ToolRunner.run(summaryStep.getConf(), summaryStep, args);
+			ToolRunner.run(summaryStep, args);
 			
 			//System.out.println("intitial step completed in " + timeFormat.format(System.currentTimeMillis()-startTime)) ;
 			
@@ -223,16 +223,15 @@ public class DumpExtractor {
 		}
 		
 		PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
-		ToolRunner.run(sortingStep.getConf(), sortingStep, args);
-		
-		
+		ToolRunner.run(sortingStep, args);
+				
 		//calculate page depths
 		int depthIteration = 0 ;
 		PageDepthStep depthStep ;
 		while (true) {
 			
 			depthStep = new PageDepthStep(workingDir, depthIteration, sortingStep) ;
-			ToolRunner.run(depthStep.getConf(), depthStep, args);
+			ToolRunner.run(depthStep, args);
 			
 			if (!depthStep.furtherIterationsRequired())
 				break ;
@@ -242,15 +241,15 @@ public class DumpExtractor {
 		
 		//gather label senses
 		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
-		ToolRunner.run(sensesStep.getConf(), sensesStep, args);
+		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
 		PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
-		ToolRunner.run(primaryLabelStep.getConf(), primaryLabelStep, args);
+		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
 		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
-		ToolRunner.run(occurrencesStep.getConf(), occurrencesStep, args);
+		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		finalStep.run() ;
@@ -259,6 +258,8 @@ public class DumpExtractor {
 	}
 
 	private void extractSiteInfo() throws IOException {
+		
+		logger.info("Extracting site info...");
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(getFileSystem(inputFile).open(inputFile))) ;
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(getFileSystem(workingDir).create(new Path(workingDir + "/" + OUTPUT_SITEINFO)))) ;

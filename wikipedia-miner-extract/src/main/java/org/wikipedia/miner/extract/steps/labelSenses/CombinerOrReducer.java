@@ -7,12 +7,13 @@ import java.util.Comparator;
 
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
 
 
-public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelSenseList, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
+public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, AvroKey<LabelSenseList>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 	
 	public enum Counts {ambiguous, unambiguous} ;
 	
@@ -22,13 +23,13 @@ public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelSense
 	
 	
 	@Override
-	public void reduce(CharSequence label, Iterable<LabelSenseList> senseLists, Context context) throws IOException, InterruptedException {
+	public void reduce(AvroKey<CharSequence> label, Iterable<AvroKey<LabelSenseList>> senseLists, Context context) throws IOException, InterruptedException {
 	
 		LabelSenseList allSenses = new LabelSenseList() ;
 		allSenses.setSenses(new ArrayList<LabelSense>()) ;
 		
-		for (LabelSenseList senses:senseLists) {
-			
+		for (AvroKey<LabelSenseList> senseProxy:senseLists) {
+			LabelSenseList senses = senseProxy.datum();
 			for (LabelSense sense:senses.getSenses()) {
 				allSenses.getSenses().add(LabelSense.newBuilder(sense).build()) ;
 			}
@@ -46,7 +47,7 @@ public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelSense
 			
 		}
 		
-		context.write(new AvroKey<CharSequence>(label), new AvroValue<LabelSenseList>(allSenses));
+		context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelSenseList>(allSenses));
 	}
 
 	public static class MyCombiner extends CombinerOrReducer {
@@ -72,18 +73,18 @@ public abstract class CombinerOrReducer extends Reducer<CharSequence, LabelSense
 		@Override
 		public int compare(LabelSense a, LabelSense b) {
 			
-			int cmp = b.getDocCount().compareTo(a.getDocCount()) ;
+			int cmp = Integer.compare(b.getDocCount(),a.getDocCount()) ;
 			
 			if (cmp != 0) 
 				return cmp ;
 			
-			cmp = b.getOccCount().compareTo(a.getOccCount()) ;
+			cmp = Integer.compare(b.getOccCount(),a.getOccCount()) ;
 			
 			if (cmp != 0)
 				return cmp ;
 			
 			
-			return a.getId().compareTo(b.getId());
+			return Integer.compare(a.getId(),b.getId());
 			
 			
 		}

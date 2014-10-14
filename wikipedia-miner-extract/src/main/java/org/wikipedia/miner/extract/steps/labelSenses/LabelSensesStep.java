@@ -13,6 +13,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -69,6 +70,9 @@ public class LabelSensesStep extends Step {
 		job.setCombinerClass(MyCombiner.class) ;
 		job.setReducerClass(MyReducer.class);
 	
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.STRING));
+		AvroJob.setMapOutputValueSchema(job, LabelSenseList.getClassSchema());
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setOutputValueSchema(job, LabelSenseList.getClassSchema());
 		FileOutputFormat.setOutputPath(job, getDir());

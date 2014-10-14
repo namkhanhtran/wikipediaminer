@@ -1,5 +1,10 @@
 package org.wikipedia.miner.extract.steps.finalSummary;
 
+import gnu.trove.TIntCollection;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -396,7 +401,7 @@ public class FinalSummaryStep extends LocalStep {
 		dbPage.setType(getType(detail).ordinal());
 		dbPage.setTitle(detail.getTitle().toString());
 
-		if (depth != null && depth.getDepth() != null)
+		if (depth != null && depth.getDepth() != Integer.MIN_VALUE)
 			dbPage.setDepth(depth.getDepth());
 		else
 			dbPage.setDepth(-1);
@@ -406,18 +411,22 @@ public class FinalSummaryStep extends LocalStep {
 
 	private DbIntList buildIntList(List<PageSummary> summaries) {
 
-		ArrayList<Integer> ids = new ArrayList<Integer>() ;
+		ArrayList<Integer> ids = new ArrayList<Integer>(summaries.size()) ;
 		for (PageSummary summary:summaries)
 			ids.add(summary.getId()) ;
 
 		return new DbIntList(ids) ;
 	}
 
-	private DbIntList buildIntList(Collection<Integer> values) {
+	private DbIntList buildIntList(TIntCollection values) {
 
-		ArrayList<Integer> ints = new ArrayList<Integer>() ;
-		for (Integer value:values)
-			ints.add(value) ;
+		final ArrayList<Integer> ints = new ArrayList<Integer>(values.size()) ;
+		values.forEach(new TIntProcedure() {
+			public boolean execute(int c) {
+				ints.add(c);
+				return true;
+			}
+		});
 
 		return new DbIntList(ints) ;
 	}
@@ -461,7 +470,9 @@ public class FinalSummaryStep extends LocalStep {
 			link.setLinkId(summary.getId());
 
 			ArrayList<Integer> sentenceIndexes = new ArrayList<Integer>() ;
-			sentenceIndexes.addAll(summary.getSentenceIndexes()) ;
+			int[] idx = summary.getSentenceIndexes().toArray(new int[summary.getSentenceIndexes().size()]);
+			for (int i : idx)
+				sentenceIndexes.add(i);
 
 			link.setSentenceIndexes(sentenceIndexes);
 

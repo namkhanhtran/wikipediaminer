@@ -65,6 +65,9 @@ public class PrimaryLabelStep extends Step {
 		AvroJob.setInputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setInputValueSchema(job, LabelSenseList.getClassSchema());
 			
+		AvroJob.setMapOutputKeySchema(job, Schema.create(Type.INT));
+		AvroJob.setMapOutputValueSchema(job, PrimaryLabels.getClassSchema());
+		
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.INT));
 		AvroJob.setOutputValueSchema(job, PrimaryLabels.getClassSchema());
 		
@@ -108,20 +111,20 @@ public class PrimaryLabelStep extends Step {
 		}
 	}
 	
-	public static class MyReducer extends Reducer<Integer, PrimaryLabels, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
+	public static class MyReducer extends Reducer<AvroKey<Integer>, AvroValue<PrimaryLabels>, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
 		
 		@Override
-		public void reduce(Integer pageId, Iterable<PrimaryLabels> partials,Context context) throws IOException, InterruptedException {
+		public void reduce(AvroKey<Integer> pageId, Iterable<AvroValue<PrimaryLabels>> partials,Context context) throws IOException, InterruptedException {
 			
 			ArrayList<CharSequence> primaryLabels = new ArrayList<CharSequence>() ;
 			
-			for (PrimaryLabels partial:partials) {
-				
+			for ( AvroValue<PrimaryLabels> partialProxy:partials) {
+				PrimaryLabels partial = partialProxy.datum();
 				PrimaryLabels clone = PrimaryLabels.newBuilder(partial).build() ;
 				primaryLabels.addAll(clone.getLabels()) ;
 			}
 			
-			context.write(new AvroKey<Integer>(pageId), new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
+			context.write(pageId, new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
 		}
 	}
 	

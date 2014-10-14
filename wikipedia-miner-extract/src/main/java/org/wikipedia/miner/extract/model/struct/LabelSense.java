@@ -25,7 +25,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * All-args constructor.
    */
-  public LabelSense(java.lang.Integer id, java.lang.Integer docCount, java.lang.Integer occCount, java.lang.Boolean fromTitle, java.lang.Boolean fromRedirect) {
+  public LabelSense(int id, int docCount, int occCount, boolean fromTitle, boolean fromRedirect) {
     this.id = id;
     this.docCount = docCount;
     this.occCount = occCount;
@@ -61,7 +61,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * Gets the value of the 'id' field.
    */
-  public java.lang.Integer getId() {
+  public int getId() {
     return id;
   }
 
@@ -69,14 +69,14 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'id' field.
    * @param value the value to set.
    */
-  public void setId(java.lang.Integer value) {
+  public void setId(int value) {
     this.id = value;
   }
 
   /**
    * Gets the value of the 'docCount' field.
    */
-  public java.lang.Integer getDocCount() {
+  public int getDocCount() {
     return docCount;
   }
 
@@ -84,14 +84,14 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'docCount' field.
    * @param value the value to set.
    */
-  public void setDocCount(java.lang.Integer value) {
+  public void setDocCount(int value) {
     this.docCount = value;
   }
 
   /**
    * Gets the value of the 'occCount' field.
    */
-  public java.lang.Integer getOccCount() {
+  public int getOccCount() {
     return occCount;
   }
 
@@ -99,14 +99,14 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
    * Sets the value of the 'occCount' field.
    * @param value the value to set.
    */
-  public void setOccCount(java.lang.Integer value) {
+  public void setOccCount(int value) {
     this.occCount = value;
   }
 
   /**
    * Gets the value of the 'fromTitle' field.
    */
-  public java.lang.Boolean getFromTitle() {
+  public boolean getFromTitle() {
     return fromTitle;
   }
 
@@ -121,7 +121,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
   /**
    * Gets the value of the 'fromRedirect' field.
    */
-  public java.lang.Boolean getFromRedirect() {
+  public boolean getFromRedirect() {
     return fromRedirect;
   }
 
@@ -216,7 +216,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'id' field */
-    public java.lang.Integer getId() {
+    public int getId() {
       return id;
     }
     
@@ -240,7 +240,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'docCount' field */
-    public java.lang.Integer getDocCount() {
+    public int getDocCount() {
       return docCount;
     }
     
@@ -264,7 +264,7 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'occCount' field */
-    public java.lang.Integer getOccCount() {
+    public int getOccCount() {
       return occCount;
     }
     
@@ -288,12 +288,12 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'fromTitle' field */
-    public java.lang.Boolean getFromTitle() {
+    public boolean getFromTitle() {
       return fromTitle;
     }
     
     /** Sets the value of the 'fromTitle' field */
-    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromTitle(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromTitle(java.lang.Boolean value) {
       validate(fields()[3], value);
       this.fromTitle = value;
       fieldSetFlags()[3] = true;
@@ -312,12 +312,12 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     }
 
     /** Gets the value of the 'fromRedirect' field */
-    public java.lang.Boolean getFromRedirect() {
+    public boolean getFromRedirect() {
       return fromRedirect;
     }
     
     /** Sets the value of the 'fromRedirect' field */
-    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromRedirect(boolean value) {
+    public org.wikipedia.miner.extract.model.struct.LabelSense.Builder setFromRedirect(java.lang.Boolean value) {
       validate(fields()[4], value);
       this.fromRedirect = value;
       fieldSetFlags()[4] = true;
@@ -339,11 +339,11 @@ public class LabelSense extends org.apache.avro.specific.SpecificRecordBase impl
     public LabelSense build() {
       try {
         LabelSense record = new LabelSense();
-        record.id = fieldSetFlags()[0] ? this.id : (java.lang.Integer) defaultValue(fields()[0]);
-        record.docCount = fieldSetFlags()[1] ? this.docCount : (java.lang.Integer) defaultValue(fields()[1]);
-        record.occCount = fieldSetFlags()[2] ? this.occCount : (java.lang.Integer) defaultValue(fields()[2]);
-        record.fromTitle = fieldSetFlags()[3] ? this.fromTitle : (java.lang.Boolean) defaultValue(fields()[3]);
-        record.fromRedirect = fieldSetFlags()[4] ? this.fromRedirect : (java.lang.Boolean) defaultValue(fields()[4]);
+        record.id = fieldSetFlags()[0] ? this.id : ((java.lang.Integer) defaultValue(fields()[0])).intValue();
+        record.docCount = fieldSetFlags()[1] ? this.docCount : ((java.lang.Integer) defaultValue(fields()[1])).intValue();
+        record.occCount = fieldSetFlags()[2] ? this.occCount : ((java.lang.Integer) defaultValue(fields()[2])).intValue();
+        record.fromTitle = fieldSetFlags()[3] ? this.fromTitle : ((java.lang.Boolean) defaultValue(fields()[3])).booleanValue();
+        record.fromRedirect = fieldSetFlags()[4] ? this.fromRedirect : ((java.lang.Boolean) defaultValue(fields()[4])).booleanValue();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
