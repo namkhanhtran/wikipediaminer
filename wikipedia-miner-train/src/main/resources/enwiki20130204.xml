@@ -78,14 +78,17 @@
 		then article comparisons will be made without machine learning.
 	 -->
 	<articleComparisonModel>
+		/home/ntran/workspace/github-lib/wikipediaminer/models/enwiki20130204/art_compare.model
 	</articleComparisonModel>
 	
 	<!-- A file containing a Weka classifier for disambiguating pairs of labels -->
 	<labelDisambiguationModel>
+		/home/ntran/workspace/github-lib/wikipediaminer/models/enwiki20130204/lbl_disambig.model
 	</labelDisambiguationModel>
 	
 	<!-- A file containing a Weka classifier for generating relatedness measures between labels -->
 	<labelComparisonModel>
+		/home/ntran/workspace/github-lib/wikipediaminer/models/enwiki20130204/lbl_compare.model
 	</labelComparisonModel>
 
 
