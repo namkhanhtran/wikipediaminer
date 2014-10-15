@@ -56,7 +56,6 @@ public class PageSortingStep extends Step {
 		
 		// JobConf conf = Job.get(PageDepthStep.class);
 		Job job = Job.getInstance(getConf());
-		Configuration conf = job.getConfiguration();
 		job.setJarByClass(PageSortingStep.class);
 		DumpExtractor.configureJob(job, args) ;
 
@@ -80,7 +79,11 @@ public class PageSortingStep extends Step {
 		FileOutputFormat.setOutputPath(job, getDir());
 		job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 		
-		job.waitForCompletion(true);
+		try {
+			job.waitForCompletion(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	
 		if (job.isSuccessful()) {	
 			finish(job) ;
