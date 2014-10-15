@@ -90,8 +90,12 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 				throw new Exception("Could not locate any label files in DistributedCache") ;
 
 
-			pageParser = new DumpPageParser(language, siteInfo) ;
-			linkParser = new DumpLinkParser(language, siteInfo) ;
+			try {
+				pageParser = new DumpPageParser(language, siteInfo) ;
+				linkParser = new DumpLinkParser(language, siteInfo) ;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 			totalLabels = conf.getInt(LabelOccurrenceStep.KEY_TOTAL_LABELS, 0) ;
 
