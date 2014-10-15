@@ -68,7 +68,7 @@ public class LabelOccurrenceStep extends Step{
 		DumpExtractor.configureJob(job, args) ;
 		
 		if (sensesStep.getTotalLabels() >= Integer.MAX_VALUE)
-			throw new Exception("Waay to many distinct labels (this must be less than " + Integer.MAX_VALUE + ")") ;
+			throw new Exception("Way too many distinct labels (this must be less than " + Integer.MAX_VALUE + ")") ;
 		
 		conf.setInt(KEY_TOTAL_LABELS, (int)sensesStep.getTotalLabels());
 
