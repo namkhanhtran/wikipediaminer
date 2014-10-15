@@ -7,14 +7,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -111,8 +117,7 @@ public class SnippetAnnotator {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public HashMap<Integer, Integer> annotate(File inputFile)
-			throws IOException {
+	public HashMap<String, Integer> annotate(File inputFile) throws IOException {
 		/*
 		 * BufferedReader reader = new BufferedReader(new
 		 * FileReader(inputFile)); String line = null; while ((line =
@@ -121,7 +126,7 @@ public class SnippetAnnotator {
 		 * System.out.println(content + "\n" + date.toString()); }
 		 * reader.close();
 		 */
-		HashMap<Integer, Integer> tweetTopic = new HashMap<Integer, Integer>();
+		HashMap<String, Integer> tweetTopic = new HashMap<String, Integer>();
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String line = null;
@@ -130,7 +135,10 @@ public class SnippetAnnotator {
 			if (line.length() == 0) {
 				continue;
 			}
-			System.out.println("DEBUGGING line: " + ++debugLine);
+			debugLine += 1;
+			if (debugLine % 100 == 0) {
+				System.out.println("Checking point " + debugLine);
+			}
 			String[] token = line.split("\t");
 			String raw_content = token[4];
 
@@ -153,12 +161,13 @@ public class SnippetAnnotator {
 
 				for (Topic topic : topicList) {
 					int topicId = topic.getId();
+					String topicTitle = topic.getTitle();
 					int weight = 1;
-					if (tweetTopic.containsKey(topicId)) {
-						weight += tweetTopic.get(topicId);
+					if (tweetTopic.containsKey(topicTitle)) {
+						weight += tweetTopic.get(topicTitle);
 					}
 
-					tweetTopic.put(topicId, weight);
+					tweetTopic.put(topicTitle, weight);
 				}
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -172,6 +181,50 @@ public class SnippetAnnotator {
 		}
 		reader.close();
 		return tweetTopic;
+	}
+
+	public void annotateMultipleFile(File directory) throws IOException {
+		for (File file : directory.listFiles()) {
+			if (!file.isFile()) {
+				continue;
+			}
+
+			Map<String, Integer> tweetTopic = annotate(file);
+			tweetTopic = sortByComparator(tweetTopic);
+			
+			String filename = file.getName() + ".topic";
+			FileWriter writer = new FileWriter(new File(directory, filename));
+			for (Map.Entry<String, Integer> entry : tweetTopic.entrySet()) {
+				writer.write(entry.getKey() + "\t" + entry.getValue());
+				writer.write("\n");
+			}
+			writer.close();
+		}
+	}
+
+	private static Map<String, Integer> sortByComparator(
+			Map<String, Integer> unsortMap) {
+
+		// Convert Map to List
+		List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(
+				unsortMap.entrySet());
+
+		// Sort list with comparator, to compare the Map values
+		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+			public int compare(Map.Entry<String, Integer> o1,
+					Map.Entry<String, Integer> o2) {
+				return (o1.getValue()).compareTo(o2.getValue());
+			}
+		});
+
+		// Convert sorted map back to a Map
+		Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+		for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it
+				.hasNext();) {
+			Map.Entry<String, Integer> entry = it.next();
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+		return sortedMap;
 	}
 
 	/**
@@ -267,9 +320,11 @@ public class SnippetAnnotator {
 		Wikipedia wikipedia = new Wikipedia(conf, false);
 		SnippetAnnotator annotator = new SnippetAnnotator(wikipedia);
 
-		HashMap<Integer, Integer> tweetTopic = annotator.annotate(new File(args[1]));
-		for (Map.Entry<Integer, Integer> topic : tweetTopic.entrySet()) {
-			System.out.println(topic.getKey() + ":\t" + topic.getValue());
-		}
+		annotator.annotateMultipleFile(new File(args[1]));
+//		HashMap<String, Integer> tweetTopic = annotator.annotate(new File(
+//				args[1]));
+//		for (Map.Entry<String, Integer> topic : tweetTopic.entrySet()) {
+//			System.out.println(topic.getKey() + ":\t" + topic.getValue());
+//		}
 	}
 }
