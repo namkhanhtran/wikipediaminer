@@ -107,7 +107,11 @@ public class LabelOccurrenceStep extends Step{
 		
 		FileOutputFormat.setOutputPath(job, getDir());
 
-		job.waitForCompletion(true);
+		try {
+			job.waitForCompletion(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		if (job.isSuccessful()) {	
 			finish(job) ;
