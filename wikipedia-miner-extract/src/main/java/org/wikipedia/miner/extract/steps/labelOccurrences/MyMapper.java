@@ -95,6 +95,7 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 				linkParser = new DumpLinkParser(language, siteInfo) ;
 			} catch (Exception e) {
 				e.printStackTrace();
+				throw e;
 			}
 
 			totalLabels = conf.getInt(LabelOccurrenceStep.KEY_TOTAL_LABELS, 0) ;
