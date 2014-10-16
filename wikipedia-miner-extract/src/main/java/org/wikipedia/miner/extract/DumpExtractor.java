@@ -121,10 +121,10 @@ public class DumpExtractor {
 		
 		//TODO: really don't want this hard coded.
 		//job.getConfiguration().set("mapred.child.java.opts", "-Xmx5100m -Dapple.awt.UIElement=true") ;
-		//job.getConfiguration().set("mapreduce.child.java.opts", "-Xmx5100m");
+		// job.getConfiguration().set("mapreduce.child.java.opts", "-Xmx5100m");
 		
-		job.getConfiguration().set("mapreduce.map.memory.mb", "-Xmx5100m");
-		job.getConfiguration().set("mapreduce.reduce.memory.mb", "-Xmx5100m");
+		job.getConfiguration().set("mapreduce.map.memory.mb", "5100");
+		job.getConfiguration().set("mapreduce.reduce.memory.mb", "5100");
 		
 		job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx5100m");
 		job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx5120m");
