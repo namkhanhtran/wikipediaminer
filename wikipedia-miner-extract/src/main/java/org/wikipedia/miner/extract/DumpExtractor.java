@@ -120,7 +120,8 @@ public class DumpExtractor {
 		//conf.setInt("mapred.tasktracker.reduce.tasks.maximum", 1) ;
 		
 		//TODO: really don't want this hard coded.
-		job.getConfiguration().set("mapred.child.java.opts", "-Xmx4096M -Dapple.awt.UIElement=true") ;
+		job.getConfiguration().set("mapred.child.java.opts", "-Xmx5100m -Dapple.awt.UIElement=true") ;
+		job.getConfiguration().set("mapreduce.child.java.opts", "-Xmx5100m");
 
 		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
 
