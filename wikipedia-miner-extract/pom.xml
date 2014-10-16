@@ -193,14 +193,14 @@
 						<goals>
 							<goal>shade</goal>
 						</goals>
-						<!--<configuration>
+						<configuration>
 							<relocations>
 									<relocation>
 										<pattern>com.google</pattern>
 										<shadedPattern>thirdparty.com.google</shadedPattern>
 									</relocation>
 							</relocations>
-						</configuration>-->
+						</configuration>
 					</execution>
 				</executions>
 			</plugin> -->
