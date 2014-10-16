@@ -183,7 +183,7 @@
 				</executions>
 			</plugin>
 
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>2.3</version>
@@ -193,17 +193,17 @@
 						<goals>
 							<goal>shade</goal>
 						</goals>
-						<configuration>
+						<!-- <configuration>
 							<relocations>
 									<relocation>
 										<pattern>com.google</pattern>
 										<shadedPattern>thirdparty.com.google</shadedPattern>
 									</relocation>
 							</relocations>
-						</configuration>
+						</configuration> -->
 					</execution>
 				</executions>
-			</plugin> -->
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
