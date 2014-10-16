@@ -195,12 +195,10 @@
 						</goals>
 						<configuration>
 							<relocations>
-								<relocations>
 									<relocation>
 										<pattern>com.google</pattern>
 										<shadedPattern>thirdparty.com.google</shadedPattern>
 									</relocation>
-								</relocations>
 							</relocations>
 						</configuration>
 					</execution>
