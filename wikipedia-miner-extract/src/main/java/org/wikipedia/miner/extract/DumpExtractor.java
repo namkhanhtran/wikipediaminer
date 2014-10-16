@@ -223,7 +223,7 @@ public class DumpExtractor {
 				summaryIteration++ ;
 		}
 		
-		PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
+		/*PageSortingStep sortingStep = new PageSortingStep(workingDir, summaryStep) ;
 		ToolRunner.run(sortingStep, args);
 				
 		//calculate page depths
@@ -253,7 +253,7 @@ public class DumpExtractor {
 		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		finalStep.run() ;
+		finalStep.run() ;*/
 		
 		return 0 ;
 	}
