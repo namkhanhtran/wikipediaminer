@@ -52,7 +52,7 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 	LabelCache labelCache ;
 
 	private final AvroKey<CharSequence> keyOut = new AvroKey<CharSequence>();
-	private final AvroValue<LabelOccurrences> valOut = new AvroValue<LabelOccurrences>(),
+	private final AvroValue<LabelOccurrences> valOut = new AvroValue<LabelOccurrences>();
 	
 	@Override
 	public void setup(Context context) {
