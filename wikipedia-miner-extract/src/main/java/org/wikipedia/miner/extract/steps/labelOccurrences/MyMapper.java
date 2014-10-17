@@ -51,6 +51,9 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 	private List<Path> labelPaths ;
 	LabelCache labelCache ;
 
+	private final AvroKey<CharSequence> keyOut = new AvroKey<CharSequence>();
+	private final AvroValue<LabelOccurrences> valOut = new AvroValue<LabelOccurrences>(),
+	
 	@Override
 	public void setup(Context context) {
 
@@ -167,7 +170,10 @@ public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, 
 		labels = handleSentence(markup.substring(lastSplit), labels, context) ;
 
 		for (Map.Entry<CharSequence, LabelOccurrences> e:labels.entrySet()) {
-			context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelOccurrences>(e.getValue()));
+			// context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelOccurrences>(e.getValue()));
+			keyOut.datum(e.getKey());
+			valOut.datum(e.getValue());
+			context.write(keyOut, valOut);
 		}
 		logger.info(parsedPage.getTitle() + ": " + labels.size() + " labels");
 

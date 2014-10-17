@@ -41,7 +41,7 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 
 		valOut.datum(allOccurrences);
 		// context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelOccurrences>(allOccurrences));
-		context.write(label, new AvroValue<LabelOccurrences>(allOccurrences));
+		context.write(label, valOut);
 	}
 
 	public static class MyCombiner extends CombinerOrReducer {
