@@ -34,7 +34,6 @@ import org.wikipedia.miner.extract.util.SiteInfo;
 import org.wikipedia.miner.util.MarkupStripper;
 
 
-
 public class MyMapper extends Mapper<LongWritable, Text, AvroKey<CharSequence>, AvroValue<LabelOccurrences>> {
 
 	private static Logger logger = Logger.getLogger(Mapper.class) ;

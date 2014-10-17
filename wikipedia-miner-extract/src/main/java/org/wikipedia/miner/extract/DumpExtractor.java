@@ -122,6 +122,9 @@ public class DumpExtractor {
 		job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx5120m");
 
 		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
+		
+		// This is the nasty thing in MapReduce v2 and YARN: They always prefer their ancient jars first. Set this on to say you don't like it
+		job.getConfiguration().set("mapreduce.job.user.classpath.first", "true");
 
 		return job ;
 	}
