@@ -115,11 +115,11 @@ public class DumpExtractor {
 		//job.getConfiguration().set("mapred.child.java.opts", "-Xmx5100m -Dapple.awt.UIElement=true") ;
 		// job.getConfiguration().set("mapreduce.child.java.opts", "-Xmx5100m");
 		
-		job.getConfiguration().set("mapreduce.map.memory.mb", "5100");
-		job.getConfiguration().set("mapreduce.reduce.memory.mb", "5100");
+		job.getConfiguration().set("mapreduce.map.memory.mb", "6100");
+		job.getConfiguration().set("mapreduce.reduce.memory.mb", "6144");
 		
-		job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx5100m");
-		job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx5120m");
+		job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx6100m");
+		job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx6144m");
 
 		//conf.setBoolean("mapred.used.genericoptionsparser", true) ;
 		
@@ -254,12 +254,12 @@ public class DumpExtractor {
 		 */
 		
 		// hard-code to test
-		/*LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + args[6], 13890840) ;
-		ToolRunner.run(occurrencesStep, args);*/
+		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + args[6], 13890840) ;
+		ToolRunner.run(occurrencesStep, args);
 		
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, args[6], args[7], args[8], args[9], args[10], conf) ;
-		finalStep.run() ;
+		// FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, args[6], args[7], args[8], args[9], args[10], conf) ;
+		// finalStep.run() ;
 		
 		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		
 		
