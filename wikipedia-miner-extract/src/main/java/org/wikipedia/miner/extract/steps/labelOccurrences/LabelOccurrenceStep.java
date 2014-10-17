@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -16,7 +14,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -28,7 +25,6 @@ import org.wikipedia.miner.extract.steps.Step;
 import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.Counts;
 import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.MyCombiner;
 import org.wikipedia.miner.extract.steps.labelOccurrences.CombinerOrReducer.MyReducer;
-import org.wikipedia.miner.extract.steps.labelSenses.LabelSensesStep;
 import org.wikipedia.miner.extract.util.UncompletedStepException;
 import org.wikipedia.miner.extract.util.XmlInputFormat;
 
@@ -39,12 +35,17 @@ public class LabelOccurrenceStep extends Step{
 	public static final String KEY_TOTAL_LABELS = "wm.totalLabels" ;
 
 	private Map<Counts,Long> counts ;
-	private LabelSensesStep sensesStep ;
 	
-	public LabelOccurrenceStep(Path workingDir, LabelSensesStep sensesStep) throws IOException {
+	private Path senseDir;
+	private long totalLabel;
+	// private LabelSensesStep sensesStep ;
+	
+	public LabelOccurrenceStep(Path workingDir, Path senseDir, long totalLabel) throws IOException {
 		super(workingDir);
 		
-		this.sensesStep = sensesStep ;
+		// this.sensesStep = sensesStep ;
+		this.senseDir = senseDir;
+		this.totalLabel = totalLabel;
 	}
 
 	@Override
@@ -67,10 +68,12 @@ public class LabelOccurrenceStep extends Step{
 		job.setJarByClass(LabelOccurrenceStep.class);
 		DumpExtractor.configureJob(job, args) ;
 		
-		if (sensesStep.getTotalLabels() >= Integer.MAX_VALUE)
+		//if (sensesStep.getTotalLabels() >= Integer.MAX_VALUE)
+		if (totalLabel >= Integer.MAX_VALUE)
 			throw new Exception("Way too many distinct labels (this must be less than " + Integer.MAX_VALUE + ")") ;
 		
-		conf.setInt(KEY_TOTAL_LABELS, (int)sensesStep.getTotalLabels());
+		// conf.setInt(KEY_TOTAL_LABELS, (int)sensesStep.getTotalLabels());
+		conf.setInt(KEY_TOTAL_LABELS, (int)totalLabel);
 
 		job.setJobName("WM: label occurrences");
 			
@@ -90,7 +93,8 @@ public class LabelOccurrenceStep extends Step{
 		DistributedCache.addCacheFile(new Path(conf.get(DumpExtractor.KEY_LANG_FILE)).toUri(), conf);
 		
 		
-		for (FileStatus fs:FileSystem.get(conf).listStatus(sensesStep.getDir())) {
+		// for (FileStatus fs:FileSystem.get(conf).listStatus(sensesStep.getDir())) {
+		for (FileStatus fs:FileSystem.get(conf).listStatus(senseDir)) {
 
 			if (fs.getPath().getName().startsWith("part-")) {
 				Logger.getLogger(LabelOccurrenceStep.class).info("Cached labels file " + fs.getPath()) ;

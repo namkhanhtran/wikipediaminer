@@ -3,7 +3,6 @@ package org.wikipedia.miner.extract;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -26,9 +25,6 @@ import org.wikipedia.miner.extract.steps.pageDepth.PageDepthStep;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep;
 import org.wikipedia.miner.extract.steps.primaryLabel.PrimaryLabelStep;
 import org.wikipedia.miner.extract.steps.sortedPages.PageSortingStep;
-import org.wikipedia.miner.extract.util.Languages;
-import org.wikipedia.miner.extract.util.Languages.Language;
-
 
 
 /**
@@ -55,7 +51,6 @@ public class DumpExtractor {
 
 	private static Logger logger = Logger.getLogger(DumpExtractor.class);
 
-
 	public static final String KEY_INPUT_FILE = "wm.inputDir" ;
 	public static final String KEY_OUTPUT_DIR = "wm.workingDir" ;
 	public static final String KEY_LANG_FILE = "wm.langFile" ;
@@ -66,15 +61,12 @@ public class DumpExtractor {
 	public static final String LOG_WEIRD_LABEL_COUNT = "wierdLabelCounts" ;
 	public static final String LOG_MEMORY_USE = "memoryUsage" ;
 
-
 	public static final String OUTPUT_SITEINFO = "final/siteInfo.xml" ;
 	public static final String OUTPUT_PROGRESS = "tempProgress.csv" ;
 	public static final String OUTPUT_TEMPSTATS = "tempStats.csv" ;
 	public static final String OUTPUT_STATS = "final/stats.csv" ;
 	
 	DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss") ;
-
-
 
 	public DumpExtractor(String[] args) throws Exception {
 
@@ -255,11 +247,13 @@ public class DumpExtractor {
 		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
-		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
+		/*LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep.) ;
 		ToolRunner.run(occurrencesStep, args);
 		
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		finalStep.run() ;
+		finalStep.run() ;*/
+		
+		System.out.println("Total labels: " + sensesStep.getTotalLabels());		
 		
 		return 0 ;
 	}

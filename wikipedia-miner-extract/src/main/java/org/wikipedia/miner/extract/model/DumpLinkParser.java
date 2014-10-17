@@ -28,14 +28,10 @@ public class DumpLinkParser {
 	public DumpLinkParser(Language lc, SiteInfo si) {
 		this.language = lc ;
 		this.siteInfo = si ;
-		
-		System.out.println("Language object: " + lc);
-		
+				
 		langPattern = Pattern.compile("([a-z\\-]+)\\:(.*)", Pattern.DOTALL) ;
 		
 		List<String> namespaces = new ArrayList<String>() ;
-
-		System.out.println("Site info namespace object: " + language.getNamespaceAliases());
 		
 		for (Namespace namespace:siteInfo.getNamespaces())
 			namespaces.add(namespace.getName()) ;
