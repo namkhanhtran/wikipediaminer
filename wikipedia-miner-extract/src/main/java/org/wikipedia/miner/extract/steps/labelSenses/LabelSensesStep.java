@@ -35,12 +35,19 @@ public class LabelSensesStep extends Step {
 
 	private static Logger logger = Logger.getLogger(LabelSensesStep.class) ;
 	
-	private PageSortingStep finalPageSummaryStep ;
+	// private PageSortingStep finalPageSummaryStep ;
+	private String sortedPageDirname;
+	
 	private Map<Counts,Long> counts ;
 	
-	public LabelSensesStep(Path workingDir, PageSortingStep finalPageSummaryStep) throws IOException {
+	/*public LabelSensesStep(Path workingDir, PageSortingStep finalPageSummaryStep) throws IOException {
 		super(workingDir);
 		this.finalPageSummaryStep = finalPageSummaryStep ;
+		
+	}*/
+	public LabelSensesStep(Path workingDir, String sortedPageDirname) throws IOException {
+		super(workingDir);
+		this.sortedPageDirname = sortedPageDirname;
 	}
 
 	@Override
@@ -64,7 +71,8 @@ public class LabelSensesStep extends Step {
 
 		job.setJobName("WM: label senses");
 		
-		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
+		//FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
+		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + sortedPageDirname + Path.SEPARATOR + "part-r-00000.avro");
 		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		
 		AvroJob.setInputKeySchema(job, Schema.create(Type.INT));

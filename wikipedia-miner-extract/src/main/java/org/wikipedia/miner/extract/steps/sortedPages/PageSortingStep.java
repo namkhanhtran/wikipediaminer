@@ -36,11 +36,17 @@ public class PageSortingStep extends Step {
 	private static Logger logger = Logger.getLogger(PageSortingStep.class) ;
 	
 	PageSummaryStep finalPageSummaryStep ;
+	// private String pageSummaryDirname;
 
 	public PageSortingStep(Path workingDir, PageSummaryStep finalPageSummaryStep) throws IOException {
 		super(workingDir);
 		this.finalPageSummaryStep = finalPageSummaryStep ;
 	}
+	/*public PageSortingStep(Path workingDir, String pageSummaryDirName) throws IOException {
+		super(workingDir);
+		// this.finalPageSummaryStep = finalPageSummaryStep ;
+		this.pageSummaryDirname = pageSummaryDirName;
+	}*/
 
 	@Override
 	public int run(String[] args) throws Exception {
@@ -63,6 +69,7 @@ public class PageSortingStep extends Step {
 		
 		
 		FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + finalPageSummaryStep.getDirName() + Path.SEPARATOR + "part-r-00000.avro");
+		// FileInputFormat.setInputPaths(job, getWorkingDir() + Path.SEPARATOR + pageSummaryDirname + Path.SEPARATOR + "part-r-00000.avro");
 		job.setInputFormatClass(AvroKeyValueInputFormat.class);
 		
 		AvroJob.setInputKeySchema(job, PageKey.getClassSchema());

@@ -204,7 +204,7 @@ public class DumpExtractor {
 		extractSiteInfo() ;
 
 		//extract basic page summaries
-		int summaryIteration = 0 ;
+		/*int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
 			
@@ -236,15 +236,16 @@ public class DumpExtractor {
 				break ;
 			else
 				depthIteration++ ;
-		}
+		}*/
 		
 		//gather label senses
-		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
+		// LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
+		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, args[5]) ;
 		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
-		PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
-		ToolRunner.run(primaryLabelStep, args);
+		// PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
+		// ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
 		/*LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep.) ;
