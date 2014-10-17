@@ -13,6 +13,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -98,15 +100,13 @@ public class LabelCache {
 			
 			Schema schema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
 			
-			DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> datumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(schema);
+			DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> datumReader = new GenericDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(schema);
 
 			FileReader<AvroKeyValue<CharSequence,LabelSenseList>> fileReader = DataFileReader.openReader(file, datumReader) ;
 
 			while (fileReader.hasNext()) {
 
-				AvroKeyValue<CharSequence,LabelSenseList> pair = fileReader.next();
-				
-				
+				AvroKeyValue<CharSequence,LabelSenseList> pair = new AvroKeyValue<CharSequence, LabelSenseList>((GenericRecord) fileReader.next());	
 				
 				CharSequence label = pair.getKey() ;
 				labels.put(label) ;
