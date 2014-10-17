@@ -98,6 +98,10 @@ public class PrimaryLabelStep extends Step {
 	
 	public static class MyMapper extends Mapper<AvroKey<CharSequence>, AvroValue<LabelSenseList>, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
 		
+		private final AvroKey<Integer> keyOut = new AvroKey<Integer>();
+		private final AvroValue<PrimaryLabels> valOut = new AvroValue<PrimaryLabels>();
+		private final PrimaryLabels l = new PrimaryLabels();
+ 		
 		@Override
 		public void map(AvroKey<CharSequence> pageKey, AvroValue<LabelSenseList> pageValue, Context context) throws IOException, InterruptedException {
 			
@@ -112,11 +116,17 @@ public class PrimaryLabelStep extends Step {
 			ArrayList<CharSequence> primaryLabels = new ArrayList<CharSequence>() ;
 			primaryLabels.add(label) ;
 			
-			context.write(new AvroKey<Integer>(firstSense.getId()), new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
+			keyOut.datum(firstSense.getId());
+			l.setLabels(primaryLabels);			
+			valOut.datum(l);
+			context.write(keyOut, valOut);
 		}
 	}
 	
 	public static class MyReducer extends Reducer<AvroKey<Integer>, AvroValue<PrimaryLabels>, AvroKey<Integer>, AvroValue<PrimaryLabels>>{
+		
+		private final PrimaryLabels l = new PrimaryLabels();
+		private final AvroValue<PrimaryLabels> valOut = new AvroValue<PrimaryLabels>(); 
 		
 		@Override
 		public void reduce(AvroKey<Integer> pageId, Iterable<AvroValue<PrimaryLabels>> partials,Context context) throws IOException, InterruptedException {
@@ -129,7 +139,9 @@ public class PrimaryLabelStep extends Step {
 				primaryLabels.addAll(clone.getLabels()) ;
 			}
 			
-			context.write(pageId, new AvroValue<PrimaryLabels>(new PrimaryLabels(primaryLabels)));
+			l.setLabels(primaryLabels);
+			valOut.datum(l);
+			context.write(pageId, valOut);
 		}
 	}
 	

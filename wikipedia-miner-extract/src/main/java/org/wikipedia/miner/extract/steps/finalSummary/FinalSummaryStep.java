@@ -115,12 +115,12 @@ public class FinalSummaryStep extends LocalStep {
 		super(workingDir);
 		this.conf = conf;
 		
-		this.pageSortingDir = new Path(workingDir.toString() + Path.SEPARATOR + pageSortingStep) ;
-		this.pageDepthDir = new Path(workingDir.toString() + Path.SEPARATOR + pageDepthStep);
-		this.primaryLabelDir = new Path(workingDir.toString() + Path.SEPARATOR + primaryLabelStep);
+		this.pageSortingDir = new Path(pageSortingStep) ;
+		this.pageDepthDir = new Path(pageDepthStep);
+		this.primaryLabelDir = new Path(primaryLabelStep);
 
-		this.labelSensesDir = new Path(workingDir.toString() + Path.SEPARATOR + labelSensesStep);
-		this.labelOccurrenceDir = new Path(workingDir.toString() + Path.SEPARATOR + labelOccurrenceStep);
+		this.labelSensesDir = new Path(labelSensesStep);
+		this.labelOccurrenceDir = new Path(labelOccurrenceStep);
 	}
 
 	@Override

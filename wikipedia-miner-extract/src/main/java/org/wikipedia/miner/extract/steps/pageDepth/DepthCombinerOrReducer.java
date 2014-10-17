@@ -14,6 +14,8 @@ public abstract class DepthCombinerOrReducer extends Reducer<AvroKey<Integer>, A
 
 	public enum Counts {unforwarded, withDepth,withoutDepth} ;
 	
+	private final PageDepthSummary pds = new PageDepthSummary();
+	private final AvroValue<PageDepthSummary> valOut = new AvroValue<PageDepthSummary>();
 	
 	public abstract boolean isReducer() ;
 	
@@ -70,8 +72,12 @@ public abstract class DepthCombinerOrReducer extends Reducer<AvroKey<Integer>, A
 				context.getCounter(Counts.unforwarded).increment(1);		
 		}	
 
-		//InitialDepthMapper.collect(pageId, new PageDepthSummary(minDepth, depthForwarded, childIds), context);	
-		context.write(pageId, new AvroValue<PageDepthSummary>(new PageDepthSummary(minDepth, depthForwarded, childIds)));
+		//InitialDepthMapper.collect(pageId, new PageDepthSummary(minDepth, depthForwarded, childIds), context);
+		pds.setDepth(minDepth);
+		pds.setChildIds(childIds);
+		pds.setDepthForwarded(depthForwarded);
+		valOut.datum(pds);
+		context.write(pageId, valOut);
 	}
 	
 	public static class DepthCombiner extends DepthCombinerOrReducer {

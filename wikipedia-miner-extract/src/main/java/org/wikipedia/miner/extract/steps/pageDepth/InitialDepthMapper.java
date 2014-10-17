@@ -29,7 +29,8 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 	private String rootCategoryTitle ;
 
-
+	private final AvroKey<Integer> keyOut = new AvroKey<Integer>();
+	private final AvroValue<PageDepthSummary> valOut = new AvroValue<PageDepthSummary>();
 	
 	@Override
 	public void setup(Context context) {
@@ -94,13 +95,15 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
 		if (rootCategoryTitle.equals(page.getTitle().toString())) {
 			depthSummary.setDepth(0) ;
-			shareDepth(depthSummary, context) ;
+			shareDepth(depthSummary, context, keyOut, valOut) ;
 		} 
 
-		context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDepthSummary>(depthSummary)) ;
+		keyOut.datum(page.getId());
+		valOut.datum(depthSummary);
+		context.write(keyOut,valOut) ;
 	}
 
-	public static void shareDepth(final PageDepthSummary page, final Context context) throws IOException, InterruptedException {
+	public static void shareDepth(final PageDepthSummary page, final Context context, AvroKey<Integer> keyOut, AvroValue<PageDepthSummary> valOut) throws IOException, InterruptedException {
 
 		if (page.getDepth() == null)
 			return ;
@@ -117,7 +120,9 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 			child.setChildIds(new ArrayList<Integer>());
 
 			try {
-				context.write(new AvroKey<Integer>(childId), new AvroValue<PageDepthSummary>(child)) ;
+				keyOut.datum(childId);
+				valOut.datum(child);
+				context.write(keyOut, valOut) ;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {

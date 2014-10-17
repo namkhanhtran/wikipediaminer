@@ -108,6 +108,9 @@ public class PageSortingStep extends Step {
 	
 	public static class MyMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDetail>, AvroKey<Integer>, AvroValue<PageDetail>>{
 		
+		private final AvroKey<Integer> keyOut = new AvroKey<Integer>();
+		private final AvroValue<PageDetail> valOut = new AvroValue<PageDetail>();
+		
 		@Override
 		public void map(AvroKey<PageKey> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 			
@@ -118,19 +121,24 @@ public class PageSortingStep extends Step {
 			page.setNamespace(key.getNamespace());
 			page.setTitle(key.getTitle());
 			
-			context.write(new AvroKey<Integer>(page.getId()), new AvroValue<PageDetail>(page));
+			keyOut.datum(page.getId());
+			valOut.datum(page);
+			context.write(keyOut, valOut);
 		}
 	}
 	
 	
 	public static class MyReducer extends Reducer<AvroKey<Integer>, AvroValue<PageDetail>, AvroKey<Integer>, AvroValue<PageDetail>>{
 		
+		private final AvroValue<PageDetail> valOut = new AvroValue<PageDetail>();
+
 		@Override
 		public void reduce(AvroKey<Integer> pageId, Iterable<AvroValue<PageDetail>> pages,Context context) throws IOException, InterruptedException {
 			
 			for (AvroValue<PageDetail> pageProxy:pages) {
 				PageDetail page = pageProxy.datum();
-				context.write(pageId, new AvroValue<PageDetail>(page));
+				valOut.datum(page);
+				context.write(pageId, valOut);
 			}
 		}
 	}

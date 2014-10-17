@@ -29,6 +29,8 @@ public abstract class CombinerOrReducer extends Reducer<
 	public abstract boolean isReducer() ;
 
 	private CharSequence[] debugTitles = {"Atheist","Atheism","Atheists","Athiest","People by religion"} ;
+	
+	private final AvroValue<PageDetail> valOut = new AvroValue<PageDetail>();
 
 	@Override
 	public void reduce(AvroKey<PageKey> key, Iterable<AvroValue<PageDetail>> pagePartials, Context context) throws IOException, InterruptedException {
@@ -194,7 +196,8 @@ public abstract class CombinerOrReducer extends Reducer<
 		if (debug)
 			logger.info("combined: " + combinedPage.toString());
 
-		context.write(key, new AvroValue<PageDetail>(combinedPage));
+		valOut.datum(combinedPage);
+		context.write(key, valOut);
 	}
 
 	private SortedMap<Integer,PageSummary> addToPageMap(List<PageSummary> pages, SortedMap<Integer,PageSummary> pageMap) {

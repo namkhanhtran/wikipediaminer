@@ -19,9 +19,8 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 	
 	public abstract boolean isReducer() ;
 	
-	
-	
-	
+	private final AvroValue<LabelSenseList> valOut = new AvroValue<LabelSenseList>();
+		
 	@Override
 	public void reduce(AvroKey<CharSequence> label, Iterable<AvroValue<LabelSenseList>> senseLists, Context context) throws IOException, InterruptedException {
 	
@@ -35,7 +34,6 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 			}
 		}
 		
-		
 		if (isReducer()) {
 			
 			if (allSenses.getSenses().size() > 1)
@@ -47,7 +45,8 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 			
 		}
 		
-		context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelSenseList>(allSenses));
+		valOut.datum(allSenses);
+		context.write(label, valOut);
 	}
 
 	public static class MyCombiner extends CombinerOrReducer {

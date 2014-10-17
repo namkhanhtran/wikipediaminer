@@ -21,6 +21,9 @@ import org.wikipedia.miner.extract.util.SiteInfo;
 
 public class MyMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, AvroKey<CharSequence>, AvroValue<LabelSenseList>> {
 
+	private final AvroKey<CharSequence> keyOut = new AvroKey<CharSequence>();
+	private final AvroValue<LabelSenseList> valOut = new AvroValue<LabelSenseList>();
+	
 	@Override
 	public void map(AvroKey<Integer> pageKey, AvroValue<PageDetail> pageValue, Context context) throws IOException, InterruptedException {
 		
@@ -90,7 +93,9 @@ public class MyMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDetail>, Av
 			s.setSenses(new ArrayList<LabelSense>()) ;
 			s.getSenses().add(e.getValue()) ;
 			
-			context.write(new AvroKey<CharSequence>(e.getKey()), new AvroValue<LabelSenseList>(s));
+			keyOut.datum(e.getKey());
+			valOut.datum(s);
+			context.write(keyOut, valOut);
 		}
 		
 	}

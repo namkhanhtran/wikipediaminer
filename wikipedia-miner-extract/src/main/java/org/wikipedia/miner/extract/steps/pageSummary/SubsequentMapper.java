@@ -14,6 +14,9 @@ import org.wikipedia.miner.extract.model.struct.PageSummary;
 
 public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDetail>, AvroKey<PageKey>, AvroValue<PageDetail>> {
 
+	private final AvroKey<PageKey> keyOut = new AvroKey<PageKey>();
+	private final AvroValue<PageDetail> valOut = new AvroValue<PageDetail>();
+	
 	@Override
 	public void map(AvroKey<PageKey> key, AvroValue<PageDetail> val, Context context) throws IOException, InterruptedException {
 		
@@ -43,7 +46,9 @@ public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDet
 					PageDetail redirectDetail = PageSummaryStep.buildEmptyPageDetail() ;
 					redirectDetail.setRedirectsTo(PageSummaryStep.clone(page.getRedirectsTo())) ;
 					
-					context.write(new AvroKey<PageKey>(redirectKey), new AvroValue<PageDetail>(redirectDetail));
+					keyOut.datum(redirectKey);
+					valOut.datum(redirectDetail);
+					context.write(keyOut, valOut);
 				}
 				
 				//and record that it has been backtracked
@@ -109,6 +114,8 @@ public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDet
 			page.setLabels(new HashMap<CharSequence,LabelSummary>()) ;
 			
 			//emit the details of the target that we have built up
+			keyOut.datum(targetKey);
+			valOut.datum(target);
 			context.write(new AvroKey<PageKey>(targetKey), new AvroValue<PageDetail>(target));
 			
 		} else {
@@ -123,6 +130,8 @@ public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDet
 				PageDetail redirectDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				redirectDetail.setRedirectsTo(new PageSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false));
 				
+				keyOut.datum(redirectKey);
+				valOut.datum(redirectDetail);
 				context.write(new AvroKey<PageKey>(redirectKey), new AvroValue<PageDetail>(redirectDetail));
 				
 				//and record that it has been forwarded
@@ -139,6 +148,8 @@ public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDet
 				PageDetail sourceDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				sourceDetail.getLinksOut().add(new LinkSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false, linkIn.getSentenceIndexes()));
 				
+				keyOut.datum(sourceKey);
+				valOut.datum(sourceDetail);
 				context.write(new AvroKey<PageKey>(sourceKey), new AvroValue<PageDetail>(sourceDetail));
 				
 				//and record that it has been forwarded
@@ -161,7 +172,9 @@ public class SubsequentMapper extends Mapper<AvroKey<PageKey>, AvroValue<PageDet
 				PageDetail childDetail = PageSummaryStep.buildEmptyPageDetail() ;
 				childDetail.getParentCategories().add(new PageSummary(page.getId(), pageKey.getTitle(), pageKey.getNamespace(), false));
 				
-				context.write(new AvroKey<PageKey>(childKey), new AvroValue<PageDetail>(childDetail));
+				keyOut.datum(childKey);
+				valOut.datum(childDetail);
+				context.write(keyOut, valOut);
 				
 				//and record that it has been forwarded
 				childCategory.setForwarded(true);

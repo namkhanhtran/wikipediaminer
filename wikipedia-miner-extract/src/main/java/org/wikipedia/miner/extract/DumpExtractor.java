@@ -149,9 +149,8 @@ public class DumpExtractor {
 
 	private void configure() throws Exception {
 
-		/*if (args.length != 6) 
+		if (args.length != 6) 
 			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
-         */
 
 		//check input file
 		inputFile = getPath(args[0]); 
@@ -207,7 +206,7 @@ public class DumpExtractor {
 		extractSiteInfo() ;
 
 		//extract basic page summaries
-		/*int summaryIteration = 0 ;
+		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
 			
@@ -242,23 +241,28 @@ public class DumpExtractor {
 		}
 		
 		//gather label senses
-		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep);		
+		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep.getDirName());		
 		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
-		// PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
-		// ToolRunner.run(primaryLabelStep, args);
+		PrimaryLabelStep primaryLabelStep = new PrimaryLabelStep(workingDir, sensesStep) ;
+		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
 		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
-		 */
+		 
 		
 		// hard-code to test
-		/* LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + args[6], 13890840) ;
-		ToolRunner.run(occurrencesStep, args); */
+		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 13890840) ;
+		ToolRunner.run(occurrencesStep, args);
 		
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		FinalSummaryStep finalStep = new FinalSummaryStep(workingDir, args[6], args[7], args[8], args[9], args[10], conf) ;
+		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+				workingDir.toString() + Path.SEPARATOR + sortingStep.getDirName(), 
+				workingDir.toString() + Path.SEPARATOR + depthStep.getDirName(), 
+				workingDir.toString() + Path.SEPARATOR +primaryLabelStep.getDirName(),
+				workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 
+				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(), sortingStep.getConf()) ;
 		finalStep.run() ;
 		
 		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		

@@ -432,13 +432,13 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 		return parent ;
 	}
 
-
-	
+	private final AvroKey<PageKey> k = new AvroKey<PageKey>();
+	private final AvroValue<PageDetail> v = new AvroValue<PageDetail>();
 
 	private void collect(PageKey key, PageDetail value, Context context) throws IOException, InterruptedException {
 
-		AvroKey<PageKey> k = new AvroKey<PageKey>(key) ;
-		AvroValue<PageDetail> v = new AvroValue<PageDetail>(value) ;
+		k.datum(key) ;
+		v.datum(value) ;
 
 		context.write(k,v) ;
 	}

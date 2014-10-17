@@ -11,6 +11,8 @@ import org.wikipedia.miner.extract.model.struct.PageDepthSummary;
 
 public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<PageDepthSummary>, AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 
+	private final AvroValue<PageDepthSummary> valOut = new AvroValue<PageDepthSummary>();
+	private final AvroKey<Integer> keyOut = new AvroKey<Integer>();
 	
 	@Override
 	public void map(AvroKey<Integer> pageKey, AvroValue<PageDepthSummary> pageValue,Context context) throws IOException, InterruptedException {
@@ -30,11 +32,12 @@ public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<Pa
 			return ;
 		}
 	
-		shareDepth(depthSummary, context) ;		
-		context.write(pageKey, new AvroValue<PageDepthSummary>(depthSummary));
+		shareDepth(depthSummary, context, keyOut, valOut) ;
+		valOut.datum(depthSummary);
+		context.write(pageKey, valOut);
 	}
 	
-	public static void shareDepth(final PageDepthSummary page, final Context context) throws IOException, InterruptedException {
+	public static void shareDepth(final PageDepthSummary page, final Context context,  AvroKey<Integer> keyOut,  AvroValue<PageDepthSummary> valOut) throws IOException, InterruptedException {
 
 		if (page.getDepth() == null)
 			return ;
@@ -51,7 +54,9 @@ public class SubsequentDepthMapper extends Mapper<AvroKey<Integer>, AvroValue<Pa
 			child.setChildIds(new ArrayList<Integer>());
 
 			try {
-				context.write(new AvroKey<Integer>(childId), new AvroValue<PageDepthSummary>(child)) ;
+				keyOut.datum(childId);
+				valOut.datum(child);
+				context.write(keyOut, valOut) ;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
