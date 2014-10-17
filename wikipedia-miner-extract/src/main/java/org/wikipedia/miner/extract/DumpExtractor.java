@@ -146,9 +146,9 @@ public class DumpExtractor {
 
 	private void configure() throws Exception {
 
-		if (args.length != 6) 
+		/*if (args.length != 6) 
 			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
-
+         */
 
 		//check input file
 		inputFile = getPath(args[0]); 
