@@ -13,10 +13,13 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 	public enum Counts {falsePositives, truePositives} ;
 	
 	public abstract boolean isReducer() ;
+	
+	private final LabelOccurrences allOccurrences = new LabelOccurrences(0,0,0,0) ;
+	private final AvroValue<LabelOccurrences> valOut = new AvroValue<LabelOccurrences>();
 		
 	public void reduce(AvroKey<CharSequence> label, Iterable<AvroKey<LabelOccurrences>> partials, Context context) throws InterruptedException, IOException {
 	
-		LabelOccurrences allOccurrences = new LabelOccurrences(0,0,0,0) ;
+		// LabelOccurrences allOccurrences = new LabelOccurrences(0,0,0,0) ;
 		
 		for (AvroKey<LabelOccurrences> partialProxy:partials) {
 			LabelOccurrences partial = partialProxy.datum();
@@ -36,7 +39,9 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 			}
 		}
 
-		context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelOccurrences>(allOccurrences));
+		valOut.datum(allOccurrences);
+		// context.write(new AvroKey<CharSequence>(label.toString()), new AvroValue<LabelOccurrences>(allOccurrences));
+		context.write(label, new AvroValue<LabelOccurrences>(allOccurrences));
 	}
 
 	public static class MyCombiner extends CombinerOrReducer {

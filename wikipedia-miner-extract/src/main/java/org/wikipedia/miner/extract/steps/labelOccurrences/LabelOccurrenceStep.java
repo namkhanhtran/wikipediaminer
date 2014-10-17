@@ -1,5 +1,7 @@
 package org.wikipedia.miner.extract.steps.labelOccurrences;
 
+import gnu.trove.map.hash.TObjectLongHashMap;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +36,8 @@ public class LabelOccurrenceStep extends Step{
 	
 	public static final String KEY_TOTAL_LABELS = "wm.totalLabels" ;
 
-	private Map<Counts,Long> counts ;
+	// private Map<Counts,Long> counts ;
+	private TObjectLongHashMap<Counts> counts;
 	
 	private Path senseDir;
 	private long totalLabel;
@@ -141,11 +144,17 @@ public class LabelOccurrenceStep extends Step{
 			
 			out.writeUTF(c.name()) ;
 			
-			Long count = counts.get(c) ;
+			/* Long count = counts.get(c) ;			
 			if (count != null)
 				out.writeLong(count) ;
 			else
-				out.writeLong(0L) ;
+				out.writeLong(0L) ; */
+			
+			
+			if (counts.containsKey(c)) {
+				long count = counts.get(c);
+				out.writeLong(count);
+			} else out.writeLong(0L);
 		}
 		
 		out.close();
@@ -153,7 +162,8 @@ public class LabelOccurrenceStep extends Step{
 	
 	private void loadCounts() throws IOException {
 		
-		counts = new HashMap<Counts,Long>() ;
+		// counts = new HashMap<Counts,Long>() ;
+		counts = new TObjectLongHashMap<Counts>();
 		
 		FSDataInputStream in = getHdfs().open(getUnforwardedCountsPath());
 		
@@ -176,7 +186,8 @@ public class LabelOccurrenceStep extends Step{
 		
 		super.finish(runningJob) ;
 	
-		counts = new HashMap<Counts,Long>() ;
+		// counts = new HashMap<Counts,Long>() ;
+		counts = new TObjectLongHashMap<Counts>();
 
 		for (Counts c:Counts.values()) {
 			
