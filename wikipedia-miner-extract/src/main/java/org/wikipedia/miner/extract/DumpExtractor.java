@@ -240,7 +240,7 @@ public class DumpExtractor {
 		
 		//gather label senses
 		// LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
-		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, args[5]) ;
+		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, args[6]) ;
 		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
