@@ -17,7 +17,6 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.io.DatumReader;
-import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.log4j.Logger;
@@ -82,14 +81,9 @@ public class LabelCache {
 		
 		labels = BloomFilter.create(Funnels.unencodedCharsFunnel(),totalLabels, falsePositiveProbability) ;
 		int labelsInserted = 0 ;
-		
-		
-		
-		
+			
 		ProgressTracker tracker = new ProgressTracker(totalLabels, "Loading labels", getClass()) ;
 		
-		
-
 		for (Path path:paths) {
 			
 			logger.info("Caching labels from " + path);
@@ -99,9 +93,7 @@ public class LabelCache {
 			File file = new File(path.toString()) ;
 			
 			Schema schema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
-			
 			DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> datumReader = new GenericDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(schema);
-
 			FileReader<AvroKeyValue<CharSequence,LabelSenseList>> fileReader = DataFileReader.openReader(file, datumReader) ;
 
 			while (fileReader.hasNext()) {

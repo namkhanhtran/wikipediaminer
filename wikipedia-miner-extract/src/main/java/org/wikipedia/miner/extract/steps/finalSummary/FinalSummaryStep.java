@@ -64,13 +64,21 @@ public class FinalSummaryStep extends LocalStep {
 
 	private static Logger logger = Logger.getLogger(FinalSummaryStep.class) ;
 	
-	private PageSortingStep pageSortingStep ;
+	/*private PageSortingStep pageSortingStep ;
 	private PageDepthStep pageDepthStep ;
 	private PrimaryLabelStep primaryLabelStep ;
 	private Configuration conf;
 	
 	private LabelSensesStep labelSensesStep ;
-	private LabelOccurrenceStep labelOccurrenceStep ;
+	private LabelOccurrenceStep labelOccurrenceStep ;*/
+	
+	private Path pageSortingDir;
+	private Path pageDepthDir;
+	private Path primaryLabelDir;
+	private Path labelSensesDir;
+	private Path labelOccurrenceDir;
+	
+	private Configuration conf;
 
 	private Comparator<DbLabelForPage> labelComparator = new Comparator<DbLabelForPage>() {
 
@@ -92,7 +100,7 @@ public class FinalSummaryStep extends LocalStep {
 
 
 
-	public FinalSummaryStep(Path workingDir, PageSortingStep pageSortingStep, PageDepthStep pageDepthStep, PrimaryLabelStep primaryLabelStep, LabelSensesStep labelSensesStep, LabelOccurrenceStep labelOccurrenceStep) throws IOException {
+	/*public FinalSummaryStep(Path workingDir, PageSortingStep pageSortingStep, PageDepthStep pageDepthStep, PrimaryLabelStep primaryLabelStep, LabelSensesStep labelSensesStep, LabelOccurrenceStep labelOccurrenceStep) throws IOException {
 		super(workingDir);
 		this.conf = labelOccurrenceStep.getConf();
 		this.pageSortingStep = pageSortingStep ;
@@ -101,6 +109,18 @@ public class FinalSummaryStep extends LocalStep {
 
 		this.labelSensesStep = labelSensesStep ;
 		this.labelOccurrenceStep = labelOccurrenceStep ;
+	}*/
+	
+	public FinalSummaryStep(Path workingDir, String pageSortingStep, String pageDepthStep, String primaryLabelStep, String labelSensesStep, String labelOccurrenceStep, Configuration conf) throws IOException {
+		super(workingDir);
+		this.conf = conf;
+		
+		this.pageSortingDir = new Path(workingDir.toString() + Path.SEPARATOR + pageSortingStep) ;
+		this.pageDepthDir = new Path(workingDir.toString() + Path.SEPARATOR + pageDepthStep);
+		this.primaryLabelDir = new Path(workingDir.toString() + Path.SEPARATOR + primaryLabelStep);
+
+		this.labelSensesDir = new Path(workingDir.toString() + Path.SEPARATOR + labelSensesStep);
+		this.labelOccurrenceDir = new Path(workingDir.toString() + Path.SEPARATOR + labelOccurrenceStep);
 	}
 
 	@Override
@@ -144,7 +164,7 @@ public class FinalSummaryStep extends LocalStep {
 		BufferedWriter sentenceSplitsWriter = createWriter("sentenceSplits.csv") ;
 
 
-		Path pageDetailPath = getMainAvroResultPath(pageSortingStep) ;
+		Path pageDetailPath = getMainAvroResultPath(pageSortingDir) ;
 		SeekableInput pageDetailInput = new FsInput(pageDetailPath, conf);
 
 		//Schema pageDetailSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()) ;
@@ -153,7 +173,7 @@ public class FinalSummaryStep extends LocalStep {
 		DatumReader<AvroKeyValue<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PageDetail>>(pageDetailSchema);
 		FileReader<AvroKeyValue<Integer,PageDetail>> pageDetailReader = DataFileReader.openReader(pageDetailInput, pageDetailDatumReader) ;
 		
-		Path pageDepthsPath = getMainAvroResultPath(pageDepthStep) ;
+		Path pageDepthsPath = getMainAvroResultPath(pageDepthDir) ;
 		SeekableInput pageDepthsInput = new FsInput(pageDepthsPath, conf);
 
 		//Schema pageDepthsSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
@@ -163,7 +183,7 @@ public class FinalSummaryStep extends LocalStep {
 		FileReader<AvroKeyValue<Integer,PageDepthSummary>> pageDepthsReader = DataFileReader.openReader(pageDepthsInput, pageDepthsDatumReader) ;
 		
 		
-		Path primaryLabelPath = getMainAvroResultPath(primaryLabelStep) ;
+		Path primaryLabelPath = getMainAvroResultPath(primaryLabelDir) ;
 		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, new Configuration());
 
 		//Schema primaryLabelSchema = Pair.getPairSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
@@ -269,10 +289,6 @@ public class FinalSummaryStep extends LocalStep {
 
 			}
 
-
-
-
-
 		}
 
 
@@ -299,7 +315,7 @@ public class FinalSummaryStep extends LocalStep {
 
 		BufferedWriter labelWriter = createWriter("label.csv") ;
 
-		Path labelSensesPath = getMainAvroResultPath(labelSensesStep) ;
+		Path labelSensesPath = getMainAvroResultPath(labelSensesDir) ;
 		SeekableInput labelSensesInput = new FsInput(labelSensesPath, new Configuration());
 
 		//Schema labelSensesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
@@ -308,7 +324,7 @@ public class FinalSummaryStep extends LocalStep {
 		DatumReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelSenseList>>(labelSensesSchema);
 		FileReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesReader = DataFileReader.openReader(labelSensesInput, labelSensesDatumReader) ;
 
-		Path labelOccurrencesPath = getMainAvroResultPath(labelOccurrenceStep) ;
+		Path labelOccurrencesPath = getMainAvroResultPath(labelOccurrenceDir) ;
 		SeekableInput labelOccurrencesInput = new FsInput(labelOccurrencesPath, new Configuration());
 
 		//Schema labelOccurrencesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
@@ -511,7 +527,7 @@ public class FinalSummaryStep extends LocalStep {
 		return new BufferedWriter(streamWriter) ;
 	}
 
-	private Path getMainAvroResultPath(Step step) throws IOException {
+	/*private Path getMainAvroResultPath(Step step) throws IOException {
 
 		FileSystem fs = step.getDir().getFileSystem(step.getConf()) ;
 
@@ -528,7 +544,24 @@ public class FinalSummaryStep extends LocalStep {
 			throw new IOException("Too many result files (so too many reducers) in " + step.getDir()) ;
 
 		return fileStatuses[0].getPath() ;
+	}*/
+	
+	private Path getMainAvroResultPath(Path stepDir) throws IOException {
+
+		FileSystem fs = stepDir.getFileSystem(conf) ;
+
+		FileStatus[] fileStatuses = fs.listStatus(stepDir, new PathFilter() {
+			public boolean accept(Path path) {				
+				return path.getName().startsWith("part-") ;
+			}
+		}) ;
+
+		if (fileStatuses.length == 0)
+			throw new IOException("Could not locate main result file in " + stepDir) ;
+
+		if (fileStatuses.length > 1)
+			throw new IOException("Too many result files (so too many reducers) in " + stepDir) ;
+
+		return fileStatuses[0].getPath() ;
 	}
-
-
 }
