@@ -236,11 +236,10 @@ public class DumpExtractor {
 				break ;
 			else
 				depthIteration++ ;
-		}*/
+		}
 		
 		//gather label senses
-		// LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep) ;
-		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, args[6]) ;
+		LabelSensesStep sensesStep = new LabelSensesStep(workingDir, sortingStep);		
 		ToolRunner.run(sensesStep, args);
 		
 		//gather primary labels
@@ -248,13 +247,17 @@ public class DumpExtractor {
 		// ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
-		/*LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep.) ;
+		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
+		 */
+		
+		// hard-code to test
+		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + args[6], 13890840) ;
 		ToolRunner.run(occurrencesStep, args);
 		
-		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
+		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		finalStep.run() ;*/
 		
-		System.out.println("Total labels: " + sensesStep.getTotalLabels());		
+		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		
 		
 		return 0 ;
 	}
