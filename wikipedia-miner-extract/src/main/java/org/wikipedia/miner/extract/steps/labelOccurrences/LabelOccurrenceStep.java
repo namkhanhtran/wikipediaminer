@@ -36,7 +36,7 @@ public class LabelOccurrenceStep extends Step{
 
 	private Map<Counts,Long> counts ;
 	
-	private String senseDirName;
+	private Path senseDir;
 	private long totalLabel;
 	// private LabelSensesStep sensesStep ;
 	
@@ -44,7 +44,7 @@ public class LabelOccurrenceStep extends Step{
 		super(workingDir);
 		
 		// this.sensesStep = sensesStep ;
-		this.senseDirName = senseDir;
+		this.senseDir = new Path(senseDir);
 		this.totalLabel = totalLabel;
 	}
 
