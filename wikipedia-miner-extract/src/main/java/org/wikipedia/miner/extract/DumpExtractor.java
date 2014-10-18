@@ -270,7 +270,7 @@ public class DumpExtractor {
 				workingDir.toString() + Path.SEPARATOR + "pageDepth_9", 
 				workingDir.toString() + Path.SEPARATOR + "primaryLabels",
 				workingDir.toString() + Path.SEPARATOR + "labelSenses", 
-				workingDir.toString() + Path.SEPARATOR + "labelOccurences", conf);
+				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", conf);
 		finalStep.run() ;
 		
 		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		
