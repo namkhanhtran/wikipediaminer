@@ -89,6 +89,4 @@ public abstract class CombinerOrReducer extends Reducer<AvroKey<CharSequence>, A
 		}
 		
 	}
-	
-	
 }

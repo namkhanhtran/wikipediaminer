@@ -18,11 +18,11 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.hadoop.util.AvroCharSequenceComparator;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.mapred.FsInput;
-import org.apache.avro.mapreduce.AvroKeyValueRecordReader;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -201,12 +201,12 @@ public class FinalSummaryStep extends LocalStep {
 		AvroKeyValue<Integer,PrimaryLabels> primaryLabelPair = null ;
 		while (pageDetailReader.hasNext()) {
 
-			detailPair = pageDetailReader.next();
+			detailPair = new AvroKeyValue<Integer, PageDetail>((GenericRecord) pageDetailReader.next());
 			PageDetail detail = detailPair.getValue() ;
 
 			//identify page depth summary, if there is one
 			while ((depthPair == null || depthPair.getKey().intValue() < detailPair.getKey().intValue()) && pageDepthsReader.hasNext())
-				depthPair = pageDepthsReader.next();
+				depthPair = new AvroKeyValue<Integer, PageDepthSummary>((GenericRecord) pageDepthsReader.next());
 			
 			PageDepthSummary depth = null ;
 			if (depthPair.getKey().intValue() == (detailPair.getKey().intValue()))
@@ -214,8 +214,8 @@ public class FinalSummaryStep extends LocalStep {
 			
 			//identify primary label summary, if there is one
 			while ((primaryLabelPair == null || primaryLabelPair.getKey().intValue() < detailPair.getKey().intValue()) && primaryLabelReader.hasNext())
-				primaryLabelPair = primaryLabelReader.next();
-
+				primaryLabelPair = new AvroKeyValue<Integer, PrimaryLabels>((GenericRecord) primaryLabelReader.next());
+			
 			Set<CharSequence> primaryLabels = new HashSet<CharSequence>() ;
 			if (primaryLabelPair.getKey().equals(detailPair.getKey())) 
 				primaryLabels.addAll(primaryLabelPair.getValue().getLabels()) ;
@@ -337,7 +337,7 @@ public class FinalSummaryStep extends LocalStep {
 		AvroKeyValue<CharSequence,LabelOccurrences> occurrencesPair = null ;
 		while (labelSensesReader.hasNext()) {
 
-			sensesPair = labelSensesReader.next();
+			sensesPair = new AvroKeyValue<CharSequence, LabelSenseList>((GenericRecord) labelSensesReader.next());
 			CharSequence label = sensesPair.getKey() ;
 			LabelSenseList senses = sensesPair.getValue() ;
 

@@ -19,7 +19,7 @@ public abstract class Step extends Configured implements Tool {
 	private FileSystem hdfs ;
 	
 	public Step(Path workingDir) throws IOException {
-		
+				
 		this.workingDir = workingDir ;
 		
 		Configuration conf = new Configuration();
