@@ -94,7 +94,7 @@ public class AvroFormatConverter extends Configured implements Tool {
 				throws IOException, InterruptedException {
 			String[] kvs = getKeyValue(keyObj, valueObj);
 			
-			JsonDecoder keyDecoder = decoderFactory.jsonDecoder(keySchema, kvs[0]);
+			JsonDecoder keyDecoder = decoderFactory.jsonDecoder(keySchema, "\"" + kvs[0] + "\"");
 			KEYOUT keyData = keyReader.read(null, keyDecoder);
 			keyOut.datum(keyData);
 			
