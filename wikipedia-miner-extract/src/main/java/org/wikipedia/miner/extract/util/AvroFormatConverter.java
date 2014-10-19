@@ -93,6 +93,7 @@ public class AvroFormatConverter extends Configured implements Tool {
 		protected void map(KEYIN keyObj, Text valueObj, Context context)
 				throws IOException, InterruptedException {
 			String[] kvs = getKeyValue(keyObj, valueObj);
+			LOG.info(kvs[0] + "\t" + kvs[1]);
 			
 			JsonDecoder keyDecoder = decoderFactory.jsonDecoder(keySchema, "\"" + kvs[0] + "\"");
 			KEYOUT keyData = keyReader.read(null, keyDecoder);
