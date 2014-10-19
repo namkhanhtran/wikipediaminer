@@ -107,10 +107,11 @@ public class AvroFormatConverter extends Configured implements Tool {
 		}	
 		
 		private String[] getKeyValue(KEYIN key, Text value) {
-			String[] res = new String[2];
+			String[] res = new String[2];			
 			String k,v;
 			if (textInputFormatted) {
 				v = value.toString();
+				LOG.info(v);
 				int i = v.indexOf('\t');
 				k = v.substring(0, i);
 				v = v.substring(i + 1);
