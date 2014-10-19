@@ -251,12 +251,12 @@ public class DumpExtractor {
 		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
-		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
+		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;*/
 		 
 		
 		// hard-code to test
-		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 13890840) ;
-		ToolRunner.run(occurrencesStep, args);*/
+		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 13890840) ;
+		ToolRunner.run(occurrencesStep, args);
 		
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
