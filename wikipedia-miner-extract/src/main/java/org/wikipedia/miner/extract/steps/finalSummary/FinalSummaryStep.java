@@ -562,6 +562,6 @@ public class FinalSummaryStep extends LocalStep {
 		if (fileStatuses.length > 1)
 			throw new IOException("Too many result files (so too many reducers) in " + stepDir) ;
 
-		return fileStatuses[0].getPath() ;
+		return new Path(fileStatuses[0].getPath().getName()) ;
 	}
 }
