@@ -111,7 +111,7 @@ public class AvroFormatConverter extends Configured implements Tool {
 			String k,v;
 			if (textInputFormatted) {
 				v = value.toString();
-				LOG.info(v);
+				System.out.println(v);
 				int i = v.indexOf('\t');
 				k = v.substring(0, i);
 				v = v.substring(i + 1);
