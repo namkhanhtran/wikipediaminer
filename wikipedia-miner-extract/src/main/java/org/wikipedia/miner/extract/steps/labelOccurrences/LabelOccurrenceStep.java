@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.mapreduce.AvroJob;
+import org.apache.avro.mapreduce.AvroKeyValueOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -111,6 +112,7 @@ public class LabelOccurrenceStep extends Step{
 		AvroJob.setMapOutputValueSchema(job,LabelOccurrences.getClassSchema());
 		AvroJob.setOutputKeySchema(job, Schema.create(Type.STRING));
 		AvroJob.setOutputValueSchema(job,LabelOccurrences.getClassSchema());
+		job.setOutputFormatClass(AvroKeyValueOutputFormat.class);
 		
 		FileOutputFormat.setOutputPath(job, getDir());
 

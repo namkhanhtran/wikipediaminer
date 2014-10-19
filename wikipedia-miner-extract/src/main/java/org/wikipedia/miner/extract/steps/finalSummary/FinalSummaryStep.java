@@ -22,6 +22,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.hadoop.util.AvroCharSequenceComparator;
 import org.apache.avro.io.DatumReader;
+import org.apache.avro.mapred.AvroKey;
+import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapred.FsInput;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.conf.Configuration;
@@ -317,6 +319,7 @@ public class FinalSummaryStep extends LocalStep {
 		//DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
 		Schema labelOccurrencesSchema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
 		DatumReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
+				
  		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
 
 		AvroKeyValue<CharSequence,LabelSenseList> sensesPair = null ;
@@ -326,10 +329,9 @@ public class FinalSummaryStep extends LocalStep {
 			sensesPair = new AvroKeyValue<CharSequence, LabelSenseList>((GenericRecord) labelSensesReader.next());
 			CharSequence label = sensesPair.getKey() ;
 			LabelSenseList senses = sensesPair.getValue() ;
-
-
+			
 			while ((occurrencesPair == null || labelTextComparator.compare(occurrencesPair.getKey(), sensesPair.getKey()) < 0 ) && labelOccurrencesReader.hasNext())
-				occurrencesPair = labelOccurrencesReader.next();
+				occurrencesPair = new AvroKeyValue<CharSequence, LabelOccurrences>((GenericRecord) labelOccurrencesReader.next());
 
 			LabelOccurrences occurrences = null ;
 			if (labelTextComparator.compare(occurrencesPair.getKey(), sensesPair.getKey()) == 0)
