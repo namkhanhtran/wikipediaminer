@@ -2,6 +2,7 @@ package org.wikipedia.miner.extract.steps.finalSummary;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.hadoop.io.AvroKeyValue;
 import org.apache.avro.hadoop.util.AvroCharSequenceComparator;
 import org.apache.avro.io.DatumReader;
-import org.apache.avro.mapred.FsInput;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -165,7 +165,7 @@ public class FinalSummaryStep extends LocalStep {
 
 
 		Path pageDetailPath = getMainAvroResultPath(pageSortingDir) ;
-		SeekableInput pageDetailInput = new FsInput(pageDetailPath, conf);
+		File pageDetailInput = new File(pageDetailPath.toString());
 
 		//Schema pageDetailSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDetail.getClassSchema()) ;
 		// DatumReader<Pair<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<Pair<Integer,PageDetail>>(pageDetailSchema);
@@ -174,7 +174,7 @@ public class FinalSummaryStep extends LocalStep {
 		FileReader<AvroKeyValue<Integer,PageDetail>> pageDetailReader = DataFileReader.openReader(pageDetailInput, pageDetailDatumReader) ;
 		
 		Path pageDepthsPath = getMainAvroResultPath(pageDepthDir) ;
-		SeekableInput pageDepthsInput = new FsInput(pageDepthsPath, conf);
+		File pageDepthsInput = new File(pageDepthsPath.toString());
 
 		//Schema pageDepthsSchema = Pair.getPairSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
 		//DatumReader<Pair<Integer,PageDepthSummary>> pageDepthsDatumReader = new SpecificDatumReader<Pair<Integer,PageDepthSummary>>(pageDepthsSchema);
@@ -184,7 +184,7 @@ public class FinalSummaryStep extends LocalStep {
 		
 		
 		Path primaryLabelPath = getMainAvroResultPath(primaryLabelDir) ;
-		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, new Configuration());
+		File primaryLabelInput = new File(primaryLabelPath.toString());
 
 		//Schema primaryLabelSchema = Pair.getPairSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
 		//DatumReader<Pair<Integer,PrimaryLabels>> primaryLabelDatumReader = new SpecificDatumReader<Pair<Integer,PrimaryLabels>>(primaryLabelSchema);
@@ -316,7 +316,7 @@ public class FinalSummaryStep extends LocalStep {
 		BufferedWriter labelWriter = createWriter("label.csv") ;
 
 		Path labelSensesPath = getMainAvroResultPath(labelSensesDir) ;
-		SeekableInput labelSensesInput = new FsInput(labelSensesPath, new Configuration());
+		File labelSensesInput = new File(labelSensesPath.toString());
 
 		//Schema labelSensesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
 		//DatumReader<Pair<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelSenseList>>(labelSensesSchema);
@@ -325,7 +325,7 @@ public class FinalSummaryStep extends LocalStep {
 		FileReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesReader = DataFileReader.openReader(labelSensesInput, labelSensesDatumReader) ;
 
 		Path labelOccurrencesPath = getMainAvroResultPath(labelOccurrenceDir) ;
-		SeekableInput labelOccurrencesInput = new FsInput(labelOccurrencesPath, new Configuration());
+		File labelOccurrencesInput = new File(labelOccurrencesPath.toString());
 
 		//Schema labelOccurrencesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
 		//DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
