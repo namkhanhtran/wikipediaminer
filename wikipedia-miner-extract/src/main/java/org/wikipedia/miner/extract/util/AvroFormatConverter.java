@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
@@ -264,16 +265,15 @@ public class AvroFormatConverter extends Configured implements Tool {
 	private static Schema inferSchema(String schemaName) {
 		
 		// Try loading from standard schemas first
-		Class schemaClass = Schema.class;
 		try {
-			Field schemaField = schemaClass.getDeclaredField(schemaName);
-			return (Schema) schemaField.get(null);
+			Type schemaType = Schema.Type.valueOf(schemaName);
+			return Schema.create(schemaType);
 		} 
 		
 		// Nothing found in standard schemas, go for avro-tools generated classes
 		catch (Exception e) {
 		    try {
-				schemaClass = Class.forName(schemaName);
+				Class schemaClass = Class.forName(schemaName);
 				Field schemaField = schemaClass.getDeclaredField("SCHEMA$");
 			    return (Schema) schemaField.get(null);
 			} catch (Exception e1) {
