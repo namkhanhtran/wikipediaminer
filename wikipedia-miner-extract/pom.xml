@@ -53,6 +53,12 @@
 			<artifactId>guava</artifactId>
 			<version>16.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>tuan4j</groupId>
+			<artifactId>tuan4j-distributed</artifactId>
+			<version>0.2-beta1</version>
+		</dependency>
 
 		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-core</artifactId> 
 			<version>1.2.0</version> <scope>provided</scope> </dependency> -->
