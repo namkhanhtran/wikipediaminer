@@ -51,12 +51,6 @@ import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.model.struct.PrimaryLabels;
 import org.wikipedia.miner.extract.steps.LocalStep;
-import org.wikipedia.miner.extract.steps.Step;
-import org.wikipedia.miner.extract.steps.labelOccurrences.LabelOccurrenceStep;
-import org.wikipedia.miner.extract.steps.labelSenses.LabelSensesStep;
-import org.wikipedia.miner.extract.steps.pageDepth.PageDepthStep;
-import org.wikipedia.miner.extract.steps.primaryLabel.PrimaryLabelStep;
-import org.wikipedia.miner.extract.steps.sortedPages.PageSortingStep;
 import org.wikipedia.miner.extract.util.SiteInfo;
 import org.wikipedia.miner.model.Page.PageType;
 
@@ -184,7 +178,7 @@ public class FinalSummaryStep extends LocalStep {
 		
 		
 		Path primaryLabelPath = getMainAvroResultPath(primaryLabelDir) ;
-		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, new Configuration());
+		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, conf);
 
 		//Schema primaryLabelSchema = Pair.getPairSchema(Schema.create(Type.INT),PrimaryLabels.getClassSchema()) ;
 		//DatumReader<Pair<Integer,PrimaryLabels>> primaryLabelDatumReader = new SpecificDatumReader<Pair<Integer,PrimaryLabels>>(primaryLabelSchema);
@@ -219,12 +213,6 @@ public class FinalSummaryStep extends LocalStep {
 			Set<CharSequence> primaryLabels = new HashSet<CharSequence>() ;
 			if (primaryLabelPair.getKey().equals(detailPair.getKey())) 
 				primaryLabels.addAll(primaryLabelPair.getValue().getLabels()) ;
-			
-
-			
-
-			
-			
 			
 			//now we definitely have a page. If we have a depth, then it is synchonized with page
 
@@ -282,8 +270,6 @@ public class FinalSummaryStep extends LocalStep {
 
 				} else {
 
-
-
 					//TODO: oops, no clean way of dealing with category redirects
 				}
 
@@ -316,7 +302,7 @@ public class FinalSummaryStep extends LocalStep {
 		BufferedWriter labelWriter = createWriter("label.csv") ;
 
 		Path labelSensesPath = getMainAvroResultPath(labelSensesDir) ;
-		SeekableInput labelSensesInput = new FsInput(labelSensesPath, new Configuration());
+		SeekableInput labelSensesInput = new FsInput(labelSensesPath, conf);
 
 		//Schema labelSensesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelSenseList.getClassSchema()) ;
 		//DatumReader<Pair<CharSequence,LabelSenseList>> labelSensesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelSenseList>>(labelSensesSchema);
@@ -325,13 +311,13 @@ public class FinalSummaryStep extends LocalStep {
 		FileReader<AvroKeyValue<CharSequence,LabelSenseList>> labelSensesReader = DataFileReader.openReader(labelSensesInput, labelSensesDatumReader) ;
 
 		Path labelOccurrencesPath = getMainAvroResultPath(labelOccurrenceDir) ;
-		SeekableInput labelOccurrencesInput = new FsInput(labelOccurrencesPath, new Configuration());
+		SeekableInput labelOccurrencesInput = new FsInput(labelOccurrencesPath, conf);
 
 		//Schema labelOccurrencesSchema = Pair.getPairSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
 		//DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
 		Schema labelOccurrencesSchema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
 		DatumReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
-		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
+ 		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
 
 		AvroKeyValue<CharSequence,LabelSenseList> sensesPair = null ;
 		AvroKeyValue<CharSequence,LabelOccurrences> occurrencesPair = null ;
