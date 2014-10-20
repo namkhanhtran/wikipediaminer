@@ -54,12 +54,6 @@
 			<version>16.0</version>
 		</dependency>
 		
-		<dependency>
-			<groupId>tuan4j</groupId>
-			<artifactId>tuan4j-distributed</artifactId>
-			<version>0.2-beta1</version>
-		</dependency>
-
 		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-core</artifactId> 
 			<version>1.2.0</version> <scope>provided</scope> </dependency> -->
 		<dependency>
@@ -256,11 +250,6 @@
 		<repository>
 			<id>cloudera-avro175</id>
 			<url>https://repository.cloudera.com/artifactory/repo/org/apache/avro/avro-maven-plugin/1.7.5-cdh5.1.0/</url>
-		</repository>
-		<repository>
-			<id>antoine-tran-github-releases</id>
-			<name>Tuan Tran's Personal Repository for Maven</name>
-			<url>https://raw.github.com/antoine-tran/maven-repo/master/releases</url>
 		</repository>
 	</repositories>
 
