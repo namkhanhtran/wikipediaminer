@@ -25,7 +25,7 @@ public class SiteInfo {
 	public static final int FILE_KEY = 6 ;
 	public static final int TEMPLATE_KEY = 10 ;
 	public static final int CATEGORY_KEY = 14 ;
-	
+		
 	@Element(name="sitename")
 	private String siteName ;
 	

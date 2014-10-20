@@ -205,7 +205,7 @@ public class DumpExtractor {
 
 		extractSiteInfo() ;
 
-		/* 
+		 
 		//extract basic page summaries
 		
 		int summaryIteration = 0 ;
@@ -251,26 +251,31 @@ public class DumpExtractor {
 		ToolRunner.run(primaryLabelStep, args);
 		
 		//gather label occurrences
-		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;*/
+		//LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, sensesStep) ;
 		 
 		
 		// hard-code to test
-		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 13890840) ;
+		// LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 13890840) ;
+		
+		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 
+				sensesStep.getTotalLabels()) ;
 		ToolRunner.run(occurrencesStep, args);
 		
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + sortingStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + depthStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR +primaryLabelStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 
-				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(), sortingStep.getConf()) ;*/
-		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(), sortingStep.getConf()) ;
+		
+		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + "sortedPages", 
 				workingDir.toString() + Path.SEPARATOR + "pageDepth_9", 
 				workingDir.toString() + Path.SEPARATOR + "primaryLabels",
 				workingDir.toString() + Path.SEPARATOR + "labelSenses", 
-				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", conf);
+				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", conf);*/
+		
 		finalStep.run() ;
 		
 		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		
