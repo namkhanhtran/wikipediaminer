@@ -123,7 +123,6 @@ public class AvroFormatConverter extends Configured implements Tool {
 				}
 			} catch (Exception e) {
 				System.out.println(v);
-				e.printStackTrace();
 			}
 			res[0] = k;
 			res[1] = v;
