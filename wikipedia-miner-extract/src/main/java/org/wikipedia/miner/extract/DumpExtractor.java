@@ -210,7 +210,9 @@ public class DumpExtractor {
 
 		extractSiteInfo() ;
 		 		
+		/*
 		//extract basic page summaries
+	
 		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
@@ -262,7 +264,7 @@ public class DumpExtractor {
 		
 		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 
 				sensesStep.getTotalLabels()) ;
-		ToolRunner.run(occurrencesStep, args);
+		ToolRunner.run(occurrencesStep, args);*/
 		
 		
 		// Make another access to raw file to extract inter-language links and stats
@@ -275,21 +277,23 @@ public class DumpExtractor {
 		finalizeStatistics(stats);
 
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + sortingStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + depthStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR +primaryLabelStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + tsstep.getDirName(),
-				sortingStep.getConf()) ;
+				sortingStep.getConf()) ;*/
 		
-		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + "sortedPages", 
 				workingDir.toString() + Path.SEPARATOR + "pageDepth_9", 
 				workingDir.toString() + Path.SEPARATOR + "primaryLabels",
 				workingDir.toString() + Path.SEPARATOR + "labelSenses", 
-				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", conf);*/
+				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", 
+				workingDir.toString() + Path.SEPARATOR + "translations",
+				conf);
 		
 		finalStep.run() ;
 		
