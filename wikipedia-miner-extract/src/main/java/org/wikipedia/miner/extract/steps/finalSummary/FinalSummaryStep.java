@@ -136,11 +136,13 @@ public class FinalSummaryStep extends LocalStep {
 		if (isFinished()) {
 			logger.info(" - already completed");
 			return 0 ;
-		} else
-			reset() ;
+		} 
+		
+		//else
+		//	reset() ;
 
-		finalizePageStuff() ;
-		finalizeLabelStuff() ;
+		// finalizePageStuff() ;
+		// finalizeLabelStuff() ;
 
 		// Tuan - 2014-10-21
 		finalizeTranslationStuff();
@@ -385,7 +387,7 @@ public class FinalSummaryStep extends LocalStep {
 
 	/** Output the translation file */
 	private void finalizeTranslationStuff() throws IOException {
-		BufferedWriter transWriter = createWriter("translation.csv") ;
+		BufferedWriter transWriter = createWriter("translations.csv") ;
 		Path transPath = getMainAvroResultPath(translationDir) ;
 		FileSystem dfs = transPath.getFileSystem(conf);
 

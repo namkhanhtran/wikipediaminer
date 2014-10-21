@@ -41,7 +41,11 @@ import org.wikipedia.miner.extract.util.Util;
 import org.wikipedia.miner.model.Page.PageType;
 import org.wikipedia.miner.util.MarkupStripper;
 
-
+/**
+ * 
+ * @author tuan
+ *
+ */
 public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslations> {
 
 	private static Logger logger = Logger.getLogger(MyMapper.class) ;

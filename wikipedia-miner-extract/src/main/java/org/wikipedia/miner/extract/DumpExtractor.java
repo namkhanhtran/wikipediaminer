@@ -318,7 +318,7 @@ public class DumpExtractor {
 			cro.writeLong(e.getValue(), null) ;
 
 			writer.write(outStream.toString("UTF-8")) ;
-			writer.newLine() ;
+			writer.newLine() ;			
 		}
 
 		writer.close();
