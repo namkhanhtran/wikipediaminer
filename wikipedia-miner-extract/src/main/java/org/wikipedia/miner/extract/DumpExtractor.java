@@ -210,7 +210,7 @@ public class DumpExtractor {
 
 		extractSiteInfo() ;
 		 		
-		/*
+		
 		//extract basic page summaries
 	
 		int summaryIteration = 0 ;
@@ -264,7 +264,7 @@ public class DumpExtractor {
 		
 		LabelOccurrenceStep occurrencesStep = new LabelOccurrenceStep(workingDir, workingDir.toString() + Path.SEPARATOR + "labelSenses", 
 				sensesStep.getTotalLabels()) ;
-		ToolRunner.run(occurrencesStep, args);*/
+		ToolRunner.run(occurrencesStep, args);
 		
 		
 		// Make another access to raw file to extract inter-language links and stats
