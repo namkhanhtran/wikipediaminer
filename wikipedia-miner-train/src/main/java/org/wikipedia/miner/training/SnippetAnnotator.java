@@ -185,14 +185,14 @@ public class SnippetAnnotator {
 
 	public void annotateMultipleFile(File directory) throws IOException {
 		for (File file : directory.listFiles()) {
-			if (!file.isFile()) {
+			if (!file.isFile() || !file.getName().endsWith(".tsv")) {
 				continue;
 			}
 			System.out.println("Processing file : " + file.getName());
 			Map<String, Integer> tweetTopic = annotate(file);
 			tweetTopic = sortByComparator(tweetTopic);
 			
-			String filename = file.getName() + ".topic";
+			String filename = file.getName() + ".topic.20140503";
 			FileWriter writer = new FileWriter(new File(directory, filename));
 			for (Map.Entry<String, Integer> entry : tweetTopic.entrySet()) {
 				writer.write(entry.getKey() + "\t" + entry.getValue());
