@@ -3,11 +3,14 @@ package org.wikipedia.miner.extract;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -15,6 +18,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.record.CsvRecordOutput;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
@@ -25,6 +29,7 @@ import org.wikipedia.miner.extract.steps.pageDepth.PageDepthStep;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep;
 import org.wikipedia.miner.extract.steps.primaryLabel.PrimaryLabelStep;
 import org.wikipedia.miner.extract.steps.sortedPages.PageSortingStep;
+import org.wikipedia.miner.extract.steps.transstats.TransAndStatsStep;
 
 
 /**
@@ -64,7 +69,7 @@ public class DumpExtractor {
 	public static final String OUTPUT_SITEINFO = "final/siteInfo.xml" ;
 	public static final String OUTPUT_PROGRESS = "tempProgress.csv" ;
 	public static final String OUTPUT_TEMPSTATS = "tempStats.csv" ;
-	public static final String OUTPUT_STATS = "final/stats.csv" ;
+	public static final String OUTPUT_STATS = "stats.csv" ;
 	
 	DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss") ;
 
@@ -204,10 +209,8 @@ public class DumpExtractor {
 	private int run() throws Exception {
 
 		extractSiteInfo() ;
-
-		 
+		 		
 		//extract basic page summaries
-		
 		int summaryIteration = 0 ;
 		PageSummaryStep summaryStep ; 
 		while (true) {
@@ -261,13 +264,25 @@ public class DumpExtractor {
 				sensesStep.getTotalLabels()) ;
 		ToolRunner.run(occurrencesStep, args);
 		
+		
+		// Make another access to raw file to extract inter-language links and stats
+		// TODO: Integrate this step into PageSummaryStep
+		// Tuan - 2014-10-21
+		TreeMap<String,Long> stats = new TreeMap<String, Long>();
+		TransAndStatsStep tsstep = new TransAndStatsStep(workingDir);
+		ToolRunner.run(tsstep, args);
+		tsstep.updateStats(stats);
+		finalizeStatistics(stats);
+
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
 		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + sortingStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + depthStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR +primaryLabelStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 
-				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(), sortingStep.getConf()) ;
+				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(),
+				workingDir.toString() + Path.SEPARATOR + tsstep.getDirName(),
+				sortingStep.getConf()) ;
 		
 		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + "sortedPages", 
@@ -281,6 +296,28 @@ public class DumpExtractor {
 		// System.out.println("Total labels: " + sensesStep.getTotalLabels());		
 		
 		return 0 ;
+	}
+	
+	private void finalizeStatistics(TreeMap<String, Long> stats) throws IOException {
+
+		FileSystem fs = FileSystem.get(conf);
+		BufferedWriter writer = new BufferedWriter(
+				new OutputStreamWriter(
+						fs.create(new Path(workingDir.toString() + Path.SEPARATOR + OUTPUT_STATS)))) ;
+
+		for(Map.Entry<String,Long> e:stats.entrySet()) {
+
+			ByteArrayOutputStream outStream = new ByteArrayOutputStream() ;
+
+			CsvRecordOutput cro = new CsvRecordOutput(outStream) ;
+			cro.writeString(e.getKey(), null) ;
+			cro.writeLong(e.getValue(), null) ;
+
+			writer.write(outStream.toString("UTF-8")) ;
+			writer.newLine() ;
+		}
+
+		writer.close();
 	}
 
 	private void extractSiteInfo() throws IOException {
