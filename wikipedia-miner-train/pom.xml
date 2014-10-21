@@ -54,7 +54,7 @@
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>build-annotator</id>
+						<id>build-snippet-annotator</id>
 						<configuration>
 							<descriptors>
 								<descriptor>src/main/assembly/assembly.xml</descriptor>
@@ -64,13 +64,32 @@
 									<mainClass>org.wikipedia.miner.training.SnippetAnnotator</mainClass>
 								</manifest>
 							</archive>
-							<finalName>${project.artifactId}-annotator</finalName>
+							<finalName>${project.artifactId}-snippet-annotator</finalName>
 						</configuration>						
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 					</execution>
+					
+					<execution>
+						<id>build-annotator</id>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+							<archive>
+								<manifest>
+									<mainClass>org.wikipedia.miner.training.AnnotationWorkbench</mainClass>
+								</manifest>
+							</archive>
+							<finalName>${project.artifactId}-annotator</finalName>
+						</configuration>						
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>					
 					
 					<execution>
 						<id>build-comparison</id>

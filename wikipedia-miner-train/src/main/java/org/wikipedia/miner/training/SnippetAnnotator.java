@@ -188,7 +188,7 @@ public class SnippetAnnotator {
 			if (!file.isFile()) {
 				continue;
 			}
-
+			System.out.println("Processing file : " + file.getName());
 			Map<String, Integer> tweetTopic = annotate(file);
 			tweetTopic = sortByComparator(tweetTopic);
 			
