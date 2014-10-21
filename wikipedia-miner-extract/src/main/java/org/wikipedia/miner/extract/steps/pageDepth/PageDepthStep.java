@@ -38,8 +38,6 @@ public class PageDepthStep extends IterativeStep {
 
 	private Map<Counts,Long> counts ;
 
-
-
 	public PageDepthStep(Path workingDir, int iteration, PageSortingStep finalPageSummaryStep) throws IOException {
 		super(workingDir, iteration);
 
@@ -123,8 +121,6 @@ public class PageDepthStep extends IterativeStep {
 	private Path getCountsPath() {
 		return new Path(getDir() + Path.SEPARATOR + "counts") ;
 	}
-
-	
 	
 	private void saveCounts() throws IOException {
 		FSDataOutputStream out = getHdfs().create(getCountsPath());

@@ -138,7 +138,7 @@ public class InitialMapper extends Mapper<LongWritable, Text, AvroKey<PageKey>, 
 
 			if (parsedPage.getNamespace().getKey() == SiteInfo.CATEGORY_KEY)
 				context.getCounter(SummaryPageType.categoryRedirect).increment(1);
-
+			
 			handleRedirect(parsedPage, context) ;
 
 			break ;

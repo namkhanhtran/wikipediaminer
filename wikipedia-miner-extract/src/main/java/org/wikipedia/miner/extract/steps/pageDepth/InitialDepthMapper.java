@@ -10,7 +10,6 @@ import org.apache.avro.mapred.AvroValue;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.extract.DumpExtractor;
@@ -54,8 +53,6 @@ AvroKey<Integer>, AvroValue<PageDepthSummary>> {
 				throw new Exception("Could not locate '" + conf.get(DumpExtractor.KEY_LANG_FILE) + "' in DistributedCache") ;
 
 			rootCategoryTitle = Util.normaliseTitle(language.getRootCategory()) ;
-
-
 
 		} catch (Exception e) {
 

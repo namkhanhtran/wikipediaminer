@@ -1,4 +1,4 @@
-package org.wikipedia.miner.extract.steps.lang;
+package org.wikipedia.miner.extract.steps.transstats;
 
 
 import java.io.File;
@@ -33,11 +33,11 @@ import org.wikipedia.miner.extract.model.struct.PageDetail;
 import org.wikipedia.miner.extract.model.struct.PageKey;
 import org.wikipedia.miner.extract.model.struct.PageSummary;
 import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep;
-import org.wikipedia.miner.extract.steps.pageSummary.PageSummaryStep.SummaryPageType;
 import org.wikipedia.miner.extract.util.Languages;
 import org.wikipedia.miner.extract.util.Languages.Language;
 import org.wikipedia.miner.extract.util.PageSentenceExtractor;
 import org.wikipedia.miner.extract.util.SiteInfo;
+import org.wikipedia.miner.extract.util.Util;
 import org.wikipedia.miner.model.Page.PageType;
 import org.wikipedia.miner.util.MarkupStripper;
 
@@ -52,15 +52,17 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 	private DumpPageParser pageParser ;
 	private DumpLinkParser linkParser ;
 
+	private String rootCategoryTitle;
+
 	private MarkupStripper stripper = new MarkupStripper() ;
-	
+
 	private final IntWritable keyOut = new IntWritable();
-	
+
 	@Override
 	public void setup(Context context) {
 
 		Configuration conf = context.getConfiguration();
-		
+
 		try {
 
 			language = null ;
@@ -88,7 +90,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 			pageParser = new DumpPageParser(language, siteInfo) ;
 			linkParser = new DumpLinkParser(language, siteInfo) ;
 
-			//rootCategoryTitle = Util.normaliseTitle(languageConfig.getRootCategoryName()) ;
+			rootCategoryTitle = Util.normaliseTitle(language.getRootCategory()) ;
 
 		} catch (Exception e) {
 
@@ -100,14 +102,14 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
 		DumpPage parsedPage = null ;
-		
+
 		//build up translations tree map
 		TreeMap<String, String> translationsByLangCode = new TreeMap<String, String>() ;
-		
+
 		try {
 			parsedPage = pageParser.parsePage(value.toString()) ;
 		} catch (Exception e) {
-			context.getCounter(SummaryPageType.unparseable).increment(1);
+			context.getCounter(TransAndStatsStep.PageCounter.unparseable).increment(1);
 			logger.error("Could not parse dump page " , e) ;
 		}
 
@@ -116,14 +118,33 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 		switch (parsedPage.getType()) {
 
-		case article :			
+		case article :
+			context.getCounter(TransAndStatsStep.PageCounter.articleCount).increment(1);
+
 			break ;
 		case category :
-			handleArticleOrCategory(parsedPage, translationsByLangCode, context) ;
+			context.getCounter(TransAndStatsStep.PageCounter.categoryCount).increment(1);
+
+			if (rootCategoryTitle.equals(parsedPage.getTitle())) {
+				context.getCounter(TransAndStatsStep.PageCounter.rootCategoryCount).increment(1);
+				context.getCounter(TransAndStatsStep.PageCounter.rootCategoryId).increment(parsedPage.getId());
+			}
+            handleCategory(parsedPage, translationsByLangCode, context);
+			
 			break ;
 		case disambiguation :
+			context.getCounter(TransAndStatsStep.PageCounter.disambiguationCount).increment(1);
+
 			break ;
 		case redirect :
+			if (parsedPage.getNamespace().getKey() == SiteInfo.MAIN_KEY)
+				context.getCounter(TransAndStatsStep.PageCounter.articleRedirect).increment(1);
+
+			if (parsedPage.getNamespace().getKey() == SiteInfo.CATEGORY_KEY)
+				context.getCounter(TransAndStatsStep.PageCounter.categoryRedirect).increment(1);
+
+			context.getCounter(TransAndStatsStep.PageCounter.redirectCount).increment(1);
+
 			break ;
 		default:
 			//for all other page types (e.g. templates) do nothing
@@ -133,21 +154,21 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 	}
 
 	private PageKey buildKey(DumpPage parsedPage) {
-		
+
 		PageKey key = new PageKey();
-		
+
 		key.setNamespace(parsedPage.getNamespace().getKey());
 		key.setTitle(parsedPage.getTitle());
-		
+
 		return key ;
 	}
-	
-	private void handleArticleOrCategory(DumpPage parsedPage, TreeMap<String, String> translationsByLangCode, Context context) throws IOException, InterruptedException {
 
-		
+	private void handleCategory(DumpPage parsedPage, TreeMap<String, String> translationsByLangCode, Context context) throws IOException, InterruptedException {
+
+
 		PageKey key = buildKey(parsedPage) ;
 		PageDetail page = buildBasePageDetails(parsedPage) ;
-		
+
 		handleLinks(key, page,  parsedPage.getMarkup(), translationsByLangCode, context) ;
 	}
 
@@ -155,12 +176,12 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 
 		PageDetail page = PageSummaryStep.buildEmptyPageDetail() ;
-		
+
 		page.setId(parsedPage.getId());
-		
+
 		if (parsedPage.getType().equals(PageType.disambiguation))
 			page.setIsDisambiguation(true);
-		
+
 		//note: we don't set namespace or title, because these will be found in page keys (so it would be wasteful to repeat them)
 
 		if (parsedPage.getTarget() != null)
@@ -168,20 +189,18 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 		if (parsedPage.getLastEdited() != null)
 			page.setLastEdited(parsedPage.getLastEdited().getTime());
-		
+
 
 		return page ;
 	}
-	
-	
+
+
 	public void handleLinks(PageKey key, PageDetail page, String markup, TreeMap<String,String> translationsByLangCode, Context context) throws IOException, InterruptedException {
 
 		String strippedMarkup = null ;
 
 		try {
-
 			strippedMarkup = stripper.stripAllButInternalLinksAndEmphasis(markup, ' ') ;
-			AvroValue<PageDetail>
 		} catch (Exception e) {
 
 			logger.warn("Could not process link markup for " + page.getId() + ":" + key.getTitle());
@@ -190,10 +209,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 		Vector<int[]> linkRegions = stripper.gatherComplexRegions(strippedMarkup, "\\[\\[", "\\]\\]") ;
 
-		
-		for(int[] linkRegion: linkRegions) {
-			
-			
+		for(int[] linkRegion: linkRegions) {			
 			String linkMarkup = strippedMarkup.substring(linkRegion[0]+2, linkRegion[1]-2) ;
 
 			DumpLink link = null ;
@@ -208,22 +224,21 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 			if (link.getTargetLanguage() != null) {
 				//logger.info("Language link: " + linkMarkup);
-				
+
 				//TODO: how do we get translations now?
-				
-				// 2014-10-20 (Tuan) : On Vietnamese Women's Day, I continue Milne's code. God bless him !!
+
+				// 2014-10-20 (Tuan) : On Vietnamese Women's Day, I continued Milne's code. God bless him !!
 				if (translationsByLangCode != null) {
 					translationsByLangCode.put(link.getTargetLanguage(), link.getAnchor()) ;
 				}
 				continue ;
 			}				
 		}
-		
+
 		// emit collected translations
 		if (!translationsByLangCode.isEmpty()) {
 			keyOut.set(page.getId());
 			context.write(keyOut, new DbTranslations(translationsByLangCode));
-		}
-		
+		}	
 	}
 }

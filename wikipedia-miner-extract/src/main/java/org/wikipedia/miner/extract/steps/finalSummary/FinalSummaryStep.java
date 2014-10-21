@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -32,6 +33,9 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.record.CsvRecordOutput;
 import org.apache.hadoop.record.Record;
 import org.apache.log4j.Logger;
@@ -43,6 +47,7 @@ import org.wikipedia.miner.db.struct.DbLinkLocation;
 import org.wikipedia.miner.db.struct.DbLinkLocationList;
 import org.wikipedia.miner.db.struct.DbPage;
 import org.wikipedia.miner.db.struct.DbSenseForLabel;
+import org.wikipedia.miner.db.struct.DbTranslations;
 import org.wikipedia.miner.extract.model.struct.LabelOccurrences;
 import org.wikipedia.miner.extract.model.struct.LabelSense;
 import org.wikipedia.miner.extract.model.struct.LabelSenseList;
@@ -59,21 +64,22 @@ import org.wikipedia.miner.model.Page.PageType;
 public class FinalSummaryStep extends LocalStep {
 
 	private static Logger logger = Logger.getLogger(FinalSummaryStep.class) ;
-	
+
 	/*private PageSortingStep pageSortingStep ;
 	private PageDepthStep pageDepthStep ;
 	private PrimaryLabelStep primaryLabelStep ;
 	private Configuration conf;
-	
+
 	private LabelSensesStep labelSensesStep ;
 	private LabelOccurrenceStep labelOccurrenceStep ;*/
-	
+
 	private Path pageSortingDir;
 	private Path pageDepthDir;
 	private Path primaryLabelDir;
 	private Path labelSensesDir;
 	private Path labelOccurrenceDir;
-	
+	private Path translationDir;
+
 	private Configuration conf;
 
 	private Comparator<DbLabelForPage> labelComparator = new Comparator<DbLabelForPage>() {
@@ -106,24 +112,27 @@ public class FinalSummaryStep extends LocalStep {
 		this.labelSensesStep = labelSensesStep ;
 		this.labelOccurrenceStep = labelOccurrenceStep ;
 	}*/
-	
-	public FinalSummaryStep(Path workingDir, String pageSortingStep, String pageDepthStep, String primaryLabelStep, String labelSensesStep, String labelOccurrenceStep, Configuration conf) throws IOException {
-		super(workingDir);
+
+	public FinalSummaryStep(Path workingDir, String pageSortingStep, String pageDepthStep, 
+			String primaryLabelStep, String labelSensesStep, String labelOccurrenceStep, 
+			String translationDir, Configuration conf) throws IOException {
+		super(workingDir, conf);
 		this.conf = conf;
-		
+
 		this.pageSortingDir = new Path(pageSortingStep) ;
 		this.pageDepthDir = new Path(pageDepthStep);
 		this.primaryLabelDir = new Path(primaryLabelStep);
 
 		this.labelSensesDir = new Path(labelSensesStep);
 		this.labelOccurrenceDir = new Path(labelOccurrenceStep);
+		this.translationDir = new Path(translationDir);
 	}
 
 	@Override
 	public int run() throws Exception {
-		
+
 		logger.info("Starting final step");
-		
+
 		if (isFinished()) {
 			logger.info(" - already completed");
 			return 0 ;
@@ -132,6 +141,9 @@ public class FinalSummaryStep extends LocalStep {
 
 		finalizePageStuff() ;
 		finalizeLabelStuff() ;
+
+		// Tuan - 2014-10-21
+		finalizeTranslationStuff();
 
 		finish() ;
 		return 0 ;
@@ -168,7 +180,7 @@ public class FinalSummaryStep extends LocalStep {
 		Schema pageDetailSchema = AvroKeyValue.getSchema(Schema.create(Type.INT),PageDetail.getClassSchema());
 		DatumReader<AvroKeyValue<Integer,PageDetail>> pageDetailDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PageDetail>>(pageDetailSchema);
 		FileReader<AvroKeyValue<Integer,PageDetail>> pageDetailReader = DataFileReader.openReader(pageDetailInput, pageDetailDatumReader) ;
-		
+
 		Path pageDepthsPath = getMainAvroResultPath(pageDepthDir) ;
 		SeekableInput pageDepthsInput = new FsInput(pageDepthsPath, conf);
 
@@ -177,8 +189,8 @@ public class FinalSummaryStep extends LocalStep {
 		Schema pageDepthsSchema = AvroKeyValue.getSchema(Schema.create(Type.INT),PageDepthSummary.getClassSchema()) ;
 		DatumReader<AvroKeyValue<Integer,PageDepthSummary>> pageDepthsDatumReader = new SpecificDatumReader<AvroKeyValue<Integer,PageDepthSummary>>(pageDepthsSchema);
 		FileReader<AvroKeyValue<Integer,PageDepthSummary>> pageDepthsReader = DataFileReader.openReader(pageDepthsInput, pageDepthsDatumReader) ;
-		
-		
+
+
 		Path primaryLabelPath = getMainAvroResultPath(primaryLabelDir) ;
 		SeekableInput primaryLabelInput = new FsInput(primaryLabelPath, conf);
 
@@ -203,26 +215,26 @@ public class FinalSummaryStep extends LocalStep {
 			//identify page depth summary, if there is one
 			while ((depthPair == null || depthPair.getKey().intValue() < detailPair.getKey().intValue()) && pageDepthsReader.hasNext())
 				depthPair = new AvroKeyValue<Integer, PageDepthSummary>((GenericRecord) pageDepthsReader.next());
-			
+
 			PageDepthSummary depth = null ;
 			if (depthPair.getKey().intValue() == (detailPair.getKey().intValue()))
 				depth = depthPair.getValue() ;
-			
+
 			//identify primary label summary, if there is one
 			while ((primaryLabelPair == null || primaryLabelPair.getKey().intValue() < detailPair.getKey().intValue()) && primaryLabelReader.hasNext())
 				primaryLabelPair = new AvroKeyValue<Integer, PrimaryLabels>((GenericRecord) primaryLabelReader.next());
-			
+
 			Set<CharSequence> primaryLabels = new HashSet<CharSequence>() ;
 			if (primaryLabelPair.getKey().equals(detailPair.getKey())) 
 				primaryLabels.addAll(primaryLabelPair.getValue().getLabels()) ;
-			
+
 			//now we definitely have a page. If we have a depth, then it is synchonized with page
 
 			DbPage page = buildPage(detail, depth) ;
-			
+
 			if (page.getType() == PageType.invalid.ordinal())
 				continue ;
-			
+
 			write(detail.getId(), page, pageWriter) ;
 
 			if (detail.getNamespace() == SiteInfo.MAIN_KEY) {
@@ -319,8 +331,8 @@ public class FinalSummaryStep extends LocalStep {
 		//DatumReader<Pair<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<Pair<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
 		Schema labelOccurrencesSchema = AvroKeyValue.getSchema(Schema.create(Type.STRING),LabelOccurrences.getClassSchema()) ;
 		DatumReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesDatumReader = new SpecificDatumReader<AvroKeyValue<CharSequence,LabelOccurrences>>(labelOccurrencesSchema);
-				
- 		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
+
+		FileReader<AvroKeyValue<CharSequence,LabelOccurrences>> labelOccurrencesReader = DataFileReader.openReader(labelOccurrencesInput, labelOccurrencesDatumReader) ;
 
 		AvroKeyValue<CharSequence,LabelSenseList> sensesPair = null ;
 		AvroKeyValue<CharSequence,LabelOccurrences> occurrencesPair = null ;
@@ -329,7 +341,7 @@ public class FinalSummaryStep extends LocalStep {
 			sensesPair = new AvroKeyValue<CharSequence, LabelSenseList>((GenericRecord) labelSensesReader.next());
 			CharSequence label = sensesPair.getKey() ;
 			LabelSenseList senses = sensesPair.getValue() ;
-			
+
 			while ((occurrencesPair == null || labelTextComparator.compare(occurrencesPair.getKey(), sensesPair.getKey()) < 0 ) && labelOccurrencesReader.hasNext())
 				occurrencesPair = new AvroKeyValue<CharSequence, LabelOccurrences>((GenericRecord) labelOccurrencesReader.next());
 
@@ -342,33 +354,51 @@ public class FinalSummaryStep extends LocalStep {
 
 			ArrayList<DbSenseForLabel> dbSenses = new ArrayList<DbSenseForLabel>() ;
 			for (LabelSense sense:senses.getSenses()) {
-				
+
 				DbSenseForLabel dbSense = new DbSenseForLabel() ;
 				dbSense.setId(sense.getId());
 				dbSense.setLinkDocCount(sense.getDocCount());
 				dbSense.setLinkOccCount(sense.getOccCount());
 				dbSense.setFromRedirect(sense.getFromRedirect());
 				dbSense.setFromTitle(sense.getFromTitle());
-				
+
 				dbSenses.add(dbSense) ;
 			}
-			
+
 			DbLabel dbLabel = new DbLabel() ;
 			dbLabel.setSenses(dbSenses);
-			
+
 			if (occurrences != null) {
 				dbLabel.setLinkDocCount(occurrences.getLinkDocCount());
 				dbLabel.setLinkOccCount(occurrences.getLinkOccCount());
 				dbLabel.setTextDocCount(occurrences.getTextDocCount());
 				dbLabel.setTextOccCount(occurrences.getTextOccCount());
 			}
-			
+
 			write(label, dbLabel, labelWriter) ;
-			
+
 		}
-		
+
 		labelWriter.close();
-		
+
+	}
+
+	/** Output the translation file */
+	private void finalizeTranslationStuff() throws IOException {
+		BufferedWriter transWriter = createWriter("translation.csv") ;
+		Path transPath = getMainAvroResultPath(translationDir) ;
+		FileSystem dfs = transPath.getFileSystem(conf);
+
+		SequenceFile.Reader reader = new SequenceFile.Reader(conf, Reader.file(transPath));
+
+		IntWritable keyIn = new IntWritable();
+		DbTranslations valIn = new DbTranslations();
+
+		while (reader.next(keyIn, valIn)) {
+			int k = keyIn.get();
+			write(k, valIn, transWriter);
+		}
+		transWriter.close();
 	}
 
 	private void write(Integer id, Record record, BufferedWriter writer) throws IOException {
@@ -381,7 +411,18 @@ public class FinalSummaryStep extends LocalStep {
 
 		writer.write(outStream.toString("UTF-8")) ;
 	}
-	
+
+	private void write(int id, Record record, BufferedWriter writer) throws IOException {
+
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream() ;
+
+		CsvRecordOutput cro = new CsvRecordOutput(outStream) ;
+		cro.writeInt(id, "pageId") ;
+		record.serialize(cro) ;
+
+		writer.write(outStream.toString("UTF-8")) ;
+	}
+
 	private void write(CharSequence label, Record record, BufferedWriter writer) throws IOException {
 
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream() ;
@@ -446,7 +487,7 @@ public class FinalSummaryStep extends LocalStep {
 
 			label.setFromRedirect(redirectTitles.contains(text));
 			label.setFromTitle(page.getTitle().equals(text));
-			
+
 			label.setIsPrimary(primaryLabels.contains(text));
 
 			dbLabels.add(label) ;
@@ -533,7 +574,7 @@ public class FinalSummaryStep extends LocalStep {
 
 		return fileStatuses[0].getPath() ;
 	}*/
-	
+
 	private Path getMainAvroResultPath(Path stepDir) throws IOException {
 
 		FileSystem fs = stepDir.getFileSystem(conf) ;

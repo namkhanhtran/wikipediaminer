@@ -53,20 +53,19 @@ public class PageSummaryStep extends IterativeStep {
 
 	private static Logger logger = Logger.getLogger(PageSummaryStep.class) ;
 
+	/* Tuan - 2014-10-21 : I have no idea why David Milne changed the name of items in this enum and not in
+	 * WEnvironment. A big spec hole
+	 */
 	public enum SummaryPageType {article, category, disambiguation, articleRedirect, categoryRedirect, unparseable} ; 
+	
+	
 	public enum Unforwarded {redirect,linkIn,linkOut,parentCategory,childCategory,childArticle} ; 
-
 
 	private Map<Unforwarded,Long> unforwardedCounts ;
 
-
-
 	public PageSummaryStep(Path workingDir, int iteration) throws IOException {
 		super(workingDir, iteration);
-
-
 	}
-
 
 	public boolean furtherIterationsRequired() {
 
