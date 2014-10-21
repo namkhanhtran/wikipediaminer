@@ -1,19 +1,12 @@
 package org.wikipedia.miner.extract.steps.transstats;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.TreeMap;
 
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
