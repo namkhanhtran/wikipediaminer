@@ -303,7 +303,7 @@ public class DumpExtractor {
 		FileSystem fs = FileSystem.get(conf);
 		BufferedWriter writer = new BufferedWriter(
 				new OutputStreamWriter(
-						fs.create(new Path(workingDir.toString() + Path.SEPARATOR + OUTPUT_STATS)))) ;
+						fs.create(new Path(finalDir.toString() + Path.SEPARATOR + OUTPUT_STATS)))) ;
 
 		for(Map.Entry<String,Long> e:stats.entrySet()) {
 
