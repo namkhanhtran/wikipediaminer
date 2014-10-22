@@ -707,7 +707,7 @@ public class WEnvironment  {
 		
 		WEnvironment env = new WEnvironment(conf) ;
 		
-		
+		/*
 		env.dbStatistics.loadFromCsvFile(statistics, overwrite, null) ;
 		env.dbPage.loadFromCsvFile(page, overwrite, null) ;
 		env.dbLabel.loadFromCsvFile(label, overwrite, null) ;
@@ -734,7 +734,8 @@ public class WEnvironment  {
 		env.dbSentenceSplits.loadFromCsvFile(sentenceSplits, overwrite, null) ;
 		
 		env.dbTranslations.loadFromCsvFile(translations, overwrite, null) ;
-		
+		*/
+		System.out.println(markup.getName());
 		env.dbMarkup.loadFromXmlFile(markup, overwrite, null) ;
 		
 		env.close();
