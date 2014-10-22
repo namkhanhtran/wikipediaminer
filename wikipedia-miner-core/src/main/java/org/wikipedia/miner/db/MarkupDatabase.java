@@ -102,12 +102,14 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 		while (xmlStreamReader.hasNext()) {
 
 			int eventCode = xmlStreamReader.next();
-
+			System.out.println(xmlStreamReader.getLocalName());
 			switch (eventCode) {
 			case XMLStreamReader.START_ELEMENT :
 				switch(resolveDumpTag(xmlStreamReader.getLocalName())) {
 				case page:
 					//System.out.println(" - " + countingReader.getByteCount()) ;
+				default:
+					break;
 				}
 
 				break;
@@ -141,6 +143,8 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 					currMarkup = null ;
 
 					tracker.update(countingReader.getByteCount()) ;
+				default:
+					break;
 				}
 
 				characters = new StringBuffer() ;
