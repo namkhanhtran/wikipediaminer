@@ -124,7 +124,8 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 		case article :
 			context.getCounter(TransAndStatsStep.PageCounter.articleCount).increment(1);
-
+			handleArticleOrCategory(parsedPage, translationsByLangCode, context);
+			
 			break ;
 		case category :
 			context.getCounter(TransAndStatsStep.PageCounter.categoryCount).increment(1);
@@ -133,7 +134,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 				context.getCounter(TransAndStatsStep.PageCounter.rootCategoryCount).increment(1);
 				context.getCounter(TransAndStatsStep.PageCounter.rootCategoryId).increment(parsedPage.getId());
 			}
-            handleCategory(parsedPage, translationsByLangCode, context);
+            handleArticleOrCategory(parsedPage, translationsByLangCode, context);
 			
 			break ;
 		case disambiguation :
@@ -167,7 +168,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 		return key ;
 	}
 
-	private void handleCategory(DumpPage parsedPage, TreeMap<String, String> translationsByLangCode, Context context) throws IOException, InterruptedException {
+	private void handleArticleOrCategory(DumpPage parsedPage, TreeMap<String, String> translationsByLangCode, Context context) throws IOException, InterruptedException {
 
 
 		PageKey key = buildKey(parsedPage) ;
