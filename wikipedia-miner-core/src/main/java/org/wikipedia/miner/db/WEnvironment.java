@@ -675,7 +675,7 @@ public class WEnvironment  {
 	public static void buildEnvironment(WikipediaConfiguration conf, File dataDirectory, boolean overwrite) throws IOException, XMLStreamException {
 		
 		//check all files exist and are readable before doing anything
-		
+		/*
 		File statistics = getDataFile(dataDirectory, "stats.csv") ;
 		File page = getDataFile(dataDirectory, "page.csv") ;
 		File label = getDataFile(dataDirectory, "label.csv") ;
@@ -695,7 +695,7 @@ public class WEnvironment  {
 		File sentenceSplits = getDataFile(dataDirectory, "sentenceSplits.csv") ;
 		
 		File translations = getDataFile(dataDirectory, "translations.csv") ;
-		
+		*/
 		File markup = getMarkupDataFile(dataDirectory) ;
 		
 		
