@@ -108,7 +108,8 @@
 			<version>2.2</version>
 		</dependency>
 
-		<!-- adding for fixing error: java.lang.ArrayIndexOutOfBoundsException: 8192 -->
+		<!-- adding for fixing error: java.lang.ArrayIndexOutOfBoundsException: 
+			8192 -->
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
@@ -130,6 +131,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4.1</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -140,6 +142,16 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 				</configuration>
+
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
