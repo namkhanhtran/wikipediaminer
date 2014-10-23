@@ -172,6 +172,10 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 						currMarkup = null;
 
 						tracker.update(countingReader.getByteCount());
+						
+						if (pageTotal % 1000 == 0) {
+							System.out.println("Processed " + pageTotal + " pages");
+						}
 					}
 					break;
 				default:
