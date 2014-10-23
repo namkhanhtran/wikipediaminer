@@ -118,7 +118,7 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 			int eventCode = -1;
 			try {
 				eventCode = xmlStreamReader.next();
-			} catch (XMLStreamException e) {
+			} catch (Exception e) {
 				System.out.println("ERROR");
 				eventCode = -1;
 				flag = true;
