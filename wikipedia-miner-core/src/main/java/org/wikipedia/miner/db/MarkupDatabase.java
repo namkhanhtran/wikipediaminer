@@ -122,6 +122,7 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 				System.out.println("ERROR");
 				eventCode = -1;
 				flag = true;
+				break;
 			}
 
 			switch (eventCode) {
@@ -173,7 +174,7 @@ public class MarkupDatabase extends WDatabase<Integer, String> {
 
 						tracker.update(countingReader.getByteCount());
 						
-						if (pageTotal % 1000 == 0) {
+						if (pageTotal % 10000 == 0) {
 							System.out.println("Processed " + pageTotal + " pages");
 						}
 					}
