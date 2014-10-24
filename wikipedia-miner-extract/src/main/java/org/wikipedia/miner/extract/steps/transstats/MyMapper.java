@@ -20,6 +20,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.Logger;
 import org.wikipedia.miner.db.struct.DbTranslations;
 import org.wikipedia.miner.extract.DumpExtractor;
@@ -61,7 +62,9 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 	private MarkupStripper stripper = new MarkupStripper() ;
 
 	private final IntWritable keyOut = new IntWritable();
-
+	
+	// TODO: multiple outputs here
+	
 	@Override
 	public void setup(Context context) {
 
@@ -95,7 +98,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 			linkParser = new DumpLinkParser(language, siteInfo) ;
 
 			rootCategoryTitle = Util.normaliseTitle(language.getRootCategory()) ;
-
+			
 		} catch (Exception e) {
 
 			logger.error("Could not configure mapper", e);
@@ -155,6 +158,13 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 			//for all other page types (e.g. templates) do nothing
 			return ;
 		}
+		
+		// emit collected translations
+		if (!translationsByLangCode.isEmpty()) {
+			keyOut.set(parsedPage.getId());
+			context.write(keyOut, new DbTranslations(translationsByLangCode));
+		}
+		
 
 	}
 
@@ -232,18 +242,11 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 				//TODO: how do we get translations now?
 
-				// 2014-10-20 (Tuan) : On Vietnamese Women's Day, I continued Milne's code. God bless him !!
 				if (translationsByLangCode != null) {
 					translationsByLangCode.put(link.getTargetLanguage(), link.getAnchor()) ;
 				}
 				continue ;
-			}				
-		}
-
-		// emit collected translations
-		if (!translationsByLangCode.isEmpty()) {
-			keyOut.set(page.getId());
-			context.write(keyOut, new DbTranslations(translationsByLangCode));
+			}			
 		}	
 	}
 }

@@ -31,7 +31,7 @@ public class TransAndStatsStep extends Step {
 
 	private static Logger logger = Logger.getLogger(TransAndStatsStep.class) ;
 
-	public enum PageCounter {articleCount, categoryCount, disambiguationCount, articleRedirect, 
+	public enum PageCounter {articleCount, categoryCount, disambiguationCount, articleRedirect, lastEdit,
 		categoryRedirect, redirectCount, rootCategoryId, rootCategoryCount, unparseable} ;
 
 		public TransAndStatsStep(Path workingDir) throws IOException {

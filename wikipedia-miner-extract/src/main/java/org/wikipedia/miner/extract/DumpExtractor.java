@@ -1,4 +1,4 @@
-package org.wikipedia.miner.extract;
+	package org.wikipedia.miner.extract;
 
 
 import java.io.BufferedReader;
@@ -107,14 +107,15 @@ public class DumpExtractor {
 		job.getConfiguration().set(KEY_SENTENCE_MODEL, args[3]) ;
 		job.getConfiguration().set(KEY_OUTPUT_DIR, args[4]) ;
 		
-		//force one reducer by default. These don't take very long, and multiple reducers would make finalise file functions more complicated.  
+		// force one reducer by default. These don't take very long, and multiple reducers would make 
+		// finalise file functions more complicated.  
 		job.setNumReduceTasks(1) ;
 
 		//many of our tasks require pre-loading lots of data, may as well reuse this as much as we can.
-		//conf.setNumTasksToExecutePerJvm(-1) ;
+		// conf.setNumTasksToExecutePerJvm(-1) ;
 
 		//conf.setInt("mapred.tasktracker.map.tasks.maximum", 2) ;
-		//conf.setInt("mapred.tasktracker.reduce.tasks.maximum", 1) ;
+		job.getConfiguration().setInt("mapred.tasktracker.reduce.tasks.maximum", 1) ;
 		
 		//TODO: really don't want this hard coded.
 		//job.getConfiguration().set("mapred.child.java.opts", "-Xmx5100m -Dapple.awt.UIElement=true") ;
@@ -155,7 +156,9 @@ public class DumpExtractor {
 	private void configure() throws Exception {
 
 		if (args.length != 6) 
-			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file, a language code, an openNLP sentence detection model, an hdfs writable working directory, and an output directory") ;
+			throw new IllegalArgumentException("Please specify an xml dump of wikipedia, a language.xml config file,"
+					+ " a language code, an openNLP sentence detection model, an hdfs writable working directory, "
+					+ "and an output directory") ;
 
 		//check input file
 		inputFile = getPath(args[0]); 
@@ -277,23 +280,23 @@ public class DumpExtractor {
 		finalizeStatistics(stats);
 
 		//FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, sortingStep, depthStep, primaryLabelStep, sensesStep, occurrencesStep) ;
-		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + sortingStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + depthStep.getDirName(), 
-				workingDir.toString() + Path.SEPARATOR +primaryLabelStep.getDirName(),
+				workingDir.toString() + Path.SEPARATOR + primaryLabelStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + sensesStep.getDirName(), 
 				workingDir.toString() + Path.SEPARATOR + occurrencesStep.getDirName(),
 				workingDir.toString() + Path.SEPARATOR + tsstep.getDirName(),
-				sortingStep.getConf()) ;*/
+				sortingStep.getConf()) ;
 		
-		FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
+		/*FinalSummaryStep finalStep = new FinalSummaryStep(finalDir, 
 				workingDir.toString() + Path.SEPARATOR + "sortedPages", 
 				workingDir.toString() + Path.SEPARATOR + "pageDepth_9", 
 				workingDir.toString() + Path.SEPARATOR + "primaryLabels",
 				workingDir.toString() + Path.SEPARATOR + "labelSenses", 
 				workingDir.toString() + Path.SEPARATOR + "labelOccurrences", 
 				workingDir.toString() + Path.SEPARATOR + "translations",
-				conf);
+				conf);*/
 		
 		finalStep.run() ;
 		
