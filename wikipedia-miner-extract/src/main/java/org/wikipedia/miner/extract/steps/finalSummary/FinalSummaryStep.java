@@ -141,8 +141,8 @@ public class FinalSummaryStep extends LocalStep {
 		//else
 		//	reset() ;
 
-		// finalizePageStuff() ;
-		// finalizeLabelStuff() ;
+		finalizePageStuff() ;
+		finalizeLabelStuff() ;
 
 		// Tuan - 2014-10-21
 		finalizeTranslationStuff();
