@@ -164,8 +164,6 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 			keyOut.set(parsedPage.getId());
 			context.write(keyOut, new DbTranslations(translationsByLangCode));
 		}
-		
-
 	}
 
 	private PageKey buildKey(DumpPage parsedPage) {
@@ -212,7 +210,7 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 
 	public void handleLinks(PageKey key, PageDetail page, String markup, TreeMap<String,String> translationsByLangCode, Context context) throws IOException, InterruptedException {
 
-		String strippedMarkup = null ;
+		/*String strippedMarkup = null ;
 
 		try {
 			strippedMarkup = stripper.stripAllButInternalLinksAndEmphasis(markup, ' ') ;
@@ -222,10 +220,12 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 			return ;
 		}
 
-		Vector<int[]> linkRegions = stripper.gatherComplexRegions(strippedMarkup, "\\[\\[", "\\]\\]") ;
+		Vector<int[]> linkRegions = stripper.gatherComplexRegions(strippedMarkup, "\\[\\[", "\\]\\]") ;*/
+		Vector<int[]> linkRegions = stripper.gatherComplexRegions(markup, "\\[\\[", "\\]\\]") ;
 
 		for(int[] linkRegion: linkRegions) {			
-			String linkMarkup = strippedMarkup.substring(linkRegion[0]+2, linkRegion[1]-2) ;
+			//String linkMarkup = strippedMarkup.substring(linkRegion[0]+2, linkRegion[1]-2) ;
+			String linkMarkup = markup.substring(linkRegion[0]+2, linkRegion[1]-2) ;
 
 			DumpLink link = null ;
 			try {
@@ -245,7 +245,6 @@ public class MyMapper extends Mapper<LongWritable, Text, IntWritable, DbTranslat
 				if (translationsByLangCode != null) {
 					translationsByLangCode.put(link.getTargetLanguage(), link.getAnchor()) ;
 				}
-				continue ;
 			}			
 		}	
 	}
