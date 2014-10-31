@@ -57,6 +57,8 @@ public class SnippetAnnotator {
 
 	public DecimalFormat df = new DecimalFormat("#0%");
 
+	private Map<String, Integer> pageIds;
+	
 	public DateFormat dateFormat = new SimpleDateFormat(
 			"EEE MMM dd HH:mm:ss zzz yyyy");
 
@@ -72,6 +74,8 @@ public class SnippetAnnotator {
 		topicDetector = new TopicDetector(wikipedia, disambiguator);
 		linkDetector = new LinkDetector(wikipedia);
 		tagger = new WikiTagger();
+		
+		pageIds = new HashMap<String, Integer>();
 	}
 
 	private static final float THRESHOLD = 0.5f;
@@ -117,7 +121,7 @@ public class SnippetAnnotator {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public HashMap<Topic, Integer> annotate(File inputFile) throws IOException {
+	public HashMap<String, Integer> annotate(File inputFile) throws IOException {
 		/*
 		 * BufferedReader reader = new BufferedReader(new
 		 * FileReader(inputFile)); String line = null; while ((line =
@@ -126,7 +130,7 @@ public class SnippetAnnotator {
 		 * System.out.println(content + "\n" + date.toString()); }
 		 * reader.close();
 		 */
-		HashMap<Topic, Integer> tweetTopic = new HashMap<Topic, Integer>();
+		HashMap<String, Integer> tweetTopic = new HashMap<String, Integer>();
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String line = null;
@@ -162,12 +166,14 @@ public class SnippetAnnotator {
 				for (Topic topic : topicList) {
 					int topicId = topic.getId();
 					String topicTitle = topic.getTitle();
+					if (!pageIds.containsKey(topicTitle))
+						pageIds.put(topicTitle, topicId);
 					int weight = 1;
-					if (tweetTopic.containsKey(topic)) {
-						weight += tweetTopic.get(topic);
+					if (tweetTopic.containsKey(topicTitle)) {
+						weight += tweetTopic.get(topicTitle);
 					}
 
-					tweetTopic.put(topic, weight);
+					tweetTopic.put(topicTitle, weight);
 				}
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -189,39 +195,39 @@ public class SnippetAnnotator {
 				continue;
 			}
 			System.out.println("Processing file : " + file.getName());
-			Map<Topic, Integer> tweetTopic = annotate(file);
+			Map<String, Integer> tweetTopic = annotate(file);
 			tweetTopic = sortByComparator(tweetTopic);
 			
 			String filename = file.getName() + ".topic.20140614";
 			FileWriter writer = new FileWriter(new File(directory, filename));
-			for (Map.Entry<Topic, Integer> entry : tweetTopic.entrySet()) {
-				writer.write(entry.getKey().getTitle() + "\t" + entry.getKey().getId() + "\t" + entry.getValue());
+			for (Map.Entry<String, Integer> entry : tweetTopic.entrySet()) {
+				writer.write(entry.getKey() + "\t" + pageIds.get(entry.getKey()) + "\t" + entry.getValue());
 				writer.write("\n");
 			}
 			writer.close();
 		}
 	}
 
-	private static Map<Topic, Integer> sortByComparator(
-			Map<Topic, Integer> unsortMap) {
+	private static Map<String, Integer> sortByComparator(
+			Map<String, Integer> unsortMap) {
 
 		// Convert Map to List
-		List<Map.Entry<Topic, Integer>> list = new LinkedList<Map.Entry<Topic, Integer>>(
+		List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(
 				unsortMap.entrySet());
 
 		// Sort list with comparator, to compare the Map values
-		Collections.sort(list, new Comparator<Map.Entry<Topic, Integer>>() {
-			public int compare(Map.Entry<Topic, Integer> o1,
-					Map.Entry<Topic, Integer> o2) {
+		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+			public int compare(Map.Entry<String, Integer> o1,
+					Map.Entry<String, Integer> o2) {
 				return (o2.getValue()).compareTo(o1.getValue());
 			}
 		});
 
 		// Convert sorted map back to a Map
-		Map<Topic, Integer> sortedMap = new LinkedHashMap<Topic, Integer>();
-		for (Iterator<Map.Entry<Topic, Integer>> it = list.iterator(); it
+		Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+		for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it
 				.hasNext();) {
-			Map.Entry<Topic, Integer> entry = it.next();
+			Map.Entry<String, Integer> entry = it.next();
 			sortedMap.put(entry.getKey(), entry.getValue());
 		}
 		return sortedMap;
