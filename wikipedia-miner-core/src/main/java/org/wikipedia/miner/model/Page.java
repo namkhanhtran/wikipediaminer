@@ -168,7 +168,9 @@ public class Page implements Comparable<Page> {
 		return s ;
 	}
 
-
+	public int hashCode() {
+		return this.id;
+	}
 
 	/**
 	 * @return the unique identifier
