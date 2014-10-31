@@ -117,7 +117,7 @@ public class SnippetAnnotator {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public HashMap<String, Integer> annotate(File inputFile) throws IOException {
+	public HashMap<Topic, Integer> annotate(File inputFile) throws IOException {
 		/*
 		 * BufferedReader reader = new BufferedReader(new
 		 * FileReader(inputFile)); String line = null; while ((line =
@@ -126,7 +126,7 @@ public class SnippetAnnotator {
 		 * System.out.println(content + "\n" + date.toString()); }
 		 * reader.close();
 		 */
-		HashMap<String, Integer> tweetTopic = new HashMap<String, Integer>();
+		HashMap<Topic, Integer> tweetTopic = new HashMap<Topic, Integer>();
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		String line = null;
@@ -163,11 +163,11 @@ public class SnippetAnnotator {
 					int topicId = topic.getId();
 					String topicTitle = topic.getTitle();
 					int weight = 1;
-					if (tweetTopic.containsKey(topicTitle)) {
-						weight += tweetTopic.get(topicTitle);
+					if (tweetTopic.containsKey(topic)) {
+						weight += tweetTopic.get(topic);
 					}
 
-					tweetTopic.put(topicTitle, weight);
+					tweetTopic.put(topic, weight);
 				}
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -189,39 +189,39 @@ public class SnippetAnnotator {
 				continue;
 			}
 			System.out.println("Processing file : " + file.getName());
-			Map<String, Integer> tweetTopic = annotate(file);
+			Map<Topic, Integer> tweetTopic = annotate(file);
 			tweetTopic = sortByComparator(tweetTopic);
 			
-			String filename = file.getName() + ".topic.20140503";
+			String filename = file.getName() + ".topic.20140614";
 			FileWriter writer = new FileWriter(new File(directory, filename));
-			for (Map.Entry<String, Integer> entry : tweetTopic.entrySet()) {
-				writer.write(entry.getKey() + "\t" + entry.getValue());
+			for (Map.Entry<Topic, Integer> entry : tweetTopic.entrySet()) {
+				writer.write(entry.getKey().getTitle() + "\t" + entry.getKey().getId() + "\t" + entry.getValue());
 				writer.write("\n");
 			}
 			writer.close();
 		}
 	}
 
-	private static Map<String, Integer> sortByComparator(
-			Map<String, Integer> unsortMap) {
+	private static Map<Topic, Integer> sortByComparator(
+			Map<Topic, Integer> unsortMap) {
 
 		// Convert Map to List
-		List<Map.Entry<String, Integer>> list = new LinkedList<Map.Entry<String, Integer>>(
+		List<Map.Entry<Topic, Integer>> list = new LinkedList<Map.Entry<Topic, Integer>>(
 				unsortMap.entrySet());
 
 		// Sort list with comparator, to compare the Map values
-		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-			public int compare(Map.Entry<String, Integer> o1,
-					Map.Entry<String, Integer> o2) {
-				return (o1.getValue()).compareTo(o2.getValue());
+		Collections.sort(list, new Comparator<Map.Entry<Topic, Integer>>() {
+			public int compare(Map.Entry<Topic, Integer> o1,
+					Map.Entry<Topic, Integer> o2) {
+				return (o2.getValue()).compareTo(o1.getValue());
 			}
 		});
 
 		// Convert sorted map back to a Map
-		Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
-		for (Iterator<Map.Entry<String, Integer>> it = list.iterator(); it
+		Map<Topic, Integer> sortedMap = new LinkedHashMap<Topic, Integer>();
+		for (Iterator<Map.Entry<Topic, Integer>> it = list.iterator(); it
 				.hasNext();) {
-			Map.Entry<String, Integer> entry = it.next();
+			Map.Entry<Topic, Integer> entry = it.next();
 			sortedMap.put(entry.getKey(), entry.getValue());
 		}
 		return sortedMap;
